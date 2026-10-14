@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Learning Sessions & Study Groups - SkillSwap</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    .session-container { max-width: 1100px; margin: 30px auto; padding: 0 20px; }
+    .session-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; flex-wrap: wrap; gap: 15px; }
+    .session-header h1 { font-size: 2rem; font-weight: 800; color: #1e293b; margin: 0; }
+    .btn-schedule { background: #2563eb; color: #fff; padding: 10px 18px; border-radius: 8px; font-weight: 600; text-decoration: none; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; font-size: 0.95rem; }
+    .btn-schedule:hover { background: #1d4ed8; }
+    .btn-study-group { background: #059669; color: #fff; padding: 10px 18px; border-radius: 8px; font-weight: 600; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; font-size: 0.95rem; }
+    .btn-study-group:hover { background: #047857; }
+    
+    .status-tabs { display: flex; gap: 10px; margin-bottom: 25px; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; flex-wrap: wrap; }
+    .status-tab { background: none; border: none; font-size: 0.95rem; font-weight: 600; color: #64748b; padding: 6px 14px; border-radius: 6px; cursor: pointer; }
+    .status-tab.active { background: #eff6ff; color: #2563eb; }
+
+    .sessions-list { display: flex; flex-direction: column; gap: 16px; }
+    .session-card { background: #fff; border-radius: 14px; border: 1px solid #e2e8f0; padding: 22px 24px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.04); flex-wrap: wrap; gap: 15px; transition: 0.2s; }
+    .session-card:hover { box-shadow: 0 6px 18px rgba(0,0,0,0.07); }
+    .session-info h3 { margin: 0 0 6px; font-size: 1.2rem; color: #0f172a; }
+    .session-meta { display: flex; gap: 16px; color: #64748b; font-size: 0.9rem; flex-wrap: wrap; margin-top: 4px; }
+    .badge { padding: 4px 10px; border-radius: 20px; font-size: 0.78rem; font-weight: 700; text-transform: uppercase; }
+    .badge-scheduled { background: #dbeafe; color: #1d4ed8; }
+    .badge-completed { background: #dcfce7; color: #15803d; }
+    .badge-cancelled { background: #fee2e2; color: #b91c1c; }
+    .badge-missed { background: #fef3c7; color: #b45309; }
+    .badge-type { background: #f1f5f9; color: #475569; }
+    .badge-study { background: #d1fae5; color: #065f46; }
+
+    .session-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    .btn-link { background: #eff6ff; color: #2563eb; padding: 8px 14px; border-radius: 6px; text-decoration: none; font-weight: 600; font-size: 0.88rem; display: inline-flex; align-items: center; gap: 6px; }
+    .btn-link:hover { background: #dbeafe; }
+    .btn-action-small { border: 1px solid #cbd5e1; background: #fff; padding: 7px 12px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: 500; display: inline-flex; align-items: center; gap: 5px; }
+    .btn-action-small:hover { background: #f8fafc; }
+
+    /* Modal */
+    .modal-backdrop { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; }
+    .modal-box { background: #fff; border-radius: 16px; width: 100%; max-width: 540px; padding: 28px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); max-height: 90vh; overflow-y: auto; }
+    .modal-title { font-size: 1.3rem; font-weight: 700; margin: 0 0 18px; color: #0f172a; }
+    .form-group { margin-bottom: 14px; }
+    .form-group label { display: block; font-size: 0.88rem; font-weight: 600; color: #334155; margin-bottom: 6px; }
+    .form-input { width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.95rem; box-sizing: border-box; }
+    .form-row { display: flex; gap: 12px; }
+    .checkbox-row { display: flex; align-items: center; gap: 8px; font-size: 0.9rem; color: #334155; margin: 12px 0; font-weight: 500; }
+    .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+  </style>
+</head>
+<body>
+  <header class="navbar">
+    <div class="container">
+      <div class="nav-brand">
+        <div class="logo-icon"><i class="fas fa-exchange-alt"></i></div>
+        <h1 class="logo"><a href="{{ url_for('main.app') }}" style="color:inherit;text-decoration:none;">SkillSwap</a></h1>
+      </div>
+      <nav class="nav-links">
+        <a href="{{ url_for('main.app') }}" class="nav-link"><i class="fas fa-home"></i><span>Home</span></a>
+        <a href="{{ url_for('main.smart_matches_page') }}" class="nav-link"><i class="fas fa-magic"></i><span>Smart Matches</span></a>
+        <a href="{{ url_for('main.sessions_dashboard') }}" class="nav-link active"><i class="fas fa-calendar-alt"></i><span>Sessions</span></a>
+        <a href="{{ url_for('main.library_page') }}" class="nav-link"><i class="fas fa-book-open"></i><span>Library</span></a>
+        <a href="{{ url_for('main.messages') }}" class="nav-link"><i class="fas fa-comments"></i><span>Messages</span></a>
+        <a href="{{ url_for('main.see_request') }}" class="nav-link"><i class="fas fa-handshake"></i><span>Swap Requests</span></a>
+        <a href="{{ url_for('main.logout') }}" class="nav-link login-btn"><i class="fas fa-sign-out-alt"></i><span>Logout</span></a>
+      </nav>
+      <div class="nav-right-actions" style="display:flex;align-items:center;gap:12px;">
+        <button class="theme-toggle-btn" title="Toggle Light / Dark Mode" aria-label="Toggle Light / Dark Mode">
+          <i class="fas fa-moon"></i>
+        </button>
+        <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Open Navigation Menu">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Mobile Menu -->
+  <div class="mobile-menu" id="mobileMenu">
+    <div class="mobile-menu-content">
+      <a href="{{ url_for('main.app') }}" class="mobile-nav-link"><i class="fas fa-home"></i><span>Home</span></a>
+      <a href="{{ url_for('main.smart_matches_page') }}" class="mobile-nav-link"><i class="fas fa-magic"></i><span>Smart Matches</span></a>
+      <a href="{{ url_for('main.sessions_dashboard') }}" class="mobile-nav-link"><i class="fas fa-calendar-alt"></i><span>Sessions</span></a>
+      <a href="{{ url_for('main.library_page') }}" class="mobile-nav-link"><i class="fas fa-book-open"></i><span>Library</span></a>
+      <a href="{{ url_for('main.messages') }}" class="mobile-nav-link"><i class="fas fa-comments"></i><span>Messages</span></a>
+      <a href="{{ url_for('main.see_request') }}" class="mobile-nav-link"><i class="fas fa-handshake"></i><span>Swap Requests</span></a>
+      <a href="{{ url_for('main.profile') }}" class="mobile-nav-link"><i class="fas fa-user"></i><span>Profile</span></a>
+      <a href="{{ url_for('main.logout') }}" class="mobile-nav-link"><i class="fas fa-sign-out-alt"></i><span>Logout</span></a>
+    </div>
+  </div>
+
+  <main class="session-container">
+    <div class="session-header">
+      <div>
+        <h1>📅 Sessions & Study Groups</h1>
+        <p style="color:#64748b; margin: 4px 0 0;">Join public learning rooms, schedule 1-on-1 swaps, or start a collaborative study group.</p>
+      </div>
+      <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+        <button class="btn-study-group" onclick="openStudyGroupModal()">
+          <i class="fas fa-users"></i> Create Study Group
+        </button>
+        <button class="btn-schedule" onclick="openScheduleModal()">
+          <i class="fas fa-plus"></i> Schedule Session
+        </button>
+      </div>
+    </div>
+
+    <!-- Status Tabs & Batch Controls -->
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 20px;">
+      <div class="status-tabs" style="margin-bottom: 0;">
+        <button class="status-tab active" onclick="filterStatus('all')">All</button>
+        <button class="status-tab" onclick="filterStatus('study_group')">Study Groups</button>
+        <button class="status-tab" onclick="filterStatus('scheduled')">Upcoming</button>
+        <button class="status-tab" onclick="filterStatus('completed')">Completed</button>
+        <button class="status-tab" onclick="filterStatus('cancelled')">Cancelled</button>
+      </div>
+      <div style="display: flex; gap: 8px;">
+        <button class="btn-action-small" id="btnDeleteSelected" style="color: #ef4444; display: none;" onclick="deleteSelectedSessions()">
+          <i class="fas fa-trash-alt"></i> Delete Selected (<span id="selectedCount">0</span>)
+        </button>
+        <button class="btn-action-small" style="color: #64748b;" onclick="clearCompletedHistory()">
+          <i class="fas fa-history"></i> Clear Past History
+        </button>
+      </div>
+    </div>
+
+    <!-- Sessions List -->
+    <div id="sessionsList" class="sessions-list"></div>
+  </main>
+
+  <!-- Modal for Scheduling / Study Group -->
+  <div class="modal-backdrop" id="scheduleModal">
+    <div class="modal-box">
+      <h2 class="modal-title" id="modalHeading">Schedule Learning Session</h2>
+      <form id="sessionForm" onsubmit="handleScheduleSubmit(event)">
+        <input type="hidden" id="editSessionId" value="">
+        <input type="hidden" id="isStudyGroup" value="false">
+
+        <div class="form-group">
+          <label>Topic / Title</label>
+          <input type="text" id="title" class="form-input" placeholder="e.g. Full-Stack Web Dev Practice / System Design" required>
+        </div>
+
+        <div class="checkbox-row" id="privateRow">
+          <input type="checkbox" id="isPrivateCheckbox" onchange="togglePrivateField()">
+          <label for="isPrivateCheckbox">Make this a Private 1-on-1 Session (Default is Public)</label>
+        </div>
+
+        <div class="form-group" id="privatePartnerGroup" style="display: none;">
+          <label>Partner User ID / Swap ID (Optional)</label>
+          <input type="text" id="participantUserId" class="form-input" placeholder="Enter partner User ID or Swap ID">
+          <small style="color:#64748b; display:block; margin-top:3px;">Leave blank for open public session.</small>
+        </div>
+
+        <div class="checkbox-row" id="sendChatRow" style="display: none;">
+          <input type="checkbox" id="sendToChatCheckbox">
+          <label for="sendToChatCheckbox">Send session invite to partner's direct messages</label>
+        </div>
+
+        <div class="form-group">
+          <label>Meeting Link (Google Meet / Zoom / Discord)</label>
+          <input type="url" id="meetingUrl" class="form-input" placeholder="https://meet.google.com/xyz-abc-def">
+        </div>
+
+        <div class="form-group">
+          <label>Session Date</label>
+          <input type="date" id="sessionDate" class="form-input" required>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group" style="flex:1;">
+            <label>Start Time</label>
+            <input type="time" id="startTime" class="form-input" required>
+          </div>
+          <div class="form-group" style="flex:1;">
+            <label>End Time</label>
+            <input type="time" id="endTime" class="form-input" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Preparation Notes & Goals (Optional)</label>
+          <textarea id="notes" class="form-input" rows="2" placeholder="Prerequisites, topics to cover, repository links..."></textarea>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn-action-small" onclick="closeScheduleModal()">Cancel</button>
+          <button type="submit" class="btn-schedule" id="modalSubmitBtn">Schedule</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    let allSessions = [];
+    let currentFilter = 'all';
+    const selectedSessionIds = new Set();
+    const currentUserId = "{{ session.get('user_id', '') }}";
+
+    async function loadSessions() {
+      const container = document.getElementById('sessionsList');
+      container.innerHTML = '<div style="text-align: center; padding: 40px;"><i class="fas fa-spinner fa-spin fa-2x text-primary"></i></div>';
+
+      try {
+        const res = await fetch('/api/sessions');
+        const data = await res.json();
+        allSessions = data.sessions || [];
+        selectedSessionIds.clear();
+        updateSelectionControls();
+        renderSessions();
+      } catch (e) {
+        container.innerHTML = `<div style="text-align: center; padding: 40px; color:#ef4444;">Error loading sessions: ${e.message}</div>`;
+      }
+    }
+
+    function toggleSelectSession(id) {
+      if (selectedSessionIds.has(id)) {
+        selectedSessionIds.delete(id);
+      } else {
+        selectedSessionIds.add(id);
+      }
+      updateSelectionControls();
+    }
+
+    function updateSelectionControls() {
+      const btn = document.getElementById('btnDeleteSelected');
+      const countSpan = document.getElementById('selectedCount');
+      if (btn && countSpan) {
+        countSpan.textContent = selectedSessionIds.size;
+        btn.style.display = selectedSessionIds.size > 0 ? 'inline-flex' : 'none';
+      }
+    }
+
+    function renderSessions() {
+      const container = document.getElementById('sessionsList');
+      let filtered = allSessions;
+      if (currentFilter === 'study_group') {
+        filtered = allSessions.filter(s => s.isStudyGroup);
+      } else if (currentFilter !== 'all') {
+        filtered = allSessions.filter(s => s.status === currentFilter);
+      }
+
+      if (filtered.length === 0) {
+        container.innerHTML = `
+          <div style="background:#fff; border-radius:14px; border: 1px dashed #cbd5e1; text-align:center; padding: 50px;">
+            <i class="fas fa-calendar-times fa-3x" style="color:#94a3b8; margin-bottom:12px;"></i>
+            <h3>No sessions found</h3>
+            <p style="color:#64748b;">Schedule a public session or create a study group to learn together!</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = filtered.map(s => {
+        const isSelected = selectedSessionIds.has(s.id);
+        const canManage = (s.hostUserId === currentUserId || s.participantUserId === currentUserId);
+
+        return `
+        <div class="session-card" style="${isSelected ? 'border-color: #2563eb; background: #f8fafc;' : ''}">
+          <div style="display:flex; align-items:flex-start; gap: 12px; flex: 1;">
+            ${canManage ? `
+              <input type="checkbox" 
+                     style="margin-top: 6px; cursor: pointer; width: 18px; height: 18px;" 
+                     ${isSelected ? 'checked' : ''} 
+                     onchange="toggleSelectSession('${s.id}')"
+                     title="Select for batch delete">
+            ` : ''}
+            <div class="session-info" style="flex: 1;">
+              <div style="display:flex; align-items:center; gap: 8px; margin-bottom: 6px; flex-wrap:wrap;">
+                <span class="badge badge-${s.status}">${s.status}</span>
+                ${s.isStudyGroup ? '<span class="badge badge-study"><i class="fas fa-users"></i> Study Group</span>' : (s.isPrivate ? '<span class="badge badge-type">Private</span>' : '<span class="badge badge-type">Public</span>')}
+                <h3>${s.title}</h3>
+              </div>
+              <div class="session-meta">
+                <span><i class="fas fa-calendar"></i> ${s.sessionDate}</span>
+                <span><i class="fas fa-clock"></i> ${s.startTime} - ${s.endTime}</span>
+                <span><i class="fas fa-user"></i> Host: ${s.hostName || 'Member'}</span>
+                <span><i class="fas fa-users"></i> ${s.otherUser?.name || 'Open Community'}</span>
+              </div>
+              ${s.notes ? `<div style="margin-top:6px; font-size:0.85rem; color:#64748b;"><i class="fas fa-info-circle"></i> ${s.notes}</div>` : ''}
+            </div>
+          </div>
+
+          <div class="session-actions">
+            ${s.meetingUrl ? `
+              <a href="${s.meetingUrl}" target="_blank" class="btn-link">
+                <i class="fas fa-video"></i> Join Link
+              </a>
+            ` : ''}
+            <button class="btn-action-small" onclick="shareSession('${escapeJs(s.title)}', '${s.sessionDate}', '${s.startTime}', '${s.meetingUrl || ''}')">
+              <i class="fas fa-share-alt"></i> Share
+            </button>
+            ${canManage ? `
+              <button class="btn-action-small" onclick="openEditModal('${s.id}')" title="Edit Session">
+                <i class="fas fa-edit"></i> Edit
+              </button>
+            ` : ''}
+            ${s.status === 'scheduled' && canManage ? `
+              <button class="btn-action-small" onclick="updateStatus('${s.id}', 'completed')"><i class="fas fa-check"></i> Done</button>
+              <button class="btn-action-small" style="color:#ef4444;" onclick="updateStatus('${s.id}', 'cancelled')"><i class="fas fa-times"></i> Cancel</button>
+            ` : ''}
+            ${canManage ? `
+              <button class="btn-action-small" style="color:#ef4444;" onclick="deleteSingleSession('${s.id}')" title="Delete Session">
+                <i class="fas fa-trash"></i>
+              </button>
+            ` : ''}
+          </div>
+        </div>
+      `}).join('');
+    }
+
+    function escapeJs(str) {
+      return (str || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+    }
+
+    function shareSession(title, date, time, link) {
+      const shareText = `Join learning session: "${title}" on ${date} at ${time}. ${link ? 'Meeting Link: ' + link : ''}`;
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(shareText);
+        alert('Session details copied to clipboard! You can share it in chat or messages.');
+      } else {
+        prompt('Copy session details:', shareText);
+      }
+    }
+
+    function filterStatus(status) {
+      currentFilter = status;
+      document.querySelectorAll('.status-tab').forEach(b => b.classList.remove('active'));
+      event.target.classList.add('active');
+      renderSessions();
+    }
+
+    function togglePrivateField() {
+      const isPrivate = document.getElementById('isPrivateCheckbox').checked;
+      document.getElementById('privatePartnerGroup').style.display = isPrivate ? 'block' : 'none';
+      document.getElementById('sendChatRow').style.display = isPrivate ? 'flex' : 'none';
+    }
+
+    function openScheduleModal() {
+      document.getElementById('modalHeading').textContent = 'Schedule Learning Session';
+      document.getElementById('editSessionId').value = '';
+      document.getElementById('isStudyGroup').value = 'false';
+      document.getElementById('sessionForm').reset();
+      document.getElementById('privateRow').style.display = 'flex';
+      togglePrivateField();
+      document.getElementById('modalSubmitBtn').textContent = 'Schedule Session';
+      document.getElementById('scheduleModal').style.display = 'flex';
+    }
+
+    function openStudyGroupModal() {
+      document.getElementById('modalHeading').textContent = 'Create a Study Group';
+      document.getElementById('editSessionId').value = '';
+      document.getElementById('isStudyGroup').value = 'true';
+      document.getElementById('sessionForm').reset();
+      document.getElementById('title').value = 'Collaborative Study Group';
+      document.getElementById('isPrivateCheckbox').checked = false;
+      document.getElementById('privateRow').style.display = 'none';
+      togglePrivateField();
+      document.getElementById('modalSubmitBtn').textContent = 'Create Study Group';
+      document.getElementById('scheduleModal').style.display = 'flex';
+    }
+
+    function openEditModal(sessionId) {
+      const session = allSessions.find(s => s.id === sessionId);
+      if (!session) return;
+
+      document.getElementById('modalHeading').textContent = 'Edit Session';
+      document.getElementById('editSessionId').value = session.id;
+      document.getElementById('isStudyGroup').value = session.isStudyGroup ? 'true' : 'false';
+      document.getElementById('title').value = session.title || '';
+      document.getElementById('meetingUrl').value = session.meetingUrl || '';
+      document.getElementById('sessionDate').value = session.sessionDate || '';
+      document.getElementById('startTime').value = session.startTime || '';
+      document.getElementById('endTime').value = session.endTime || '';
+      document.getElementById('notes').value = session.notes || '';
+      
+      document.getElementById('isPrivateCheckbox').checked = Boolean(session.isPrivate);
+      togglePrivateField();
+      if (session.participantUserId) {
+        document.getElementById('participantUserId').value = session.participantUserId;
+      }
+      
+      document.getElementById('modalSubmitBtn').textContent = 'Update Session';
+      document.getElementById('scheduleModal').style.display = 'flex';
+    }
+
+    function closeScheduleModal() {
+      document.getElementById('scheduleModal').style.display = 'none';
+      document.getElementById('sessionForm').reset();
+      document.getElementById('editSessionId').value = '';
+    }
+
+    async function handleScheduleSubmit(e) {
+      e.preventDefault();
+      const editId = document.getElementById('editSessionId').value;
+      const isPrivate = document.getElementById('isPrivateCheckbox').checked;
+      const isStudyGroup = document.getElementById('isStudyGroup').value === 'true';
+
+      const payload = {
+        title: document.getElementById('title').value,
+        isPrivate: isPrivate,
+        isStudyGroup: isStudyGroup,
+        participantUserId: isPrivate ? document.getElementById('participantUserId').value : '',
+        sendToChat: isPrivate ? document.getElementById('sendToChatCheckbox').checked : false,
+        meetingUrl: document.getElementById('meetingUrl').value,
+        sessionDate: document.getElementById('sessionDate').value,
+        startTime: document.getElementById('startTime').value,
+        endTime: document.getElementById('endTime').value,
+        notes: document.getElementById('notes').value
+      };
+
+      try {
+        const url = editId ? `/api/sessions/${editId}` : '/api/sessions';
+        const method = editId ? 'PUT' : 'POST';
+
+        const res = await fetch(url, {
+          method: method,
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (data.status === 'success') {
+          closeScheduleModal();
+          loadSessions();
+        } else {
+          alert('Failed to save session: ' + data.message);
+        }
+      } catch (err) {
+        alert('Network error: ' + err.message);
+      }
+    }
+
+    async function updateStatus(sessionId, newStatus) {
+      if (!confirm(`Mark this session as ${newStatus}?`)) return;
+      try {
+        const res = await fetch(`/api/sessions/${sessionId}/status`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: newStatus })
+        });
+        const data = await res.json();
+        if (data.status === 'success') {
+          loadSessions();
+        } else {
+          alert(data.message);
+        }
+      } catch (e) {
+        alert(e.message);
+      }
+    }
+
+    async function deleteSingleSession(sessionId) {
+      if (!confirm('Are you sure you want to delete this session?')) return;
+      try {
+        const res = await fetch(`/api/sessions/${sessionId}`, { method: 'DELETE' });
+        const data = await res.json();
+        if (data.status === 'success') {
+          selectedSessionIds.delete(sessionId);
+          loadSessions();
+        } else {
+          alert(data.message);
+        }
+      } catch (e) {
+        alert(e.message);
+      }
+    }
+
+    async function deleteSelectedSessions() {
+      if (selectedSessionIds.size === 0) return;
+      if (!confirm(`Delete ${selectedSessionIds.size} selected session(s)?`)) return;
+
+      try {
+        const res = await fetch('/api/sessions/batch-delete', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ session_ids: Array.from(selectedSessionIds) })
+        });
+        const data = await res.json();
+        if (data.status === 'success') {
+          selectedSessionIds.clear();
+          loadSessions();
+        } else {
+          alert(data.message);
+        }
+      } catch (e) {
+        alert(e.message);
+      }
+    }
+
+    async function clearCompletedHistory() {
+      if (!confirm('Clear all completed and cancelled sessions from history?')) return;
+      try {
+        const res = await fetch('/api/sessions/batch-delete', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ delete_history: true })
+        });
+        const data = await res.json();
+        if (data.status === 'success') {
+          loadSessions();
+        } else {
+          alert(data.message);
+        }
+      } catch (e) {
+        alert(e.message);
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', loadSessions);
+  </script>
+  <script src="{{ url_for('static', filename='js/theme.js') }}"></script>
+</body>
+</html>

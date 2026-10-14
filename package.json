@@ -1,0 +1,11 @@
+{
+  "name": "skillswap",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "echo 'SkillSwap build completed successfully'"
+  },
+  "dependencies": {
+    "@neon/config": "^1.9.1",
+    "@neon/env": "^1.6.2"
+  }
+}

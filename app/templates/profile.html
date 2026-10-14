@@ -1,0 +1,1180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>User Profile - SkillSwap</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/profile.css') }}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Cloudinary Upload Widget -->
+  <script src="https://upload-widget.cloudinary.com/global/all.js" type="text/javascript"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.14.0/Sortable.min.js"></script>
+</head>
+<body>
+  <div class="container">
+    <!-- Header Section -->
+    <div class="header">
+      <div class="header-left">
+        <h1><i class="fas fa-user-circle"></i> 
+          <span id="profileTitle">Profile</span>
+          <span id="editModeIndicator" class="edit-indicator">Edit Mode</span>
+        </h1>
+        <p id="profileSubtitle">View and manage your profile information</p>
+      </div>
+      <div class="header-actions">
+        <a href="{{ url_for('main.see_request') }}" class="btn-swap">
+          <i class="fas fa-exchange-alt"></i> Swap Requests
+          
+        </a>
+        <a href="/app" class="btn-home">
+          <i class="fas fa-home"></i> Home
+        </a>
+        <button id="toggleEditBtn" class="btn-edit">
+          <i class="fas fa-edit"></i> Edit Profile
+        </button>
+        <button class="theme-toggle-btn" title="Toggle Light / Dark Mode" aria-label="Toggle Light / Dark Mode">
+          <i class="fas fa-moon"></i>
+        </button>
+        <div class="user-avatar-container">
+          <img src="{{ user_data.photo_url or '/static/default-profile.svg' }}" class="user-avatar" alt="User Avatar" onerror="this.src='/static/default-profile.svg'">
+          <div class="online-status"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Profile Form Section -->
+    <form id="profileForm" method="POST" class="profile-form">
+      <div class="profile-content">
+        <!-- Left Column - Form Fields -->
+        <div class="form-column">
+          <!-- Personal Information Card -->
+          <div class="card">
+            <div class="card-header">
+              <i class="fas fa-id-card"></i>
+              <h3>Personal Information</h3>
+            </div>
+            <div class="card-body">
+              <div class="form-group">
+                <label>Full Name</label>
+                <div class="input-with-icon">
+                  <i class="fas fa-user"></i>
+                  <input type="text" name="name" value="{{ user_data.name or '' }}" placeholder="Enter your full name" required disabled>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label>Headline</label>
+                <div class="input-with-icon">
+                  <i class="fas fa-briefcase"></i>
+                  <input type="text" name="headline" value="{{ user_data.headline or '' }}" placeholder="e.g., Senior Software Engineer" disabled>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label>About Me</label>
+                <div class="textarea-with-icon">
+                  <i class="fas fa-info-circle"></i>
+                  <textarea name="about" placeholder="Tell us about yourself..." rows="4" disabled>{{ user_data.about or '' }}</textarea>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label>Location</label>
+                <div class="location-container">
+                  <div class="input-with-icon" style="width: 100%;">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <input type="text" id="cityInput" name="city" value="{{ user_data.city or '' }}" placeholder="Enter your city / region" disabled>
+                    <div id="citySuggestions" class="suggestions-dropdown"></div>
+                  </div>
+                  <input type="hidden" id="stateInput" name="state" value="{{ user_data.state or '' }}">
+                  <input type="hidden" id="countryInput" name="country" value="{{ user_data.country or '' }}">
+                </div>
+                <div class="location-display" id="locationDisplay">
+                  {% if user_data.city and user_data.state %}
+                  <span><i class="fas fa-check-circle"></i> {{ user_data.city }}, {{ user_data.state }}</span>
+                  {% endif %}
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label>Availability</label>
+                <div class="input-with-icon">
+                  <i class="fas fa-clock"></i>
+                  <select name="availability" required disabled>
+                    <option value="Weekdays" {% if user_data.availability == "Weekdays" %}selected{% endif %}>Weekdays</option>
+                    <option value="Weekends" {% if user_data.availability == "Weekends" %}selected{% endif %}>Weekends</option>
+                    <option value="Evenings" {% if user_data.availability == "Evenings" %}selected{% endif %}>Evenings</option>
+                    <option value="Mornings" {% if user_data.availability == "Mornings" %}selected{% endif %}>Mornings</option>
+                    <option value="Flexible" {% if user_data.availability == "Flexible" %}selected{% endif %}>Flexible</option>
+                    <option value="Not Available" {% if user_data.availability == "Not Available" %}selected{% endif %}>Not Available</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label>Gender</label>
+                <div class="input-with-icon">
+                  <i class="fas fa-venus-mars"></i>
+                  <select name="gender" disabled>
+                    <option value="Prefer not to say" {% if user_data.gender == "Prefer not to say" or not user_data.gender %}selected{% endif %}>Prefer not to say</option>
+                    <option value="Male" {% if user_data.gender == "Male" %}selected{% endif %}>Male</option>
+                    <option value="Female" {% if user_data.gender == "Female" %}selected{% endif %}>Female</option>
+                    <option value="Non-binary" {% if user_data.gender == "Non-binary" %}selected{% endif %}>Non-binary</option>
+                    <option value="Other" {% if user_data.gender == "Other" %}selected{% endif %}>Other</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Information Visibility Preferences -->
+              <div class="form-group" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px 16px;">
+                <label style="font-weight: 700; color: #1e293b; margin-bottom: 8px; display: flex; align-items: center; gap: 8px;">
+                  <i class="fas fa-eye" style="color: #2563eb;"></i> What Information Is Visible to Others
+                </label>
+                <div style="display: flex; flex-direction: column; gap: 8px; font-size: 0.9rem; color: #475569;">
+                  <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                    <input type="checkbox" name="vis_email" {% if user_data.visibility_settings and user_data.visibility_settings.get('show_email') is not false %}checked{% elif not user_data.visibility_settings %}checked{% endif %} disabled style="width: 16px; height: 16px;">
+                    <span>Email address</span>
+                  </label>
+                  <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                    <input type="checkbox" name="vis_location" {% if user_data.visibility_settings and user_data.visibility_settings.get('show_location') is not false %}checked{% elif not user_data.visibility_settings %}checked{% endif %} disabled style="width: 16px; height: 16px;">
+                    <span>Location (City / State)</span>
+                  </label>
+                  <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                    <input type="checkbox" name="vis_education" {% if user_data.visibility_settings and user_data.visibility_settings.get('show_education') is not false %}checked{% elif not user_data.visibility_settings %}checked{% endif %} disabled style="width: 16px; height: 16px;">
+                    <span>Education & Qualifications</span>
+                  </label>
+                  <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                    <input type="checkbox" name="vis_gender" {% if user_data.visibility_settings and user_data.visibility_settings.get('show_gender') is not false %}checked{% elif not user_data.visibility_settings %}checked{% endif %} disabled style="width: 16px; height: 16px;">
+                    <span>Gender</span>
+                  </label>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label>Contact Information</label>
+                <div class="contact-grid">
+                  <div class="input-with-icon">
+                    <i class="fas fa-envelope"></i>
+                    <input type="email" name="email" value="{{ user_data.email or '' }}" placeholder="Email address" disabled>
+                  </div>
+                  <div class="input-with-icon">
+                    <i class="fas fa-phone"></i>
+                    <input type="tel" name="phone" value="{{ user_data.phone or '' }}" placeholder="Phone number" disabled>
+                  </div>
+                  <div class="input-with-icon">
+                    <i class="fas fa-globe"></i>
+                    <input type="url" name="website" value="{{ user_data.website or '' }}" placeholder="Website URL" disabled>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Languages Section -->
+               <div class="form-group">
+                <label>Languages</label>
+                <div id="languagesContainer">
+                  {% if user_data.languages %}
+                    {% for lang in user_data.languages %}
+                    <div class="language-item" data-index="{{ loop.index0 }}">
+                      <div class="language-input-group">
+                        <input type="text" class="language-name" value="{{ lang.language }}" placeholder="Language" disabled>
+                        <select class="language-proficiency" disabled>
+                          <option value="Beginner" {% if lang.proficiency == "Beginner" %}selected{% endif %}>Beginner</option>
+                          <option value="Intermediate" {% if lang.proficiency == "Intermediate" %}selected{% endif %}>Intermediate</option>
+                          <option value="Advanced" {% if lang.proficiency == "Advanced" %}selected{% endif %}>Advanced</option>
+                          <option value="Native" {% if lang.proficiency == "Native" %}selected{% endif %}>Native</option>
+                          <option value="Fluent" {% if lang.proficiency == "Fluent" %}selected{% endif %}>Fluent</option>
+                        </select>
+                        <button type="button" class="btn-remove-language" style="display: none;">
+                          <i class="fas fa-times"></i>
+                        </button>
+                      </div>
+                    </div>
+                    {% endfor %}
+                  {% endif %}
+                </div>
+                <button type="button" id="addLanguageBtn" class="btn-secondary" style="display: none;">
+                  <i class="fas fa-plus"></i> Add Language
+                </button>
+              </div>
+            </div>
+          </div>
+          
+
+          <!-- Skills & Expertise Card -->
+          <div class="card">
+            <div class="card-header">
+              <i class="fas fa-code"></i>
+              <h3>Skills & Expertise</h3>
+            </div>
+            <div class="card-body">
+              <div class="form-group">
+                <label>Skills Offered</label>
+                <div class="skills-input-container">
+                  <div class="input-with-icon">
+                    <i class="fas fa-hands-helping"></i>
+                    <input type="text" id="offeredSkillInput" placeholder="Type to search skills..." disabled>
+                    <div id="offeredSkillSuggestions" class="suggestions-dropdown"></div>
+                  </div>
+                  <div class="skills-tags" id="offeredSkillsTags">
+                    {% if user_data.offeredSkill %}
+                      {% for skill in user_data.offeredSkill %}
+                        <div class="skill-tag" data-skill="{{ skill }}">
+                          {{ skill }}
+                          <span class="remove-skill" style="display: none;">&times;</span>
+                        </div>
+                      {% endfor %}
+                    {% endif %}
+                  </div>
+                  <input type="hidden" name="offeredSkill" id="offeredSkillHidden" value="{{ user_data.offeredSkill | join(',') }}">
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label>Skills Wanted</label>
+                <div class="skills-input-container">
+                  <div class="input-with-icon">
+                    <i class="fas fa-lightbulb"></i>
+                    <input type="text" id="requestedSkillInput" placeholder="Type to search skills..." disabled>
+                    <div id="requestedSkillSuggestions" class="suggestions-dropdown"></div>
+                  </div>
+                  <div class="skills-tags" id="requestedSkillsTags">
+                    {% if user_data.requestedSkill %}
+                      {% for skill in user_data.requestedSkill %}
+                        <div class="skill-tag" data-skill="{{ skill }}">
+                          {{ skill }}
+                          <span class="remove-skill" style="display: none;">&times;</span>
+                        </div>
+                      {% endfor %}
+                    {% endif %}
+                  </div>
+                  <input type="hidden" name="requestedSkill" id="requestedSkillHidden" value="{{ user_data.requestedSkill | join(',') }}">
+                </div>
+              </div>
+
+              <!-- Skills Section -->
+              <div class="form-group">
+                <label>Additional Skills</label>
+                <div id="skillsContainer">
+                  {% if user_data.skills %}
+                    {% for skill in user_data.skills %}
+                    <div class="skill-item" data-index="{{ loop.index0 }}">
+                      <input type="text" class="skill-name" value="{{ skill.skill_name }}" placeholder="Skill name" disabled>
+                      <button type="button" class="btn-remove-skill" style="display: none;">
+                        <i class="fas fa-times"></i>
+                      </button>
+                    </div>
+                    {% endfor %}
+                  {% endif %}
+                </div>
+                <button type="button" id="addSkillBtn" class="btn-secondary" style="display: none;">
+                  <i class="fas fa-plus"></i> Add Skill
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Education Card -->
+          <div class="card">
+            <div class="card-header">
+              <i class="fas fa-graduation-cap"></i>
+              <h3>Education</h3>
+            </div>
+            <div class="card-body">
+              <div id="educationContainer">
+                {% if user_data.education %}
+                  {% for edu in user_data.education %}
+                  <div class="education-item" data-index="{{ loop.index0 }}">
+                    <div class="education-view">
+                      <h4>{{ edu.degree_type }} in {{ edu.field_of_study }}</h4>
+                      <p class="institution">{{ edu.institution_name }}</p>
+                      <p class="details">
+                        {{ edu.start_date }} - {% if edu.current %}Present{% else %}{{ edu.end_date }}{% endif %}
+                        {% if edu.grade %} | Grade: {{ edu.grade }}{% endif %}
+                      </p>
+                      {% if edu.description %}<p class="description">{{ edu.description }}</p>{% endif %}
+                    </div>
+                    <div class="education-edit" style="display: none;">
+                      <div class="form-group enhanced">
+                        <label>Degree Type</label>
+                        <div class="select-with-icon">
+                          <i class="fas fa-graduation-cap"></i>
+                          <select class="edu-degree" disabled>
+                            <option value="">Select Degree Type</option>
+                          </select>
+                        </div>
+                      </div>
+                      
+                      <div class="form-group enhanced">
+                        <label>Specialization</label>
+                        <div class="select-with-icon">
+                          <i class="fas fa-book"></i>
+                          <select class="edu-field" disabled>
+                            <option value="">Select Specialization</option>
+                          </select>
+                        </div>
+                      </div>
+                      
+                      <div class="form-group enhanced">
+                        <label>Institution Name</label>
+                        <div class="autocomplete-container">
+                          <div class="input-with-icon">
+                            <i class="fas fa-university"></i>
+                            <input type="text" class="edu-institution" value="{{ edu.institution_name }}" placeholder="Search college/university..." disabled>
+                          </div>
+                          <div class="autocomplete-suggestions" style="display: none;"></div>
+                        </div>
+                      </div>
+                      
+                      <div class="form-group enhanced">
+                        <label>Institution Type</label>
+                        <input type="text" class="edu-institution-type" value="{{ edu.institution_type }}" placeholder="e.g., University, College" disabled>
+                      </div>
+                      
+                      <div class="form-group enhanced">
+                        <label>Location</label>
+                        <div class="location-container">
+                          <div class="input-with-icon">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <input type="text" class="edu-location" value="{{ edu.location }}" placeholder="City, State" disabled>
+                            <div class="autocomplete-suggestions" style="display: none;"></div>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div class="form-group enhanced date-picker-container">
+                        <label>Start Date</label>
+                        <div class="input-with-icon">
+                          <i class="fas fa-calendar-alt"></i>
+                          <input type="month" class="edu-start-date" value="{{ edu.start_date }}" disabled>
+                        </div>
+                      </div>
+                      
+                      <div class="form-group enhanced date-picker-container">
+                        <label>End Date</label>
+                        <div class="input-with-icon">
+                          <i class="fas fa-calendar-alt"></i>
+                          <input type="month" class="edu-end-date" value="{{ edu.end_date }}" disabled>
+                        </div>
+                      </div>
+                      
+                      <div class="form-group enhanced checkbox-group">
+                        <label class="checkbox-label">
+                          <input type="checkbox" class="edu-current" {% if edu.current %}checked{% endif %} disabled> 
+                          <span>Currently Studying</span>
+                        </label>
+                      </div>
+                      
+                      <div class="form-group enhanced">
+                        <label>Grade/Percentage</label>
+                        <input type="text" class="edu-grade" value="{{ edu.grade }}" placeholder="e.g., 3.8/4.0 or 85%" disabled>
+                      </div>
+                      
+                      <div class="form-group enhanced" style="grid-column: span 2;">
+                        <label>Description</label>
+                        <textarea class="edu-description" placeholder="Additional details about your education..." rows="3" disabled>{{ edu.description }}</textarea>
+                      </div>
+                      
+                      <div class="form-group enhanced" style="grid-column: span 2; text-align: right;">
+                        <button type="button" class="btn-remove-education" style="display: none;">
+                          <i class="fas fa-trash"></i> Remove Education
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                  {% endfor %}
+                {% endif %}
+              </div>
+              <button type="button" id="addEducationBtn" class="btn-secondary" style="display: none;">
+                <i class="fas fa-plus"></i> Add Education
+              </button>
+            </div>
+          </div>
+
+          <!-- Work Experience Card -->
+          <div class="card">
+            <div class="card-header">
+              <i class="fas fa-briefcase"></i>
+              <h3>Work Experience</h3>
+            </div>
+            <div class="card-body">
+              <div id="experienceContainer">
+                {% if user_data.experience %}
+                  {% for exp in user_data.experience %}
+                  <div class="experience-item" data-index="{{ loop.index0 }}">
+                    <div class="experience-view">
+                      <h4>{{ exp.job_title }} at {{ exp.company }}</h4>
+                      <p class="details">
+                        {{ exp.employment_type }} | 
+                        {{ exp.start_date }} - {% if exp.current %}Present{% else %}{{ exp.end_date }}{% endif %}
+                        {% if exp.location %}| {{ exp.location }}{% endif %}
+                      </p>
+                      {% if exp.responsibilities %}<p class="responsibilities">{{ exp.responsibilities }}</p>{% endif %}
+                      {% if exp.skills_used %}<p class="skills-used">Skills: {{ exp.skills_used|join(', ') }}</p>{% endif %}
+                    </div>
+                    <div class="experience-edit" style="display: none;">
+                      <div class="form-group enhanced">
+                        <label>Job Title</label>
+                        <div class="autocomplete-container">
+                          <div class="input-with-icon">
+                            <i class="fas fa-briefcase"></i>
+                            <input type="text" class="exp-title" value="{{ exp.job_title }}" placeholder="Search job title..." disabled>
+                          </div>
+                          <div class="autocomplete-suggestions" style="display: none;"></div>
+                        </div>
+                      </div>
+                      
+                      <div class="form-group enhanced">
+                        <label>Company</label>
+                        <input type="text" class="exp-company" value="{{ exp.company }}" placeholder="Company name" disabled>
+                      </div>
+                      
+                      <div class="form-group enhanced">
+                        <label>Employment Type</label>
+                        <div class="select-with-icon">
+                          <i class="fas fa-user-tie"></i>
+                          <select class="exp-type" disabled>
+                            <option value="">Select Employment Type</option>
+                          </select>
+                        </div>
+                      </div>
+                      
+                      <div class="form-group enhanced">
+                        <label>Location</label>
+                        <div class="location-container">
+                          <div class="input-with-icon">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <input type="text" class="exp-location" value="{{ exp.location }}" placeholder="City, State" disabled>
+                            <div class="autocomplete-suggestions" style="display: none;"></div>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div class="checkbox-group">
+                        <label class="checkbox-label">
+                          <input type="checkbox" class="exp-remote" {% if exp.remote %}checked{% endif %} disabled> 
+                          <span>Remote Position</span>
+                        </label>
+                      </div>
+                      
+                      <div class="form-group enhanced date-picker-container">
+                        <label>Start Date</label>
+                        <div class="input-with-icon">
+                          <i class="fas fa-calendar-alt"></i>
+                          <input type="month" class="exp-start-date" value="{{ exp.start_date }}" disabled>
+                        </div>
+                      </div>
+                      
+                      <div class="form-group enhanced date-picker-container">
+                        <label>End Date</label>
+                        <div class="input-with-icon">
+                          <i class="fas fa-calendar-alt"></i>
+                          <input type="month" class="exp-end-date" value="{{ exp.end_date }}" disabled>
+                        </div>
+                      </div>
+                      
+                      <div class="checkbox-group">
+                        <label class="checkbox-label">
+                          <input type="checkbox" class="exp-current" {% if exp.current %}checked{% endif %} disabled> 
+                          <span>Currently Working</span>
+                        </label>
+                      </div>
+                      
+                      <div class="form-group enhanced" style="grid-column: span 2;">
+                        <label>Responsibilities</label>
+                        <textarea class="exp-responsibilities" placeholder="Describe your responsibilities and achievements..." rows="4" disabled>{{ exp.responsibilities }}</textarea>
+                      </div>
+                      
+                      <div class="form-group enhanced" style="grid-column: span 2;">
+                        <label>Skills Used</label>
+                        <div class="autocomplete-container">
+                          <div class="input-with-icon">
+                            <i class="fas fa-code"></i>
+                            <input type="text" class="exp-skills" value="{{ exp.skills_used|join(', ') }}" placeholder="Enter skills separated by commas" disabled>
+                          </div>
+                          <div class="autocomplete-suggestions" style="display: none;"></div>
+                        </div>
+                      </div>
+                      
+                      <div class="form-group enhanced" style="grid-column: span 2; text-align: right;">
+                        <button type="button" class="btn-remove-experience" style="display: none;">
+                          <i class="fas fa-trash"></i> Remove Experience
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                  {% endfor %}
+                {% endif %}
+              </div>
+              <button type="button" id="addExperienceBtn" class="btn-secondary" style="display: none;">
+                <i class="fas fa-plus"></i> Add Experience
+              </button>
+            </div>
+          </div>
+
+          <!-- Certifications Card -->
+          <div class="card">
+            <div class="card-header">
+              <i class="fas fa-certificate"></i>
+              <h3>Certifications</h3>
+            </div>
+            <div class="card-body">
+              <div id="certificationsContainer">
+                {% if user_data.certifications %}
+                  {% for cert in user_data.certifications %}
+                  <div class="certification-item" data-index="{{ loop.index0 }}">
+                    <div class="certification-view">
+                      <h4>{{ cert.name }}</h4>
+                      <p class="organization">by {{ cert.organization }}</p>
+                      <p class="details">
+                        Issued: {{ cert.issue_date }}
+                        {% if cert.expiry_date %} | Expires: {{ cert.expiry_date }}{% endif %}
+                        {% if cert.credential_id %} | ID: {{ cert.credential_id }}{% endif %}
+                      </p>
+                      {% if cert.skills %}<p class="skills">Skills: {{ cert.skills|join(', ') }}</p>{% endif %}
+                      {% if cert.certificate_url %}
+                      <a href="{{ cert.certificate_url }}" target="_blank" class="btn-view-certificate">
+                        <i class="fas fa-eye"></i> View Certificate
+                      </a>
+                      {% endif %}
+                    </div>
+                    <div class="certification-edit" style="display: none;">
+                      <input type="text" class="cert-name" value="{{ cert.name }}" placeholder="Certification Name" disabled>
+                      <input type="text" class="cert-organization" value="{{ cert.organization }}" placeholder="Issuing Organization" disabled>
+                      <input type="month" class="cert-issue-date" value="{{ cert.issue_date }}" disabled>
+                      <input type="month" class="cert-expiry-date" value="{{ cert.expiry_date }}" disabled>
+                      <label><input type="checkbox" class="cert-no-expiry" {% if cert.no_expiry %}checked{% endif %} disabled> No Expiry</label>
+                      <input type="text" class="cert-credential-id" value="{{ cert.credential_id }}" placeholder="Credential ID" disabled>
+                      <input type="text" class="cert-skills" value="{{ cert.skills|join(', ') }}" placeholder="Skills (comma separated)" disabled>
+                      <div class="cert-upload-section">
+                        <button type="button" class="btn-upload-certificate" disabled>
+                          <i class="fas fa-upload"></i> Upload Certificate
+                        </button>
+                        <input type="hidden" class="cert-certificate-url" value="{{ cert.certificate_url }}">
+                        {% if cert.certificate_url %}
+                        <a href="{{ cert.certificate_url }}" target="_blank" class="current-certificate">
+                          Current Certificate
+                        </a>
+                        {% endif %}
+                      </div>
+                      <button type="button" class="btn-remove-certification" style="display: none;">
+                        <i class="fas fa-trash"></i> Remove
+                      </button>
+                    </div>
+                  </div>
+                  {% endfor %}
+                {% endif %}
+              </div>
+              <button type="button" id="addCertificationBtn" class="btn-secondary" style="display: none;">
+                <i class="fas fa-plus"></i> Add Certification
+              </button>
+            </div>
+          </div>
+
+          <!-- Projects Card -->
+          <div class="card">
+            <div class="card-header">
+              <i class="fas fa-project-diagram"></i>
+              <h3>Projects</h3>
+            </div>
+            <div class="card-body">
+              <div id="projectsContainer">
+                {% if user_data.projects %}
+                  {% for project in user_data.projects %}
+                  <div class="project-item" data-index="{{ loop.index0 }}">
+                    <div class="project-view">
+                      <h4>{{ project.title }}</h4>
+                      <p class="type">{{ project.type }}</p>
+                      <p class="description">{{ project.description }}</p>
+                      {% if project.technologies %}<p class="technologies">Technologies: {{ project.technologies|join(', ') }}</p>{% endif %}
+                      {% if project.role %}<p class="role">Role: {{ project.role }}</p>{% endif %}
+                      {% if project.links %}
+                      <div class="project-links">
+                        {% for link in project.links %}
+                        <a href="{{ link.url }}" target="_blank" class="project-link">{{ link.name }}</a>
+                        {% endfor %}
+                      </div>
+                      {% endif %}
+                    </div>
+                    <div class="project-edit" style="display: none;">
+                      <div class="form-group enhanced">
+                        <label>Project Title</label>
+                        <input type="text" class="project-title" value="{{ project.title }}" placeholder="Enter project title" disabled>
+                      </div>
+                      
+                      <div class="form-group enhanced">
+                        <label>Project Type</label>
+                        <input type="text" class="project-type" value="{{ project.type }}" placeholder="e.g., Web Application, Mobile App" disabled>
+                      </div>
+                      
+                      <div class="form-group enhanced" style="grid-column: span 2;">
+                        <label>Description</label>
+                        <textarea class="project-description" placeholder="Describe your project, its purpose, and key features..." rows="4" disabled>{{ project.description }}</textarea>
+                      </div>
+                      
+                      <div class="form-group enhanced" style="grid-column: span 2;">
+                        <label>Technologies Used</label>
+                        <div class="autocomplete-container">
+                          <div class="input-with-icon">
+                            <i class="fas fa-code"></i>
+                            <input type="text" class="project-technologies" value="{{ project.technologies|join(', ') }}" placeholder="Enter technologies separated by commas" disabled>
+                          </div>
+                          <div class="autocomplete-suggestions" style="display: none;"></div>
+                        </div>
+                      </div>
+                      
+                      <div class="form-group enhanced">
+                        <label>Your Role</label>
+                        <input type="text" class="project-role" value="{{ project.role }}" placeholder="e.g., Frontend Developer, Project Lead" disabled>
+                      </div>
+                      
+                      <div class="form-group enhanced project-links-input" style="grid-column: span 2;">
+                        <label>Project Links</label>
+                        <div class="link-input-row">
+                          <div class="select-with-icon">
+                            <i class="fas fa-link"></i>
+                            <select class="project-link-type" disabled>
+                              <option value="live">Live Demo</option>
+                              <option value="demo">Demo Video</option>
+                              <option value="github">GitHub</option>
+                              <option value="other">Other</option>
+                            </select>
+                          </div>
+                          <input type="url" class="project-link-url" placeholder="Enter URL" disabled>
+                          <button type="button" class="btn-add-project-link" disabled>
+                            <i class="fas fa-plus"></i> Add
+                          </button>
+                        </div>
+                        <div class="project-links-list">
+                          {% if project.links %}
+                            {% for link in project.links %}
+                            <div class="project-link-item">
+                              <span><strong>{{ link.name }}:</strong> {{ link.url }}</span>
+                              <button type="button" class="btn-remove-link" style="display: none;">
+                                <i class="fas fa-times"></i>
+                              </button>
+                              <input type="hidden" name="project_link_name" value="{{ link.name }}">
+                              <input type="hidden" name="project_link_url" value="{{ link.url }}">
+                            </div>
+                            {% endfor %}
+                          {% endif %}
+                        </div>
+                      </div>
+                      
+                      <div class="form-group enhanced project-images" style="grid-column: span 2;">
+                        <label>Project Images</label>
+                        <button type="button" class="btn-upload-enhanced btn-upload-project-images" disabled>
+                          <i class="fas fa-cloud-upload-alt"></i> Upload Project Images
+                        </button>
+                        <div class="project-images-list">
+                          {% if project.images %}
+                            {% for image in project.images %}
+                            <div class="project-image-preview">
+                              <img src="{{ image }}" alt="Project Image">
+                              <button type="button" class="remove-image" style="display: none;">×</button>
+                              <input type="hidden" class="project-image-url" value="{{ image }}">
+                            </div>
+                            {% endfor %}
+                          {% endif %}
+                        </div>
+                      </div>
+                      
+                      <div class="form-group enhanced" style="grid-column: span 2; text-align: right;">
+                        <button type="button" class="btn-remove-project" style="display: none;">
+                          <i class="fas fa-trash"></i> Remove Project
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                  {% endfor %}
+                {% endif %}
+              </div>
+              <button type="button" id="addProjectBtn" class="btn-secondary" style="display: none;">
+                <i class="fas fa-plus"></i> Add Project
+              </button>
+            </div>
+          </div>
+
+          <!-- Achievements Card -->
+          <div class="card">
+            <div class="card-header">
+              <i class="fas fa-trophy"></i>
+              <h3>Achievements</h3>
+            </div>
+            <div class="card-body">
+              <div id="achievementsContainer">
+                {% if user_data.achievements %}
+                  {% for achievement in user_data.achievements %}
+                  <div class="achievement-item" data-index="{{ loop.index0 }}">
+                    <div class="achievement-view">
+                      <h4>{{ achievement.title }}</h4>
+                      <p class="org">by {{ achievement.org }}</p>
+                      <p class="date">{{ achievement.date }}</p>
+                      {% if achievement.description %}<p class="description">{{ achievement.description }}</p>{% endif %}
+                    </div>
+                    <div class="achievement-edit" style="display: none;">
+                      <input type="text" class="achievement-title" value="{{ achievement.title }}" placeholder="Achievement Title" disabled>
+                      <input type="text" class="achievement-org" value="{{ achievement.org }}" placeholder="Organization" disabled>
+                      <input type="month" class="achievement-date" value="{{ achievement.date }}" disabled>
+                      <textarea class="achievement-description" placeholder="Description" disabled>{{ achievement.description }}</textarea>
+                      <button type="button" class="btn-remove-achievement" style="display: none;">
+                        <i class="fas fa-trash"></i> Remove
+                      </button>
+                    </div>
+                  </div>
+                  {% endfor %}
+                {% endif %}
+              </div>
+              <button type="button" id="addAchievementBtn" class="btn-secondary" style="display: none;">
+                <i class="fas fa-plus"></i> Add Achievement
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Column - Profile Image & Social -->
+        <div class="profile-column">
+          <div class="card profile-card">
+            <div class="card-header">
+              <i class="fas fa-camera"></i>
+              <h3>Profile Photo</h3>
+            </div>
+            <div class="card-body">
+              <div class="profile-image-container" id="profileImageContainer">
+                <img src="{{ user_data.photo_url or '/static/default-profile.svg' }}" alt="Profile" class="profile-photo" id="profileImage" onerror="this.src='/static/default-profile.svg'">
+                <div class="profile-image-overlay">
+                  <i class="fas fa-camera"></i>
+                  <span>Change Photo</span>
+                </div>
+              </div>
+              
+              <div class="upload-actions">
+                <button type="button" id="uploadImageBtn" class="btn-upload" disabled>
+                  <i class="fas fa-cloud-upload-alt"></i> Upload New Photo
+                </button>
+                <div class="upload-progress" id="uploadProgress" style="display: none;">
+                  <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                  </div>
+                  <span id="progressText">0%</span>
+                </div>
+              </div>
+
+              <input type="hidden" name="photo_url" id="photoUrlInput" value="{{ user_data.photo_url or '' }}">
+            </div>
+          </div>
+
+          <div class="card social-card">
+            <div class="card-header">
+              <i class="fas fa-share-alt"></i>
+              <h3>Social Links</h3>
+            </div>
+            <div class="card-body">
+              <!-- Social Inputs (Edit Mode) -->
+              <div class="social-inputs" id="socialInputs" style="display: none;">
+                <div class="form-group">
+                  <label>LinkedIn</label>
+                  <div class="input-with-icon">
+                    <i class="fab fa-linkedin"></i>
+                    <input type="text" name="linkedin" placeholder="https://linkedin.com/in/username" value="{{ user_data.linkedin or '' }}" id="linkedinInput" disabled>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label>Twitter</label>
+                  <div class="input-with-icon">
+                    <i class="fab fa-twitter"></i>
+                    <input type="text" name="twitter" placeholder="https://twitter.com/username" value="{{ user_data.twitter or '' }}" id="twitterInput" disabled>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label>Instagram</label>
+                  <div class="input-with-icon">
+                    <i class="fab fa-instagram"></i>
+                    <input type="text" name="instagram" placeholder="https://instagram.com/username" value="{{ user_data.instagram or '' }}" id="instagramInput" disabled>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label>GitHub</label>
+                  <div class="input-with-icon">
+                    <i class="fab fa-github"></i>
+                    <input type="text" name="github" placeholder="https://github.com/username" value="{{ user_data.github or '' }}" id="githubInput" disabled>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Social Media Icons Display (View Mode) -->
+              <div class="social-icons-display" id="socialIconsDisplay">
+                {% if user_data.linkedin or user_data.twitter or user_data.instagram or user_data.github %}
+                <div class="social-icons">
+                  {% if user_data.linkedin %}
+                  <a href="{{ user_data.linkedin }}" target="_blank" class="social-icon linkedin">
+                    <i class="fab fa-linkedin"></i>
+                  </a>
+                  {% endif %}
+                  {% if user_data.twitter %}
+                  <a href="{{ user_data.twitter }}" target="_blank" class="social-icon twitter">
+                    <i class="fab fa-twitter"></i>
+                  </a>
+                  {% endif %}
+                  {% if user_data.instagram %}
+                  <a href="{{ user_data.instagram }}" target="_blank" class="social-icon instagram">
+                    <i class="fab fa-instagram"></i>
+                  </a>
+                  {% endif %}
+                  {% if user_data.github %}
+                  <a href="{{ user_data.github }}" target="_blank" class="social-icon github">
+                    <i class="fab fa-github"></i>
+                  </a>
+                  {% endif %}
+                </div>
+                {% else %}
+                <div class="no-social-links">
+                  <i class="fas fa-share-alt"></i>
+                  <p>No social links added yet</p>
+                </div>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-actions" id="formActions" style="display: none; gap: 14px; margin-top: 30px; padding: 20px 24px; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px; box-shadow: 0 4px 15px rgba(0,0,0,0.06); align-items: center; justify-content: flex-end;">
+        <button type="button" id="cancelEditBtn" class="btn-discard" style="background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; padding: 12px 24px; border-radius: 10px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 8px;">
+          <i class="fas fa-undo"></i> Discard Changes
+        </button>
+        <button type="submit" class="btn-save" style="background: #2563eb; color: #ffffff; border: none; padding: 12px 28px; border-radius: 10px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 8px;">
+          <i class="fas fa-check"></i> Save Changes
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Templates for dynamic content -->
+  <template id="languageTemplate">
+    <div class="language-item">
+      <div class="language-input-group">
+        <input type="text" class="language-name" placeholder="Language" disabled>
+        <select class="language-proficiency" disabled>
+          <option value="Beginner">Beginner</option>
+          <option value="Intermediate">Intermediate</option>
+          <option value="Advanced">Advanced</option>
+          <option value="Native">Native</option>
+          <option value="Fluent">Fluent</option>
+        </select>
+        <button type="button" class="btn-remove-language" style="display: none;">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+    </div>
+  </template>
+
+  <template id="educationTemplate">
+    <div class="education-item enhanced-item">
+      <div class="education-edit">
+        <div class="form-group enhanced">
+          <label>Degree Type</label>
+          <div class="select-with-icon">
+            <i class="fas fa-graduation-cap"></i>
+            <select class="edu-degree" disabled>
+              <option value="">Select Degree Type</option>
+            </select>
+          </div>
+        </div>
+        
+        <div class="form-group enhanced">
+          <label>Specialization</label>
+          <div class="select-with-icon">
+            <i class="fas fa-book"></i>
+            <select class="edu-field" disabled>
+              <option value="">Select Specialization</option>
+            </select>
+          </div>
+        </div>
+        
+        <div class="form-group enhanced">
+          <label>Institution Name</label>
+          <div class="autocomplete-container">
+            <div class="input-with-icon">
+              <i class="fas fa-university"></i>
+              <input type="text" class="edu-institution" placeholder="Search college/university..." disabled>
+            </div>
+            <div class="autocomplete-suggestions" style="display: none;"></div>
+          </div>
+        </div>
+        
+        <div class="form-group enhanced">
+          <label>Institution Type</label>
+          <input type="text" class="edu-institution-type" placeholder="e.g., University, College" disabled>
+        </div>
+        
+        <div class="form-group enhanced">
+          <label>Location</label>
+          <div class="location-container">
+            <div class="input-with-icon">
+              <i class="fas fa-map-marker-alt"></i>
+              <input type="text" class="edu-location" placeholder="City, State" disabled>
+              <div class="autocomplete-suggestions" style="display: none;"></div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="form-group enhanced date-picker-container">
+          <label>Start Date</label>
+          <div class="input-with-icon">
+            <i class="fas fa-calendar-alt"></i>
+            <input type="month" class="edu-start-date" disabled>
+          </div>
+        </div>
+        
+        <div class="form-group enhanced date-picker-container">
+          <label>End Date</label>
+          <div class="input-with-icon">
+            <i class="fas fa-calendar-alt"></i>
+            <input type="month" class="edu-end-date" disabled>
+          </div>
+        </div>
+        
+        <div class="form-group enhanced checkbox-group">
+          <label class="checkbox-label">
+            <input type="checkbox" class="edu-current" disabled> 
+            <span>Currently Studying</span>
+          </label>
+        </div>
+        
+        <div class="form-group enhanced">
+          <label>Grade/Percentage</label>
+          <input type="text" class="edu-grade" placeholder="e.g., 3.8/4.0 or 85%" disabled>
+        </div>
+        
+        <div class="form-group enhanced" style="grid-column: span 2;">
+          <label>Description</label>
+          <textarea class="edu-description" placeholder="Additional details about your education..." rows="3" disabled></textarea>
+        </div>
+        
+        <div class="form-group enhanced" style="grid-column: span 2; text-align: right;">
+          <button type="button" class="btn-remove-education" style="display: none;">
+            <i class="fas fa-trash"></i> Remove Education
+          </button>
+        </div>
+      </div>
+    </div>
+  </template>
+
+  <template id="experienceTemplate">
+    <div class="experience-item enhanced-item">
+      <div class="experience-edit">
+        <div class="form-group enhanced">
+          <label>Job Title</label>
+          <div class="autocomplete-container">
+            <div class="input-with-icon">
+              <i class="fas fa-briefcase"></i>
+              <input type="text" class="exp-title" placeholder="Search job title..." disabled>
+            </div>
+            <div class="autocomplete-suggestions" style="display: none;"></div>
+          </div>
+        </div>
+        
+        <div class="form-group enhanced">
+          <label>Company</label>
+          <input type="text" class="exp-company" placeholder="Company name" disabled>
+        </div>
+        
+        <div class="form-group enhanced">
+          <label>Employment Type</label>
+          <div class="select-with-icon">
+            <i class="fas fa-user-tie"></i>
+            <select class="exp-type" disabled>
+              <option value="">Select Employment Type</option>
+            </select>
+          </div>
+        </div>
+        
+        <div class="form-group enhanced">
+          <label>Location</label>
+          <div class="location-container">
+            <div class="input-with-icon">
+              <i class="fas fa-map-marker-alt"></i>
+              <input type="text" class="exp-location" placeholder="City, State" disabled>
+              <div class="autocomplete-suggestions" style="display: none;"></div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="checkbox-group">
+          <label class="checkbox-label">
+            <input type="checkbox" class="exp-remote" disabled> 
+            <span>Remote Position</span>
+          </label>
+        </div>
+        
+        <div class="form-group enhanced date-picker-container">
+          <label>Start Date</label>
+          <div class="input-with-icon">
+            <i class="fas fa-calendar-alt"></i>
+            <input type="month" class="exp-start-date" disabled>
+          </div>
+        </div>
+        
+        <div class="form-group enhanced date-picker-container">
+          <label>End Date</label>
+          <div class="input-with-icon">
+            <i class="fas fa-calendar-alt"></i>
+            <input type="month" class="exp-end-date" disabled>
+          </div>
+        </div>
+        
+        <div class="checkbox-group">
+          <label class="checkbox-label">
+            <input type="checkbox" class="exp-current" disabled> 
+            <span>Currently Working</span>
+          </label>
+        </div>
+        
+        <div class="form-group enhanced" style="grid-column: span 2;">
+          <label>Responsibilities</label>
+          <textarea class="exp-responsibilities" placeholder="Describe your responsibilities and achievements..." rows="4" disabled></textarea>
+        </div>
+        
+        <div class="form-group enhanced" style="grid-column: span 2;">
+          <label>Skills Used</label>
+          <div class="autocomplete-container">
+            <div class="input-with-icon">
+              <i class="fas fa-code"></i>
+              <input type="text" class="exp-skills" placeholder="Enter skills separated by commas" disabled>
+            </div>
+            <div class="autocomplete-suggestions" style="display: none;"></div>
+          </div>
+        </div>
+        
+        <div class="form-group enhanced" style="grid-column: span 2; text-align: right;">
+          <button type="button" class="btn-remove-experience" style="display: none;">
+            <i class="fas fa-trash"></i> Remove Experience
+          </button>
+        </div>
+      </div>
+    </div>
+  </template>
+
+  <template id="certificationTemplate">
+    <div class="certification-item">
+      <div class="certification-edit">
+        <input type="text" class="cert-name" placeholder="Certification Name" disabled>
+        <input type="text" class="cert-organization" placeholder="Issuing Organization" disabled>
+        <input type="month" class="cert-issue-date" disabled>
+        <input type="month" class="cert-expiry-date" disabled>
+        <label><input type="checkbox" class="cert-no-expiry" disabled> No Expiry</label>
+        <input type="text" class="cert-credential-id" placeholder="Credential ID" disabled>
+        <input type="text" class="cert-skills" placeholder="Skills (comma separated)" disabled>
+        <div class="cert-upload-section">
+          <button type="button" class="btn-upload-certificate" disabled>
+            <i class="fas fa-upload"></i> Upload Certificate
+          </button>
+          <input type="hidden" class="cert-certificate-url">
+        </div>
+        <button type="button" class="btn-remove-certification" style="display: none;">
+          <i class="fas fa-trash"></i> Remove
+        </button>
+      </div>
+    </div>
+  </template>
+
+  <template id="projectTemplate">
+    <div class="project-item enhanced-item">
+      <div class="project-edit">
+        <div class="form-group enhanced">
+          <label>Project Title</label>
+          <input type="text" class="project-title" placeholder="Enter project title" disabled>
+        </div>
+        
+        <div class="form-group enhanced">
+          <label>Project Type</label>
+          <input type="text" class="project-type" placeholder="e.g., Web Application, Mobile App" disabled>
+        </div>
+        
+        <div class="form-group enhanced" style="grid-column: span 2;">
+          <label>Description</label>
+          <textarea class="project-description" placeholder="Describe your project, its purpose, and key features..." rows="4" disabled></textarea>
+        </div>
+        
+        <div class="form-group enhanced" style="grid-column: span 2;">
+          <label>Technologies Used</label>
+          <div class="autocomplete-container">
+            <div class="input-with-icon">
+              <i class="fas fa-code"></i>
+              <input type="text" class="project-technologies" placeholder="Enter technologies separated by commas" disabled>
+            </div>
+            <div class="autocomplete-suggestions" style="display: none;"></div>
+          </div>
+        </div>
+        
+        <div class="form-group enhanced">
+          <label>Your Role</label>
+          <input type="text" class="project-role" placeholder="e.g., Frontend Developer, Project Lead" disabled>
+        </div>
+        
+        <div class="form-group enhanced project-links-input" style="grid-column: span 2;">
+          <label>Project Links</label>
+          <div class="link-input-row">
+            <div class="select-with-icon">
+              <i class="fas fa-link"></i>
+              <select class="project-link-type" disabled>
+                <option value="live">Live Demo</option>
+                <option value="demo">Demo Video</option>
+                <option value="github">GitHub</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+            <input type="url" class="project-link-url" placeholder="Enter URL" disabled>
+            <button type="button" class="btn-add-project-link" disabled>
+              <i class="fas fa-plus"></i> Add
+            </button>
+          </div>
+          <div class="project-links-list"></div>
+        </div>
+        
+        <div class="form-group enhanced project-images" style="grid-column: span 2;">
+          <label>Project Images</label>
+          <button type="button" class="btn-upload-enhanced btn-upload-project-images" disabled>
+            <i class="fas fa-cloud-upload-alt"></i> Upload Project Images
+          </button>
+          <div class="project-images-list"></div>
+        </div>
+        
+        <div class="form-group enhanced" style="grid-column: span 2; text-align: right;">
+          <button type="button" class="btn-remove-project" style="display: none;">
+            <i class="fas fa-trash"></i> Remove Project
+          </button>
+        </div>
+      </div>
+    </div>
+  </template>
+
+  <template id="achievementTemplate">
+    <div class="achievement-item">
+      <div class="achievement-edit">
+        <input type="text" class="achievement-title" placeholder="Achievement Title" disabled>
+        <input type="text" class="achievement-org" placeholder="Organization" disabled>
+        <input type="month" class="achievement-date" disabled>
+        <textarea class="achievement-description" placeholder="Description" disabled></textarea>
+        <button type="button" class="btn-remove-achievement" style="display: none;">
+          <i class="fas fa-trash"></i> Remove
+        </button>
+      </div>
+    </div>
+  </template>
+
+  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
+  <script>
+    window.CURRENT_USER_ID = "{{ session.get('user_id', '') }}";
+    window.SERVER_USER_DATA = {{ user_data | tojson | safe }};
+  </script>
+  <script src="{{ url_for('static', filename='js/skills-data.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/profile.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/theme.js') }}"></script>
+</body>
+</html>

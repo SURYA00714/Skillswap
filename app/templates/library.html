@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Resource Library - SkillSwap</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    .library-container { max-width: 1200px; margin: 30px auto; padding: 0 20px; }
+    .lib-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; flex-wrap: wrap; gap: 15px; }
+    .lib-header h1 { font-size: 2.2rem; font-weight: 800; color: #1e293b; margin: 0; }
+    .btn-upload { background: #2563eb; color: #fff; padding: 10px 20px; border-radius: 8px; font-weight: 600; text-decoration: none; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; }
+    .btn-upload:hover { background: #1d4ed8; }
+
+    .search-filter-row { display: flex; gap: 15px; background: #fff; padding: 16px 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 25px; flex-wrap: wrap; align-items: center; }
+    .search-input { flex: 1; min-width: 260px; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.95rem; }
+    .category-select { padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.95rem; background: #fff; }
+
+    .resource-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; }
+    .resource-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 22px; box-shadow: 0 2px 10px rgba(0,0,0,0.04); display: flex; flex-direction: column; justify-content: space-between; transition: 0.2s; }
+    .resource-card:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.08); }
+    .res-type-badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 6px; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; margin-bottom: 12px; }
+    .res-type-file { background: #fef3c7; color: #b45309; }
+    .res-type-link { background: #e0f2fe; color: #0369a1; }
+    .res-title { font-size: 1.15rem; font-weight: 700; color: #0f172a; margin: 0 0 8px; }
+    .res-desc { color: #64748b; font-size: 0.9rem; line-height: 1.5; margin-bottom: 14px; }
+    .res-meta { display: flex; justify-content: space-between; font-size: 0.8rem; color: #94a3b8; border-top: 1px solid #f1f5f9; padding-top: 12px; margin-top: auto; }
+    .res-action-btn { margin-top: 14px; background: #2563eb; color: #fff; text-align: center; padding: 10px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 0.9rem; display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .res-action-btn:hover { background: #1d4ed8; }
+
+    /* Upload Modal */
+    .modal-backdrop { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; }
+    .modal-box { background: #fff; border-radius: 16px; width: 100%; max-width: 520px; padding: 28px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); }
+    .modal-title { font-size: 1.3rem; font-weight: 700; margin: 0 0 18px; color: #0f172a; }
+    .form-group { margin-bottom: 14px; }
+    .form-group label { display: block; font-size: 0.88rem; font-weight: 600; color: #334155; margin-bottom: 6px; }
+    .form-input { width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.95rem; box-sizing: border-box; }
+    .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+    .btn-cancel { border: 1px solid #cbd5e1; background: #fff; padding: 8px 16px; border-radius: 8px; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <header class="navbar">
+    <div class="container">
+      <div class="nav-brand">
+        <div class="logo-icon"><i class="fas fa-exchange-alt"></i></div>
+        <h1 class="logo"><a href="{{ url_for('main.app') }}" style="color:inherit;text-decoration:none;">SkillSwap</a></h1>
+      </div>
+      <nav class="nav-links">
+        <a href="{{ url_for('main.app') }}" class="nav-link"><i class="fas fa-home"></i><span>Home</span></a>
+        <a href="{{ url_for('main.smart_matches_page') }}" class="nav-link"><i class="fas fa-magic"></i><span>Smart Matches</span></a>
+        <a href="{{ url_for('main.sessions_dashboard') }}" class="nav-link"><i class="fas fa-calendar-alt"></i><span>Sessions</span></a>
+        <a href="{{ url_for('main.library_page') }}" class="nav-link active"><i class="fas fa-book-open"></i><span>Library</span></a>
+        <a href="{{ url_for('main.messages') }}" class="nav-link"><i class="fas fa-comments"></i><span>Messages</span></a>
+        <a href="{{ url_for('main.see_request') }}" class="nav-link"><i class="fas fa-handshake"></i><span>Swap Requests</span></a>
+        <a href="{{ url_for('main.logout') }}" class="nav-link login-btn"><i class="fas fa-sign-out-alt"></i><span>Logout</span></a>
+      </nav>
+      <div class="nav-right-actions" style="display:flex;align-items:center;gap:12px;">
+        <button class="theme-toggle-btn" title="Toggle Light / Dark Mode" aria-label="Toggle Light / Dark Mode">
+          <i class="fas fa-moon"></i>
+        </button>
+        <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Open Navigation Menu">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Mobile Menu -->
+  <div class="mobile-menu" id="mobileMenu">
+    <div class="mobile-menu-content">
+      <a href="{{ url_for('main.app') }}" class="mobile-nav-link"><i class="fas fa-home"></i><span>Home</span></a>
+      <a href="{{ url_for('main.smart_matches_page') }}" class="mobile-nav-link"><i class="fas fa-magic"></i><span>Smart Matches</span></a>
+      <a href="{{ url_for('main.sessions_dashboard') }}" class="mobile-nav-link"><i class="fas fa-calendar-alt"></i><span>Sessions</span></a>
+      <a href="{{ url_for('main.library_page') }}" class="mobile-nav-link"><i class="fas fa-book-open"></i><span>Library</span></a>
+      <a href="{{ url_for('main.messages') }}" class="mobile-nav-link"><i class="fas fa-comments"></i><span>Messages</span></a>
+      <a href="{{ url_for('main.see_request') }}" class="mobile-nav-link"><i class="fas fa-handshake"></i><span>Swap Requests</span></a>
+      <a href="{{ url_for('main.profile') }}" class="mobile-nav-link"><i class="fas fa-user"></i><span>Profile</span></a>
+      <a href="{{ url_for('main.logout') }}" class="mobile-nav-link"><i class="fas fa-sign-out-alt"></i><span>Logout</span></a>
+    </div>
+  </div>
+
+  <main class="library-container">
+    <div class="lib-header">
+      <div>
+        <h1>📚 Learning Resource Library</h1>
+        <p style="color:#64748b; margin: 4px 0 0;">Upload guides, documentation, code templates, or curated links for the skill swap community.</p>
+      </div>
+      <button class="btn-upload" onclick="openUploadModal()">
+        <i class="fas fa-cloud-upload-alt"></i> Share Resource
+      </button>
+    </div>
+
+    <!-- Search & Filter -->
+    <div class="search-filter-row">
+      <input type="text" id="libSearch" class="search-input" placeholder="Search by title, description, or skill..." oninput="fetchResources()">
+      <select id="libCategory" class="category-select" onchange="fetchResources()">
+        <option value="all">All Categories</option>
+        <option value="Programming">Programming & Web Dev</option>
+        <option value="Design">UI/UX & Graphic Design</option>
+        <option value="Language">Language & Communication</option>
+        <option value="Business">Business & Marketing</option>
+        <option value="General">General Skills</option>
+      </select>
+    </div>
+
+    <!-- Resource Grid -->
+    <div id="resourceGrid" class="resource-grid"></div>
+  </main>
+
+  <!-- Upload Modal -->
+  <div class="modal-backdrop" id="uploadModal">
+    <div class="modal-box">
+      <h2 class="modal-title">Share Learning Resource</h2>
+      <form id="uploadForm" onsubmit="handleUploadSubmit(event)" enctype="multipart/form-data">
+        <div class="form-group">
+          <label>Resource Title</label>
+          <input type="text" name="title" class="form-input" placeholder="e.g. Master Python in 30 Days Cheatsheet" required>
+        </div>
+
+        <div class="form-group">
+          <label>Category</label>
+          <select name="category" class="form-input">
+            <option value="Programming">Programming & Web Dev</option>
+            <option value="Design">UI/UX & Graphic Design</option>
+            <option value="Language">Language & Communication</option>
+            <option value="Business">Business & Marketing</option>
+            <option value="General">General Skills</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Skill Tag</label>
+          <input type="text" name="skillTag" class="form-input" placeholder="e.g. Python, Figma, French">
+        </div>
+
+        <div class="form-group">
+          <label>Resource Type</label>
+          <select name="resourceType" id="resourceTypeSelect" class="form-input" onchange="toggleResourceInput()">
+            <option value="file">File (PDF, Doc, ZIP, Code)</option>
+            <option value="link">Web Link / Article</option>
+          </select>
+        </div>
+
+        <div class="form-group" id="fileGroup">
+          <label>Upload File (All formats supported: Images, PNG, JPG, PDF, Docs, Code, Videos, ZIP, Audio, etc.)</label>
+          <input type="file" name="file" id="fileInput" class="form-input" accept="*/*">
+          <small style="color: #64748b; font-size: 0.8rem; display: block; margin-top: 4px;">Supports any file format with maximum storage allocation (up to 500 MB).</small>
+        </div>
+
+        <div class="form-group" id="linkGroup" style="display:none;">
+          <label>External URL</label>
+          <input type="url" name="link" id="linkInput" class="form-input" placeholder="https://example.com/guide">
+        </div>
+
+        <div class="form-group">
+          <label>Description</label>
+          <textarea name="description" class="form-input" rows="3" placeholder="Brief summary of what this resource covers..."></textarea>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn-cancel" onclick="closeUploadModal()">Cancel</button>
+          <button type="submit" class="btn-upload">Upload & Share</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    async function fetchResources() {
+      const q = document.getElementById('libSearch').value;
+      const cat = document.getElementById('libCategory').value;
+      const grid = document.getElementById('resourceGrid');
+
+      try {
+        const res = await fetch(`/api/library?category=${encodeURIComponent(cat)}&q=${encodeURIComponent(q)}`);
+        const data = await res.json();
+        const items = data.resources || [];
+
+        if (items.length === 0) {
+          grid.innerHTML = `
+            <div style="grid-column: 1/-1; background:#fff; border-radius:12px; border: 1px dashed #cbd5e1; text-align:center; padding: 50px;">
+              <i class="fas fa-folder-open fa-3x" style="color:#94a3b8; margin-bottom:12px;"></i>
+              <h3>No resources found</h3>
+              <p style="color:#64748b;">Be the first to share a file or guide with the community!</p>
+            </div>
+          `;
+          return;
+        }
+
+        grid.innerHTML = items.map(r => `
+          <div class="resource-card">
+            <div>
+              <span class="res-type-badge ${r.resourceType === 'file' ? 'res-type-file' : 'res-type-link'}">
+                <i class="fas fa-${r.resourceType === 'file' ? 'file-alt' : 'external-link-alt'}"></i> ${r.resourceType}
+              </span>
+              <h3 class="res-title">${r.title}</h3>
+              <p class="res-desc">${r.description || 'No description provided.'}</p>
+            </div>
+
+            <div>
+              <div class="res-meta">
+                <span><i class="fas fa-user"></i> ${r.uploaderName}</span>
+                <span><i class="fas fa-tag"></i> ${r.skillTag || r.category}</span>
+              </div>
+              <a href="${r.fileUrl}" target="_blank" class="res-action-btn" download>
+                <i class="fas fa-${r.resourceType === 'file' ? 'download' : 'external-link-alt'}"></i>
+                ${r.resourceType === 'file' ? 'Download Resource' : 'Open Link'}
+              </a>
+            </div>
+          </div>
+        `).join('');
+
+      } catch (err) {
+        grid.innerHTML = `<div style="grid-column: 1/-1; color:#ef4444;">Error loading library: ${err.message}</div>`;
+      }
+    }
+
+    function toggleResourceInput() {
+      const type = document.getElementById('resourceTypeSelect').value;
+      document.getElementById('fileGroup').style.display = type === 'file' ? 'block' : 'none';
+      document.getElementById('linkGroup').style.display = type === 'link' ? 'block' : 'none';
+    }
+
+    function openUploadModal() {
+      document.getElementById('uploadModal').style.display = 'flex';
+    }
+
+    function closeUploadModal() {
+      document.getElementById('uploadModal').style.display = 'none';
+    }
+
+    async function handleUploadSubmit(e) {
+      e.preventDefault();
+      const formData = new FormData(document.getElementById('uploadForm'));
+
+      try {
+        const res = await fetch('/api/library', {
+          method: 'POST',
+          body: formData
+        });
+        const data = await res.json();
+        if (data.status === 'success') {
+          closeUploadModal();
+          fetchResources();
+        } else {
+          alert('Upload failed: ' + data.message);
+        }
+      } catch (err) {
+        alert('Network error: ' + err.message);
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', fetchResources);
+  </script>
+  <script src="{{ url_for('static', filename='js/theme.js') }}"></script>
+</body>
+</html>

@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Swap Requests | SkillSwap</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/seeRequest.css') }}">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    /* Additional inline styles for enhanced effects */
+    .futuristic-tooltip {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 12px 20px;
+      border-radius: 12px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      z-index: 10002;
+      opacity: 0;
+      transform: translateX(-50%) translateY(-100%) scale(0.9);
+      transition: opacity 0.3s, transform 0.3s;
+      pointer-events: none;
+      white-space: nowrap;
+    }
+    
+    .futuristic-tooltip.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(-100%) scale(1);
+    }
+    
+    .futuristic-tooltip::after {
+      content: '';
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      border-width: 6px;
+      border-style: solid;
+      border-color: #667eea transparent transparent transparent;
+    }
+    
+    .ripple {
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.7);
+      transform: scale(0);
+      animation: ripple 0.6s linear;
+      pointer-events: none;
+    }
+    
+    @keyframes ripple {
+      to {
+        transform: scale(4);
+        opacity: 0;
+      }
+    }
+    
+    .results-counter {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      color: white;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 0.875rem;
+      font-weight: 700;
+      box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+    }
+    
+    .participant-avatar-container {
+      position: relative;
+    }
+    
+    .participant-status {
+      position: absolute;
+      bottom: 2px;
+      right: 2px;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      border: 2px solid white;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+    
+    .participant-status.online {
+      background: #10b981;
+    }
+    
+    .participant-status.offline {
+      background: #9ca3af;
+    }
+    
+    .participant-actions {
+      margin-top: 10px;
+      display: flex;
+      gap: 10px;
+    }
+    
+    .quick-actions {
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+    }
+    
+    .reduce-motion * {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+    
+    /* Enhanced animations */
+    @keyframes glow {
+      0%, 100% { box-shadow: 0 0 20px rgba(99, 102, 241, 0.3); }
+      50% { box-shadow: 0 0 30px rgba(99, 102, 241, 0.5); }
+    }
+    
+    .glowing {
+      animation: glow 2s infinite;
+    }
+    
+    /* Particle effects */
+    .particle {
+      pointer-events: none;
+      position: fixed;
+      z-index: 10000;
+    }
+  </style>
+</head>
+<body>
+  <!-- Loading Overlay -->
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-content">
+      <div class="loading-spinner"></div>
+      <div class="loading-text">
+        <h3>Loading Your Swap Requests</h3>
+        <p class="loading-subtitle">Preparing your futuristic dashboard...</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Container -->
+  <div class="requests-container">
+    <!-- Header -->
+    <header class="requests-header">
+      <div class="header-content">
+        <a href="{{ url_for('main.app') }}" class="back-btn">
+          <i class="fas fa-arrow-left"></i>
+          Back to Home
+        </a>
+        <div class="header-title">
+          <h1>Swap Requests</h1>
+          <p>Manage your skill exchange requests with futuristic precision</p>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;">
+          <button class="theme-toggle-btn" title="Toggle Light / Dark Mode" aria-label="Toggle Light / Dark Mode">
+            <i class="fas fa-moon"></i>
+          </button>
+          <div class="user-info-header" onclick="viewUserProfile('{{ current_user_data.get('user_id', '') }}')">
+            <img src="{{ current_user_data.get('photo_url', '/static/default-profile.png') }}" 
+                 alt="Profile" class="user-avatar-header">
+            <span>{{ current_user_data.get('name', 'User') }}</span>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Stats Dashboard -->
+      <div class="header-stats">
+        <div class="stat-card glowing" onclick="filterByStatus('all')">
+          <i class="fas fa-exchange-alt"></i>
+          <div>
+            <span class="stat-number">{{ stats.total if stats else 0 }}</span>
+            <span class="stat-label">Total Requests</span>
+          </div>
+        </div>
+        <div class="stat-card" onclick="filterByStatus('pending')">
+          <i class="fas fa-clock"></i>
+          <div>
+            <span class="stat-number">{{ stats.pending if stats else 0 }}</span>
+            <span class="stat-label">Pending</span>
+          </div>
+        </div>
+        <div class="stat-card" onclick="filterByStatus('accepted')">
+          <i class="fas fa-handshake"></i>
+          <div>
+            <span class="stat-number">{{ stats.accepted if stats else 0 }}</span>
+            <span class="stat-label">Accepted</span>
+          </div>
+        </div>
+        <div class="stat-card" onclick="filterByStatus('completed')">
+          <i class="fas fa-trophy"></i>
+          <div>
+            <span class="stat-number">{{ stats.completed if stats else 0 }}</span>
+            <span class="stat-label">Completed</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="requests-main">
+      <!-- View Toggle -->
+      <div class="view-toggle-container">
+        <div class="view-toggle">
+          <a href="{{ url_for('main.see_request', view='invitations') }}" 
+             class="view-tab {% if view_type == 'invitations' %}active{% endif %}" 
+             data-view="invitations">
+            <i class="fas fa-inbox"></i>
+            <span>Invitations Received</span>
+            {% if stats and stats.pending > 0 %}
+            <span class="notification-badge">{{ stats.pending }}</span>
+            {% endif %}
+          </a>
+          <a href="{{ url_for('main.see_request', view='my_requests') }}" 
+             class="view-tab {% if view_type == 'my_requests' %}active{% endif %}" 
+             data-view="my_requests">
+            <i class="fas fa-paper-plane"></i>
+            <span>My Sent Requests</span>
+          </a>
+        </div>
+        
+        <!-- Filter Controls -->
+        <div class="filter-controls">
+          <div class="filter-group">
+            <label for="statusFilter">
+              <i class="fas fa-filter"></i>
+              Filter by Status
+            </label>
+            <select id="statusFilter" class="filter-select">
+              <option value="all" {% if selected_status == 'all' %}selected{% endif %}>All Status</option>
+              <option value="pending" {% if selected_status == 'pending' %}selected{% endif %}>Pending</option>
+              <option value="accepted" {% if selected_status == 'accepted' %}selected{% endif %}>Accepted</option>
+              <option value="rejected" {% if selected_status == 'rejected' %}selected{% endif %}>Rejected</option>
+              <option value="completed" {% if selected_status == 'completed' %}selected{% endif %}>Completed</option>
+              <option value="cancelled" {% if selected_status == 'cancelled' %}selected{% endif %}>Cancelled</option>
+            </select>
+          </div>
+          
+          <div class="search-box">
+            <i class="fas fa-search"></i>
+            <input type="text" id="searchInput" placeholder="Search by user, skill, or ID..." 
+                   value="{{ request.args.get('q', '') }}">
+            <button class="search-clear" id="clearSearch">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+          
+          <button class="btn-refresh" onclick="refreshRequests()" title="Refresh requests">
+            <i class="fas fa-sync-alt"></i>
+            Refresh
+          </button>
+        </div>
+      </div>
+
+      <!-- Requests Grid -->
+      <div class="requests-grid" id="requestsGrid">
+        {% if swap_requests %}
+          {% for request in swap_requests %}
+          <div class="request-card status-{{ request.status|lower }}" 
+               data-user="{{ request.userName|lower }}"
+               data-skill="{{ request.offeredSkill|lower }} {{ request.requestedSkill|lower }}"
+               data-status="{{ request.status|lower }}"
+               tabindex="0">
+            
+            <!-- Card Header with User Info -->
+            <div class="card-header">
+              <div class="user-profile" onclick="viewUserProfile('{{ request.userId }}')" 
+                   data-tooltip="View {{ request.userName }}'s profile">
+                <img src="{{ request.userPhoto if request.userPhoto else '/static/default-profile.png' }}" 
+                     alt="{{ request.userName }}" class="user-avatar"
+                     onerror="this.src='/static/default-profile.png'">
+                <div class="user-details">
+                  <h4 class="user-name">{{ request.userName }}</h4>
+                  <div class="request-meta">
+                    <span class="request-time" title="{{ request.createdAt_formatted }}">
+                      <i class="far fa-clock"></i>
+                      {{ request.createdAt_formatted if request.createdAt_formatted else 'Recently' }}
+                    </span>
+                    <span class="user-rating">
+                      <i class="fas fa-star"></i>
+                      {{ "%.1f"|format(request.rating) if request.rating else '4.5' }}/5.0
+                    </span>
+                    {% if request.city or request.state %}
+                    <span class="user-location">
+                      <i class="fas fa-map-marker-alt"></i>
+                      {{ request.city }}{% if request.state %}, {{ request.state }}{% endif %}
+                    </span>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+              
+              <div class="status-section">
+                <div class="status-indicator status-{{ request.status|lower }}">
+                  {% if request.status|lower == 'pending' %}
+                    <i class="fas fa-clock"></i>
+                  {% elif request.status|lower == 'accepted' %}
+                    <i class="fas fa-check-circle"></i>
+                  {% elif request.status|lower == 'rejected' %}
+                    <i class="fas fa-times-circle"></i>
+                  {% elif request.status|lower == 'completed' %}
+                    <i class="fas fa-trophy"></i>
+                  {% elif request.status|lower == 'cancelled' %}
+                    <i class="fas fa-ban"></i>
+                  {% else %}
+                    <i class="fas fa-circle"></i>
+                  {% endif %}
+                  <span>{{ request.status }}</span>
+                </div>
+                <div class="request-id">
+                  <i class="fas fa-hashtag"></i>
+                  <span>{{ request.swapId if request.swapId else request.id[:8] }}</span>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Swap Details -->
+            <div class="swap-details">
+              <div class="swap-flow">
+                <div class="swap-direction">
+                  <div class="direction-label">
+                    {% if view_type == 'invitations' %}
+                      They Offer
+                    {% else %}
+                      You Offer
+                    {% endif %}
+                  </div>
+                  <div class="skill-badge primary">
+                    <i class="fas fa-arrow-up"></i>
+                    <span>{{ request.offeredSkill if request.offeredSkill else 'Skill not specified' }}</span>
+                  </div>
+                </div>
+                
+                <div class="swap-arrow">
+                  <i class="fas fa-exchange-alt"></i>
+                </div>
+                
+                <div class="swap-direction">
+                  <div class="direction-label">
+                    {% if view_type == 'invitations' %}
+                      You Receive
+                    {% else %}
+                      They Receive
+                    {% endif %}
+                  </div>
+                  <div class="skill-badge secondary">
+                    <i class="fas fa-arrow-down"></i>
+                    <span>{{ request.requestedSkill if request.requestedSkill else 'Skill not specified' }}</span>
+                  </div>
+                </div>
+              </div>
+              
+              {% if request.message %}
+              <div class="request-message">
+                <i class="fas fa-quote-left"></i>
+                <p>"{{ request.message|truncate(120) }}"</p>
+                {% if request.message|length > 120 %}
+                <button class="btn-view-more" onclick="showFullMessage('{{ request.id }}')">
+                  Read more <i class="fas fa-chevron-right"></i>
+                </button>
+                {% endif %}
+              </div>
+              {% endif %}
+            </div>
+            
+            <!-- Card Actions -->
+            <div class="card-actions">
+              <!-- Dynamic Actions based on view and status -->
+              {% if view_type == 'invitations' %}
+                {% if request.status|lower == 'pending' %}
+                <div class="action-buttons">
+                  <button class="btn-action accept" onclick="updateSwapStatus('{{ request.id }}', 'accepted')">
+                    <i class="fas fa-check"></i>
+                    Accept
+                  </button>
+                  <button class="btn-action reject" onclick="updateSwapStatus('{{ request.id }}', 'rejected')">
+                    <i class="fas fa-times"></i>
+                    Reject
+                  </button>
+                  <button class="btn-action details" onclick="showRequestDetails('{{ request.id }}')">
+                    <i class="fas fa-eye"></i>
+                    Details
+                  </button>
+                </div>
+                {% elif request.status|lower == 'accepted' %}
+                <div class="action-buttons">
+                  <button class="btn-action schedule" onclick="scheduleSwap('{{ request.id }}')">
+                    <i class="fas fa-calendar-plus"></i>
+                    Schedule
+                  </button>
+                  <button class="btn-action complete" onclick="updateSwapStatus('{{ request.id }}', 'completed')">
+                    <i class="fas fa-trophy"></i>
+                    Complete
+                  </button>
+                  <button class="btn-action message" onclick="messageUser('{{ request.userId }}')">
+                    <i class="fas fa-comment"></i>
+                    Message
+                  </button>
+                </div>
+                {% else %}
+                <div class="action-buttons">
+                  <button class="btn-action details" onclick="showRequestDetails('{{ request.id }}')">
+                    <i class="fas fa-eye"></i>
+                    View Details
+                  </button>
+                  {% if request.status|lower == 'completed' %}
+                  <button class="btn-action rate" onclick="rateSwap('{{ request.id }}')">
+                    <i class="fas fa-star"></i>
+                    Rate
+                  </button>
+                  {% endif %}
+                </div>
+                {% endif %}
+                
+              {% else %} <!-- My Sent Requests -->
+                {% if request.status|lower == 'pending' %}
+                <div class="action-buttons">
+                  <button class="btn-action cancel" onclick="updateSwapStatus('{{ request.id }}', 'cancelled')">
+                    <i class="fas fa-ban"></i>
+                    Cancel
+                  </button>
+                  <button class="btn-action details" onclick="showRequestDetails('{{ request.id }}')">
+                    <i class="fas fa-eye"></i>
+                    Details
+                  </button>
+                </div>
+                {% elif request.status|lower == 'accepted' %}
+                <div class="action-buttons">
+                  <button class="btn-action schedule" onclick="scheduleSwap('{{ request.id }}')">
+                    <i class="fas fa-calendar-plus"></i>
+                    Schedule
+                  </button>
+                  <button class="btn-action complete" onclick="updateSwapStatus('{{ request.id }}', 'completed')">
+                    <i class="fas fa-trophy"></i>
+                    Complete
+                  </button>
+                  <button class="btn-action message" onclick="messageUser('{{ request.userId }}')">
+                    <i class="fas fa-comment"></i>
+                    Message
+                  </button>
+                </div>
+                {% else %}
+                <div class="action-buttons">
+                  <button class="btn-action details" onclick="showRequestDetails('{{ request.id }}')">
+                    <i class="fas fa-eye"></i>
+                    View Details
+                  </button>
+                  {% if request.status|lower == 'completed' %}
+                  <button class="btn-action rate" onclick="rateSwap('{{ request.id }}')">
+                    <i class="fas fa-star"></i>
+                    Rate
+                  </button>
+                  {% endif %}
+                </div>
+                {% endif %}
+              {% endif %}
+            </div>
+          </div>
+          {% endfor %}
+        {% else %}
+        <!-- Empty State -->
+        <div class="empty-state">
+          <div class="empty-icon">
+            <i class="fas fa-exchange-alt"></i>
+          </div>
+          <h3>No Swap Requests Found</h3>
+          <p>
+            {% if view_type == 'invitations' %}
+            You haven't received any swap invitations yet. When someone wants to exchange skills with you, it will appear here.
+            {% else %}
+            You haven't sent any swap requests yet. Browse users and send your first request!
+            {% endif %}
+          </p>
+          <div class="empty-actions">
+            {% if view_type == 'my_requests' %}
+            <a href="{{ url_for('main.app') }}" class="btn-primary">
+              <i class="fas fa-search"></i>
+              Find Users to Swap With
+            </a>
+            {% else %}
+            <a href="{{ url_for('main.app') }}" class="btn-primary">
+              <i class="fas fa-user-plus"></i>
+              Update Your Skills to Get Noticed
+            </a>
+            {% endif %}
+            <button class="btn-secondary" onclick="refreshRequests()">
+              <i class="fas fa-sync-alt"></i>
+              Refresh
+            </button>
+          </div>
+        </div>
+        {% endif %}
+      </div>
+      
+      <!-- Load More Button -->
+      {% if swap_requests|length >= 10 %}
+      <div class="load-more-container">
+        <button class="btn-load-more" id="loadMoreBtn" onclick="loadMoreRequests()">
+          <i class="fas fa-plus"></i>
+          Load More Requests
+        </button>
+      </div>
+      {% endif %}
+    </main>
+  </div>
+
+  <!-- Request Details Modal -->
+  <div class="modal-overlay" id="detailsModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>
+          <i class="fas fa-info-circle"></i>
+          Swap Request Details
+        </h3>
+        <button class="modal-close" onclick="closeModal('detailsModal')">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body" id="detailsModalBody">
+        <!-- Dynamic content loaded via JavaScript -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Confirmation Modal -->
+  <div class="modal-overlay" id="confirmModal">
+    <div class="modal-content small">
+      <div class="modal-header">
+        <h3 id="confirmTitle">Confirm Action</h3>
+        <button class="modal-close" onclick="closeModal('confirmModal')">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p id="confirmMessage">Are you sure you want to perform this action?</p>
+        <div class="modal-actions">
+          <button class="btn-secondary" onclick="closeModal('confirmModal')">Cancel</button>
+          <button class="btn-primary" id="confirmActionBtn">Confirm</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Full Message Modal -->
+  <div class="modal-overlay" id="messageModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>
+          <i class="fas fa-envelope"></i>
+          Full Message
+        </h3>
+        <button class="modal-close" onclick="closeModal('messageModal')">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p id="fullMessageContent"></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Scripts -->
+  <script src="{{ url_for('static', filename='js/seeRequest.js') }}"></script>
+  <script>
+    // Global variables
+    let currentSwapId = null;
+    let currentAction = null;
+
+    // Initialize page
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('🚀 Futuristic Swap Requests Page Initialized');
+      
+      // Initialize event listeners
+      const statusFilter = document.getElementById('statusFilter');
+      if (statusFilter) {
+        statusFilter.addEventListener('change', function() {
+          const view = document.querySelector('.view-tab.active').dataset.view;
+          const status = this.value;
+          const search = document.getElementById('searchInput').value;
+          window.location.href = `/see-request?view=${view}&status=${status}&q=${encodeURIComponent(search)}`;
+        });
+      }
+      
+      // Search input with enhanced debounce
+      const searchInput = document.getElementById('searchInput');
+      if (searchInput) {
+        searchInput.addEventListener('input', debounce(filterRequests, 300));
+      }
+      
+      // Clear search
+      const clearSearch = document.getElementById('clearSearch');
+      if (clearSearch) {
+        clearSearch.addEventListener('click', function() {
+          searchInput.value = '';
+          filterRequests();
+        });
+      }
+      
+      // Confirmation modal button
+      const confirmBtn = document.getElementById('confirmActionBtn');
+      if (confirmBtn) {
+        confirmBtn.addEventListener('click', executeConfirmedAction);
+      }
+      
+      // Keyboard shortcuts
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+          closeAllModals();
+        }
+        if (e.key === '/' && document.activeElement.tagName !== 'INPUT') {
+          e.preventDefault();
+          searchInput.focus();
+        }
+      });
+      
+      // Add data-tooltip attributes dynamically
+      document.querySelectorAll('.btn-action').forEach(btn => {
+        const text = btn.textContent.trim();
+        btn.setAttribute('data-tooltip', text);
+      });
+    });
+    
+    // Enhanced updateSwapStatus with confirmation
+    function updateSwapStatus(swapId, action) {
+      currentSwapId = swapId;
+      currentAction = action;
+      
+      const messages = {
+        'accepted': 'Are you sure you want to accept this swap request?',
+        'rejected': 'Are you sure you want to reject this swap request?',
+        'cancelled': 'Are you sure you want to cancel this swap request?',
+        'completed': 'Mark this swap as completed? This action cannot be undone.'
+      };
+      
+      document.getElementById('confirmMessage').textContent = messages[action] || 'Are you sure you want to perform this action?';
+      document.getElementById('confirmTitle').textContent = `Confirm ${action.charAt(0).toUpperCase() + action.slice(1)}`;
+      
+      showModal('confirmModal');
+    }
+    
+    function executeConfirmedAction() {
+      if (!currentSwapId || !currentAction) return;
+      
+      showLoading(true);
+      closeModal('confirmModal');
+      
+      // Create form data
+      const formData = new FormData();
+      formData.append('action', currentAction);
+      
+      fetch(`/update-status/${currentSwapId}`, {
+        method: 'POST',
+        body: formData
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.status === 'success') {
+          showNotification('✅ ' + data.message, 'success');
+          // Reload page after delay
+          setTimeout(() => {
+            window.location.reload();
+          }, 1500);
+        } else {
+          showNotification('❌ ' + data.message, 'error');
+          showLoading(false);
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        showNotification('❌ Network error. Please try again.', 'error');
+        showLoading(false);
+      });
+    }
+    
+    function showFullMessage(swapId) {
+      fetch(`/api/swaps/${swapId}`)
+        .then(response => response.json())
+        .then(data => {
+          if (data.status === 'success') {
+            document.getElementById('fullMessageContent').textContent = data.data.message || 'No message provided.';
+            showModal('messageModal');
+          } else {
+            showToast('Could not load message', 'error');
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          showToast('Network error. Please try again.', 'error');
+        });
+    }
+    
+    // Make functions globally available
+    window.filterByStatus = function(status) {
+      const view = document.querySelector('.view-tab.active').dataset.view;
+      window.location.href = `/see-request?view=${view}&status=${status}`;
+    };
+    
+    window.scheduleSwap = function(id) { 
+      showNotification('⏰ Schedule feature coming soon!', 'info');
+    };
+    
+    window.messageUser = function(id) { 
+      showNotification('💬 Messaging feature coming soon!', 'info');
+    };
+    
+    window.rateSwap = function(id) { 
+      showNotification('⭐ Rating feature coming soon!', 'info');
+    };
+    
+    window.viewUserProfile = function(userId) {
+      window.location.href = `/swap/${userId}`;
+    };
+    
+    window.updateSwapStatus = updateSwapStatus;
+    window.showFullMessage = showFullMessage;
+  </script>
+  <script src="{{ url_for('static', filename='js/theme.js') }}"></script>
+</body>
+</html>

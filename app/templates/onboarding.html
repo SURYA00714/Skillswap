@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Welcome to SkillSwap - Quick Setup</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    body { background: #f8fafc; font-family: 'Inter', sans-serif; color: #1e293b; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+    .onboarding-card { background: #fff; width: 100%; max-width: 680px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); border: 1px solid #e2e8f0; overflow: hidden; }
+    .onboarding-header { background: linear-gradient(135deg, #2563eb, #1d4ed8); color: #fff; padding: 35px 30px; text-align: center; }
+    .onboarding-header h1 { font-size: 1.8rem; font-weight: 800; margin: 0 0 8px; }
+    .onboarding-header p { font-size: 0.95rem; opacity: 0.9; margin: 0; }
+    
+    .onboarding-body { padding: 32px 36px; }
+    .section-title { font-size: 1rem; font-weight: 700; color: #0f172a; margin: 0 0 16px; display: flex; align-items: center; gap: 8px; border-bottom: 2px solid #f1f5f9; padding-bottom: 8px; }
+    
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+    @media (max-width: 600px) { .form-row { grid-template-columns: 1fr; } }
+
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; font-size: 0.88rem; font-weight: 600; color: #475569; margin-bottom: 6px; }
+    .form-control { width: 100%; padding: 11px 14px; border: 1.5px solid #cbd5e1; border-radius: 10px; font-size: 0.95rem; box-sizing: border-box; transition: 0.2s; }
+    .form-control:focus { outline: none; border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,0.15); }
+    
+    .actions-row { display: flex; justify-content: space-between; align-items: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e2e8f0; }
+    .btn-skip { background: none; border: none; color: #64748b; font-weight: 600; font-size: 0.95rem; cursor: pointer; text-decoration: underline; padding: 10px 16px; border-radius: 8px; }
+    .btn-skip:hover { color: #0f172a; }
+    .btn-save { background: #2563eb; color: #fff; border: none; padding: 12px 28px; border-radius: 10px; font-weight: 700; font-size: 0.95rem; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: 0.2s; }
+    .btn-save:hover { background: #1d4ed8; }
+  </style>
+</head>
+<body>
+  <div class="onboarding-card">
+    <div class="onboarding-header">
+      <div style="font-size: 2.2rem; margin-bottom: 10px;"><i class="fas fa-handshake"></i></div>
+      <h1>Welcome to SkillSwap!</h1>
+      <p>Let's personalize your experience so the community can find and swap skills with you.</p>
+    </div>
+
+    <div class="onboarding-body">
+      <form id="onboardingForm" onsubmit="handleOnboardingSubmit(event)">
+        <!-- Skills Info -->
+        <div class="section-title"><i class="fas fa-bolt text-primary"></i> Skills & Expertise</div>
+        
+        <div class="form-group">
+          <label>Skills You Can Teach / Offer</label>
+          <input type="text" id="offeredSkill" class="form-control" placeholder="e.g. Python, Graphic Design, Public Speaking (comma separated)">
+        </div>
+
+        <div class="form-group">
+          <label>Skills You Want to Learn</label>
+          <input type="text" id="requestedSkill" class="form-control" placeholder="e.g. React, Spanish, Financial Modeling (comma separated)">
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Current Skill Level</label>
+            <select id="skillLevel" class="form-control">
+              <option value="Beginner">Beginner</option>
+              <option value="Intermediate" selected>Intermediate</option>
+              <option value="Advanced">Advanced</option>
+              <option value="Expert">Expert</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Availability</label>
+            <select id="availability" class="form-control">
+              <option value="Flexible" selected>Flexible</option>
+              <option value="Weekends">Weekends</option>
+              <option value="Evenings">Evenings</option>
+              <option value="Weekdays">Weekdays</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Background & Education -->
+        <div class="section-title" style="margin-top: 24px;"><i class="fas fa-graduation-cap text-primary"></i> Background & Location</div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>City / Location</label>
+            <input type="text" id="city" class="form-control" placeholder="e.g. Mumbai, New York, London">
+          </div>
+          <div class="form-group">
+            <label>Job Title / Headline</label>
+            <input type="text" id="headline" class="form-control" placeholder="e.g. Student / Full-Stack Developer">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Education / Degree</label>
+            <input type="text" id="education" class="form-control" placeholder="e.g. B.Tech Computer Science">
+          </div>
+          <div class="form-group">
+            <label>Qualifications / Certifications</label>
+            <input type="text" id="qualifications" class="form-control" placeholder="e.g. AWS Certified, IELTS 8.0">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Gender</label>
+            <select id="gender" class="form-control">
+              <option value="Prefer not to say" selected>Prefer not to say</option>
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+              <option value="Non-binary">Non-binary</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Profile Visibility to Others</label>
+            <select id="profileVisibility" class="form-control">
+              <option value="Public" selected>Public (Discoverable by Community)</option>
+              <option value="Private">Private (Hidden from Community Search)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Privacy & Visibility Customization -->
+        <div class="section-title" style="margin-top: 24px;"><i class="fas fa-shield-alt text-primary"></i> Information Visible to Others</div>
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px 18px; margin-bottom: 20px;">
+          <label style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px; cursor: pointer; font-size: 0.9rem;">
+            <input type="checkbox" id="vis_email" checked style="width: 16px; height: 16px;">
+            <span>Show my Email address to other members</span>
+          </label>
+          <label style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px; cursor: pointer; font-size: 0.9rem;">
+            <input type="checkbox" id="vis_location" checked style="width: 16px; height: 16px;">
+            <span>Show my City / Location</span>
+          </label>
+          <label style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px; cursor: pointer; font-size: 0.9rem;">
+            <input type="checkbox" id="vis_education" checked style="width: 16px; height: 16px;">
+            <span>Show my Education & Qualifications</span>
+          </label>
+          <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 0.9rem;">
+            <input type="checkbox" id="vis_gender" checked style="width: 16px; height: 16px;">
+            <span>Show my Gender on profile</span>
+          </label>
+        </div>
+
+        <div class="actions-row">
+          <button type="button" class="btn-skip" onclick="skipOnboarding()">
+            Skip for now &rarr;
+          </button>
+          <button type="submit" class="btn-save">
+            Complete Profile <i class="fas fa-arrow-right"></i>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    async function handleOnboardingSubmit(e) {
+      e.preventDefault();
+      
+      const offered = document.getElementById('offeredSkill').value
+        .split(',').map(s => s.trim()).filter(Boolean);
+      const wanted = document.getElementById('requestedSkill').value
+        .split(',').map(s => s.trim()).filter(Boolean);
+
+      const visibilitySettings = {
+        show_email: document.getElementById('vis_email').checked,
+        show_location: document.getElementById('vis_location').checked,
+        show_education: document.getElementById('vis_education').checked,
+        show_gender: document.getElementById('vis_gender').checked
+      };
+
+      const payload = {
+        offeredSkill: offered,
+        requestedSkill: wanted,
+        skillLevel: document.getElementById('skillLevel').value,
+        availability: document.getElementById('availability').value,
+        city: document.getElementById('city').value.trim(),
+        headline: document.getElementById('headline').value.trim(),
+        education: document.getElementById('education').value.trim(),
+        qualifications: document.getElementById('qualifications').value.trim(),
+        gender: document.getElementById('gender').value,
+        profileVisibility: document.getElementById('profileVisibility').value,
+        visibility_settings: visibilitySettings,
+        onboarding_completed: true
+      };
+
+      try {
+        const res = await fetch('/api/save-onboarding', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (data.status === 'success') {
+          window.location.href = '/app';
+        } else {
+          alert('Could not save profile: ' + data.message);
+        }
+      } catch (err) {
+        window.location.href = '/app';
+      }
+    }
+
+    async function skipOnboarding() {
+      try {
+        await fetch('/api/save-onboarding', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ onboarding_completed: true })
+        });
+      } catch (e) {}
+      window.location.href = '/app';
+    }
+  </script>
+</body>
+</html>

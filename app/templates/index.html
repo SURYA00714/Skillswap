@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Skill Swap Platform</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
+   <!-- Firebase Scripts -->
+  <script src="https://www.gstatic.com/firebasejs/9.8.4/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.8.4/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.8.4/firebase-firestore-compat.js"></script>
+    <script>
+    // Firebase configuration
+    const firebaseConfig = {
+      apiKey: window.FIREBASE_API_KEY || "AIzaSy_CONFIGURED_AT_RUNTIME",
+      authDomain: "skillswap-21922.firebaseapp.com",
+      projectId: "skillswap-21922",
+      storageBucket: "skillswap-21922.firebasestorage.app",
+      messagingSenderId: "942449711732",
+      appId: "1:942449711732:web:ed1ac7c996deb34b998f21",
+      measurementId: "G-DL61KXD2YR"
+    };
+
+    // Initialize Firebase
+    document.addEventListener('DOMContentLoaded', function() {
+      try {
+        if (typeof firebase !== 'undefined') {
+          firebase.initializeApp(firebaseConfig);
+          console.log("Firebase initialized in index.html");
+        }
+      } catch (error) {
+        console.error("Firebase initialization error:", error);
+      }
+    });
+  </script>
+</head>
+<body>
+  <!-- Loading Screen -->
+  <div class="loading-screen" id="loadingScreen">
+    <div class="loading-spinner">
+      <div class="spinner"></div>
+      <p>Loading SkillSwap...</p>
+    </div>
+  </div>
+
+  <!-- Header Navigation -->
+  <header class="navbar">
+    <div class="container">
+      <div class="nav-brand">
+        <div class="logo-icon">
+          <i class="fas fa-exchange-alt"></i>
+        </div>
+        <h1 class="logo">SkillSwap</h1>
+      </div>
+      
+      <nav class="nav-links">
+        <a href="{{ url_for('main.app') }}" class="nav-link active">
+          <i class="fas fa-home"></i>
+          <span>Home</span>
+        </a>
+        <a href="{{ url_for('main.smart_matches_page') }}" class="nav-link">
+          <i class="fas fa-magic"></i>
+          <span>Smart Matches</span>
+        </a>
+        <a href="{{ url_for('main.sessions_dashboard') }}" class="nav-link">
+          <i class="fas fa-calendar-alt"></i>
+          <span>Sessions</span>
+        </a>
+        <a href="{{ url_for('main.library_page') }}" class="nav-link">
+          <i class="fas fa-book-open"></i>
+          <span>Library</span>
+        </a>
+        <a href="{{ url_for('main.messages') }}" class="nav-link">
+          <i class="fas fa-comments"></i>
+          <span>Messages</span>
+        </a>
+        <a href="{{ url_for('main.see_request') }}" class="nav-link">
+          <i class="fas fa-handshake"></i>
+          <span>Swap Requests</span>
+        </a>
+        <a href="{{ url_for('main.profile') }}" class="nav-link">
+          <i class="fas fa-user"></i>
+          <span>Profile</span>
+        </a>
+        <a href="{{ url_for('main.logout') }}" class="nav-link login-btn">
+          <i class="fas fa-sign-out-alt"></i>
+          <span>Logout</span>
+        </a>
+      </nav>
+
+      <div class="nav-right-actions" style="display:flex;align-items:center;gap:12px;">
+        <!-- Theme Toggle Button -->
+        <button class="theme-toggle-btn" id="themeToggleBtn" title="Toggle Light / Dark Mode" aria-label="Toggle Light / Dark Mode">
+          <i class="fas fa-moon"></i>
+        </button>
+
+        <!-- Mobile Menu Button -->
+        <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Open Navigation Menu">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Mobile Menu -->
+  <div class="mobile-menu" id="mobileMenu">
+    <div class="mobile-menu-content">
+      <a href="{{ url_for('main.app') }}" class="mobile-nav-link">
+        <i class="fas fa-home"></i>
+        <span>Home</span>
+      </a>
+      <a href="{{ url_for('main.smart_matches_page') }}" class="mobile-nav-link">
+        <i class="fas fa-magic"></i>
+        <span>Smart Matches</span>
+      </a>
+      <a href="{{ url_for('main.sessions_dashboard') }}" class="mobile-nav-link">
+        <i class="fas fa-calendar-alt"></i>
+        <span>Sessions</span>
+      </a>
+      <a href="{{ url_for('main.library_page') }}" class="mobile-nav-link">
+        <i class="fas fa-book-open"></i>
+        <span>Library</span>
+      </a>
+      <a href="{{ url_for('main.messages') }}" class="mobile-nav-link">
+        <i class="fas fa-comments"></i>
+        <span>Messages</span>
+      </a>
+      <a href="{{ url_for('main.see_request') }}" class="mobile-nav-link">
+        <i class="fas fa-handshake"></i>
+        <span>Swap Requests</span>
+      </a>
+        <span>Swap Requests</span>
+      </a>
+      <a href="{{ url_for('main.profile') }}" class="mobile-nav-link">
+        <i class="fas fa-user"></i>
+        <span>Profile</span>
+      </a>
+      <a href="{{ url_for('main.logout') }}" class="mobile-nav-link">
+        <i class="fas fa-sign-out-alt"></i>
+        <span>Logout</span>
+      </a>
+    </div>
+  </div>
+
+  <main class="container">
+   
+    
+
+    <!-- Search & Filter -->
+    <section class="search-section">
+      <div class="search-container">
+        <form method="GET" action="{{ url_for('main.app') }}" class="search-form" id="searchForm">
+          <div class="search-input-wrapper">
+            <i class="fas fa-search search-icon"></i>
+            <input type="text" 
+                   name="q" 
+                   id="searchInput"
+                   placeholder="Search by name or offering skill..." 
+                   value="{{ request.args.get('q', '') }}" 
+                   class="search-input"
+                   autocomplete="off">
+            <button type="button" class="search-clear" id="searchClear">
+              <i class="fas fa-times"></i>
+            </button>
+            <div class="search-suggestions" id="searchSuggestions"></div>
+          </div>
+          <button type="submit" class="search-btn">
+            <span>Search</span>
+            <i class="fas fa-search"></i>
+          </button>
+        </form>
+        
+        <div class="search-tips">
+          <span class="tip-icon"><i class="fas fa-lightbulb"></i></span>
+          <span>Search by: User Name or Skill they're offering (e.g., "Flutter", "JavaScript")</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Search Results Info -->
+    {% if query %}
+    <div class="search-results-info">
+      <p>
+        <span class="results-count">{{ search_results_count }}</span> result(s) found for "<span class="search-query">{{ query }}</span>"
+        {% if search_results_count == 0 %}
+        <br><small>Try searching by user name or skill they offer (e.g., "Flutter", "JavaScript")</small>
+        {% endif %}
+      </p>
+    </div>
+    {% endif %}
+
+   
+
+    <!-- Main User Grid -->
+    <section class="user-grid-section">
+      {% if query == '' and not ai_recommendations %}
+      <div class="section-header">
+        <h2>Available Skill Swaps</h2>
+        <p>Browse through our community members</p>
+      </div>
+      {% endif %}
+      
+      <div class="user-grid" id="userGrid">
+        {% for swap in swaps %}
+        <div class="user-card" data-user-id="{{ swap.user_id }}">
+          <div class="card-header">
+            <div class="user-avatar">
+              <img src="{{ swap.photo_url }}" alt="{{ swap.name }}" class="profile-img" onerror="this.src='/static/default-profile.svg'">
+              <div class="online-indicator"></div>
+            </div>
+            
+            <div class="user-meta">
+              <h3 class="user-name">{{ swap.name }}</h3>
+              <div class="user-location">
+                <i class="fas fa-map-marker-alt"></i>
+                <span>{{ swap.display_location if swap.display_location else "Location not specified" }}</span>
+              </div>
+            </div>
+            
+            <div class="rating-badge">
+              <i class="fas fa-star"></i>
+              <span>{{ swap.rating }}/5</span>
+            </div>
+          </div>
+
+          <div class="skills-section">
+            <div class="skill-category">
+              <div class="category-header">
+                <i class="fas fa-share skill-icon offered"></i>
+                <h4>Offering</h4>
+              </div>
+              <div class="skill-tags">
+                {% for skill in swap.offeredSkill %}
+                <span class="skill-tag offered">{{ skill }}</span>
+                {% endfor %}
+              </div>
+            </div>
+            
+            <div class="skill-category">
+              <div class="category-header">
+                <i class="fas fa-hand-holding-heart skill-icon wanted"></i>
+                <h4>Seeking</h4>
+              </div>
+              <div class="skill-tags">
+                {% for skill in swap.requestedSkill %}
+                <span class="skill-tag wanted">{{ skill }}</span>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+
+          <div class="card-footer">
+            <a href="{{ url_for('main.request_swap', target_user_id=swap.user_id) }}" class="request-btn">
+              <i class="fas fa-handshake"></i>
+              <span>Request Swap</span>
+            </a>
+            <button class="bookmark-btn" data-user-id="{{ swap.user_id }}">
+              <i class="far fa-bookmark"></i>
+            </button>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </section>
+
+    <!-- Empty State -->
+    {% if swaps|length == 0 and query %}
+    <div class="empty-state" id="emptyState">
+      <div class="empty-icon">
+        <i class="fas fa-search"></i>
+      </div>
+      <h3>No results found for "{{ query }}"</h3>
+      <p>Try searching by user name or skill they offer (e.g., "Flutter", "JavaScript")</p>
+      <a href="{{ url_for('main.app') }}" class="clear-filters-btn">
+        <i class="fas fa-times"></i>
+        Clear Search
+      </a>
+    </div>
+    {% endif %}
+
+    <!-- Pagination -->
+    {% if total_pages > 1 %}
+    <div class="pagination-container">
+      <div class="pagination">
+        {% if current_page > 1 %}
+          <a href="{{ url_for('main.app', page=current_page-1, q=query) }}" class="pagination-btn prev">
+            <i class="fas fa-chevron-left"></i>
+            <span>Previous</span>
+          </a>
+        {% endif %}
+
+        <div class="pagination-info">
+          Page {{ current_page }} of {{ total_pages }}
+        </div>
+
+        {% if current_page < total_pages %}
+          <a href="{{ url_for('main.app', page=current_page+1, q=query) }}" class="pagination-btn next">
+            <span>Next</span>
+            <i class="fas fa-chevron-right"></i>
+          </a>
+        {% endif %}
+      </div>
+    </div>
+    {% endif %}
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-brand">
+          <h2 style="font-size: 1.6rem; font-weight: 800; color: #1e293b; margin: 0 0 6px;">SkillSwap</h2>
+          <p style="font-style: italic; color: #2563eb; font-weight: 600; margin: 0 0 8px;">"Teach what you love. Master what you dream."</p>
+          <p style="color: #64748b; font-size: 0.95rem; line-height: 1.5; margin: 0;">An open, peer-to-peer learning ecosystem empowering curious minds to share knowledge, exchange real-world skills, and elevate each other without boundaries.</p>
+        </div>
+        
+        <div class="footer-links">
+          <div class="footer-column">
+            <h4>Explore</h4>
+            <a href="{{ url_for('main.app') }}">Browse Skills</a>
+            <a href="{{ url_for('main.smart_matches_page') }}">Smart Matches</a>
+            <a href="{{ url_for('main.library_page') }}">Resource Hub</a>
+            <a href="{{ url_for('main.sessions_dashboard') }}">Learning Sessions</a>
+          </div>
+          <div class="footer-column">
+            <h4>Community</h4>
+            <a href="{{ url_for('main.see_request') }}">Swap Requests</a>
+            <a href="{{ url_for('main.messages') }}">Direct Messages</a>
+            <a href="#">Peer Guidelines</a>
+            <a href="#">Honor Code</a>
+          </div>
+          <div class="footer-column">
+            <h4>Growth</h4>
+            <a href="{{ url_for('main.profile') }}">Personal Profile</a>
+            <a href="#">Knowledge Sharing</a>
+            <a href="#">Mentorship Tips</a>
+            <a href="#">Help & Support</a>
+          </div>
+        </div>
+      </div>
+      
+      <div class="footer-bottom" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+        <p style="color: #475569; font-weight: 500; margin: 0;">SkillSwap &mdash; Continuous learning is the minimum requirement for success in any field.</p>
+        <span style="color: #94a3b8; font-size: 0.85rem;">Learn &bull; Connect &bull; Grow</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Back to Top Button -->
+  <button class="back-to-top" id="backToTop">
+    <i class="fas fa-chevron-up"></i>
+  </button>
+
+  <script src="{{ url_for('static', filename='js/theme.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/index.js') }}"></script>
+</body>
+</html>
