@@ -210,14 +210,14 @@
         {% for swap in swaps %}
         <div class="user-card" data-user-id="{{ swap.user_id }}">
           <div class="card-header">
-            <a href="{{ url_for('main.swap_profile', user_id=swap.user_id) }}" class="user-avatar" title="View {{ swap.name }}'s Profile">
+            <a href="{{ url_for('main.view_swap_profile', user_id=swap.user_id) }}" class="user-avatar" title="View {{ swap.name }}'s Profile">
               <img src="{{ swap.photo_url }}" alt="{{ swap.name }}" class="profile-img" onerror="this.src='/static/default-profile.svg'">
               <div class="online-indicator"></div>
             </a>
             
             <div class="user-meta">
               <h3 class="user-name">
-                <a href="{{ url_for('main.swap_profile', user_id=swap.user_id) }}" style="color:inherit;text-decoration:none;">{{ swap.name }}</a>
+                <a href="{{ url_for('main.view_swap_profile', user_id=swap.user_id) }}" style="color:inherit;text-decoration:none;">{{ swap.name }}</a>
               </h3>
               <div class="user-location">
                 <i class="fas fa-map-marker-alt"></i>

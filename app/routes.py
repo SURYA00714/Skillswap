@@ -847,7 +847,8 @@ def request_swap(target_user_id):
             return jsonify({'status': 'error', 'message': str(e)}), 500
         return redirect(url_for('main.app'))
 
-@main.route('/swap/<user_id>')
+@main.route('/swap/<user_id>', endpoint='view_swap_profile')
+@main.route('/swap-profile/<user_id>', endpoint='swap_profile')
 def view_swap_profile(user_id):
     """View another user's profile for swapping"""
     current_user_id = session.get('user_id')
