@@ -113,6 +113,7 @@ body {
     min-height: 100vh;
     color: var(--text);
     line-height: 1.6;
+    overflow-x: hidden;
 }
 
 .swap-request-container {
@@ -173,6 +174,12 @@ body {
 .back-btn:hover {
     background: var(--border);
     transform: translateX(-5px);
+}
+
+.request-header .theme-toggle-btn {
+    position: absolute;
+    right: 0;
+    top: 0;
 }
 
 .request-header h1 {
@@ -746,6 +753,11 @@ textarea:focus {
         position: relative;
         margin-bottom: 20px;
         align-self: flex-start;
+    }
+    
+    .request-header .theme-toggle-btn {
+        position: relative;
+        margin: 0 auto 16px;
     }
     
     .swap-form-card {

@@ -29,7 +29,7 @@
       </div>
       
       <nav class="nav-links">
-        <a href="{{ url_for('main.home') }}" class="nav-link">
+        <a href="{{ url_for('main.app') }}" class="nav-link">
           <i class="fas fa-home"></i>
           <span>Home</span>
         </a>
@@ -44,10 +44,12 @@
           </div>
           <span>My Profile</span>
         </a>
+      </nav>
+      <div class="nav-right-actions" style="display:flex;align-items:center;gap:12px;">
         <button class="theme-toggle-btn" title="Toggle Light / Dark Mode" aria-label="Toggle Light / Dark Mode">
           <i class="fas fa-moon"></i>
         </button>
-      </nav>
+      </div>
     </div>
   </header>
 

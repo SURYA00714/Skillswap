@@ -9,7 +9,11 @@ from datetime import datetime
 
 # Store data in instance/nosql_store.json if file-backed, or memory / /tmp on Vercel
 def _get_bundle_path():
-    return os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "instance", "nosql_store.json"))
+    app_dir = os.path.dirname(__file__)
+    internal_path = os.path.abspath(os.path.join(app_dir, "nosql_store.json"))
+    if os.path.exists(internal_path):
+        return internal_path
+    return os.path.abspath(os.path.join(app_dir, "..", "instance", "nosql_store.json"))
 
 def _get_store_path():
     if os.environ.get("VERCEL") or os.environ.get("AWS_LAMBDA_FUNCTION_NAME"):

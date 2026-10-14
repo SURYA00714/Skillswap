@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/chat.css') }}">
 </head>
 <body class="chat-page">
@@ -42,17 +43,18 @@
                     <i class="fas fa-sign-out-alt"></i>
                     <span>Logout</span>
                 </a>
+            </nav>
+
+            <div class="nav-right-actions" style="display:flex;align-items:center;gap:12px;">
                 <button class="theme-toggle-btn" title="Toggle Light / Dark Mode" aria-label="Toggle Light / Dark Mode">
                     <i class="fas fa-moon"></i>
                 </button>
-            </nav>
-
-            <!-- Mobile Menu Button -->
-            <button class="mobile-menu-btn" id="mobileMenuBtn">
-                <span></span>
-                <span></span>
-                <span></span>
-            </button>
+                <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Open Navigation Menu">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+            </div>
         </div>
     </header>
 

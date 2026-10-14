@@ -1,0 +1,489 @@
+{
+  "users": {
+    "user_vimalarjun": {
+      "id": "user_vimalarjun",
+      "uid": "user_vimalarjun",
+      "email": "vimalarjun37@gmail.com",
+      "name": "Vimal Arjun",
+      "headline": "Senior Full-Stack Engineer & AI Mentor",
+      "about": "Passionate software engineer and long-time SwapSkills member. I love teaching system design, Python/Flask, and Cloud architecture while learning UI/UX design, Rust, and advanced ML pipelines.",
+      "city": "Chennai",
+      "state": "Tamil Nadu",
+      "country": "India",
+      "availability": "Flexible",
+      "gender": "Male",
+      "profileVisibility": "Public",
+      "visibility_settings": {
+        "show_email": true,
+        "show_location": true,
+        "show_education": true,
+        "show_gender": true
+      },
+      "offeredSkill": [
+        "Python",
+        "Flask",
+        "System Design",
+        "PostgreSQL",
+        "Cloud Architecture"
+      ],
+      "requestedSkill": [
+        "Rust",
+        "React Native",
+        "UI/UX Design",
+        "Deep Learning"
+      ],
+      "skillLevel": "Expert",
+      "education": "M.Tech in Software Engineering",
+      "qualifications": "AWS Solutions Architect Certified, Kubernetes Administrator (CKA)",
+      "rating": 4.9,
+      "review_count": 28,
+      "successful_swaps_count": 24,
+      "onboarding_completed": true,
+      "createdAt": "2024-03-15T10:00:00.000000",
+      "updatedAt": "Sentinel: Value used to set a document field to the server timestamp.",
+      "swapCount": "<google.cloud.firestore_v1.transforms.Increment object at 0x7774eed61be0>"
+    },
+    "user_sriram": {
+      "id": "user_sriram",
+      "uid": "user_sriram",
+      "email": "sriram_199@gmail.com",
+      "name": "Sri ram_199",
+      "headline": "DevOps & Cloud Automation Engineer",
+      "about": "Specialist in CI/CD pipelines, Docker, Kubernetes, and Terraform. Active participant in collaborative study groups on SwapSkills.",
+      "city": "Bengaluru",
+      "state": "Karnataka",
+      "country": "India",
+      "availability": "Weekends",
+      "gender": "Male",
+      "profileVisibility": "Public",
+      "visibility_settings": {
+        "show_email": true,
+        "show_location": true,
+        "show_education": true,
+        "show_gender": true
+      },
+      "offeredSkill": [
+        "Docker",
+        "Kubernetes",
+        "DevOps",
+        "Terraform",
+        "Linux"
+      ],
+      "requestedSkill": [
+        "Python",
+        "Backend Architecture",
+        "FastAPI"
+      ],
+      "skillLevel": "Advanced",
+      "education": "B.E. Computer Science",
+      "qualifications": "HashiCorp Certified Terraform Associate",
+      "rating": 4.8,
+      "review_count": 19,
+      "successful_swaps_count": 16,
+      "onboarding_completed": true,
+      "createdAt": "2024-04-10T11:20:00.000000",
+      "updatedAt": "2026-10-14T08:00:00.000000"
+    },
+    "user_srinivasan": {
+      "id": "user_srinivasan",
+      "uid": "user_srinivasan",
+      "email": "srinivasan_198@gmail.com",
+      "name": "Srinivasan_198",
+      "headline": "Lead Frontend Architect & TypeScript Enthusiast",
+      "about": "Crafting responsive, high-performance web applications with React, Next.js, and TypeScript. Looking to exchange frontend expertise for deep backend workflows.",
+      "city": "Coimbatore",
+      "state": "Tamil Nadu",
+      "country": "India",
+      "availability": "Evenings",
+      "gender": "Male",
+      "profileVisibility": "Public",
+      "visibility_settings": {
+        "show_email": true,
+        "show_location": true,
+        "show_education": true,
+        "show_gender": true
+      },
+      "offeredSkill": [
+        "React",
+        "TypeScript",
+        "Next.js",
+        "Tailwind CSS",
+        "Frontend Architecture"
+      ],
+      "requestedSkill": [
+        "Python",
+        "System Design",
+        "PostgreSQL"
+      ],
+      "skillLevel": "Expert",
+      "education": "B.Tech Information Technology",
+      "qualifications": "Meta Certified Frontend Developer",
+      "rating": 5.0,
+      "review_count": 22,
+      "successful_swaps_count": 18,
+      "onboarding_completed": true,
+      "createdAt": "2024-05-02T09:15:00.000000",
+      "updatedAt": "2026-10-14T08:00:00.000000"
+    },
+    "user_kingsley": {
+      "id": "user_kingsley",
+      "uid": "user_kingsley",
+      "email": "kingsley_210@gmail.com",
+      "name": "Kingsley_210",
+      "headline": "Data Scientist & Machine Learning Specialist",
+      "about": "Exploring transformers, statistical modeling, and production ML pipelines. Enthusiastic SwapSkills study group host.",
+      "city": "Hyderabad",
+      "state": "Telangana",
+      "country": "India",
+      "availability": "Flexible",
+      "gender": "Male",
+      "profileVisibility": "Public",
+      "visibility_settings": {
+        "show_email": true,
+        "show_location": true,
+        "show_education": true,
+        "show_gender": true
+      },
+      "offeredSkill": [
+        "Machine Learning",
+        "Data Science",
+        "Python",
+        "PyTorch",
+        "Pandas"
+      ],
+      "requestedSkill": [
+        "Cloud Architecture",
+        "Flask",
+        "FastAPI"
+      ],
+      "skillLevel": "Advanced",
+      "education": "M.S. in Data Analytics",
+      "qualifications": "TensorFlow Developer Certificate",
+      "rating": 4.9,
+      "review_count": 15,
+      "successful_swaps_count": 12,
+      "onboarding_completed": true,
+      "createdAt": "2024-06-18T14:40:00.000000",
+      "updatedAt": "Sentinel: Value used to set a document field to the server timestamp.",
+      "pendingSwapCount": "<google.cloud.firestore_v1.transforms.Increment object at 0x7774eed59340>"
+    },
+    "user_arul": {
+      "id": "user_arul",
+      "uid": "user_arul",
+      "email": "arul_jothi_207@gmail.com",
+      "name": "Arul Jothi Ramalingam_207",
+      "headline": "Cybersecurity Analyst & Ethical Hacker",
+      "about": "Specializing in network vulnerability assessment, Web Application Security, and defensive coding practices. Active in SwapSkills sessions.",
+      "city": "Madurai",
+      "state": "Tamil Nadu",
+      "country": "India",
+      "availability": "Weekdays",
+      "gender": "Male",
+      "profileVisibility": "Public",
+      "visibility_settings": {
+        "show_email": true,
+        "show_location": true,
+        "show_education": true,
+        "show_gender": true
+      },
+      "offeredSkill": [
+        "Cybersecurity",
+        "Ethical Hacking",
+        "Network Security",
+        "Penetration Testing"
+      ],
+      "requestedSkill": [
+        "Python",
+        "Linux",
+        "Automation"
+      ],
+      "skillLevel": "Expert",
+      "education": "B.E. Computer Science & Engineering",
+      "qualifications": "CEH (Certified Ethical Hacker), CompTIA Security+",
+      "rating": 4.9,
+      "review_count": 20,
+      "successful_swaps_count": 17,
+      "onboarding_completed": true,
+      "createdAt": "2024-07-01T08:30:00.000000",
+      "updatedAt": "2026-10-14T08:00:00.000000"
+    }
+  },
+  "learning_sessions": {
+    "session_vimal_sriram": {
+      "id": "session_vimal_sriram",
+      "swapId": "swap_vimal_sriram",
+      "hostUserId": "user_vimalarjun",
+      "participantUserId": "user_sriram",
+      "title": "Cloud Architecture & Docker CI/CD Hands-on",
+      "meetingUrl": "https://meet.google.com/qrs-tuvw-xyz",
+      "sessionDate": "2026-10-18",
+      "startTime": "18:00",
+      "endTime": "19:30",
+      "isPublic": true,
+      "isPrivate": false,
+      "isStudyGroup": false,
+      "status": "scheduled",
+      "notes": "Covering multi-stage Docker builds, Kubernetes manifests, and production deployment best practices.",
+      "created_at": "2026-10-10T10:00:00.000000"
+    },
+    "session_srinivasan_vimal": {
+      "id": "session_srinivasan_vimal",
+      "swapId": "swap_vimal_srini",
+      "hostUserId": "user_srinivasan",
+      "participantUserId": "user_vimalarjun",
+      "title": "Modern React 19 & Next.js Server Components Masterclass",
+      "meetingUrl": "https://meet.google.com/abc-defg-hij",
+      "sessionDate": "2026-10-21",
+      "startTime": "19:30",
+      "endTime": "21:00",
+      "isPublic": true,
+      "isPrivate": false,
+      "isStudyGroup": true,
+      "status": "scheduled",
+      "notes": "Open study group session on Server Actions, hydration optimizations, and responsive layouts.",
+      "created_at": "2026-10-11T12:00:00.000000"
+    },
+    "session_kingsley_study": {
+      "id": "session_kingsley_study",
+      "swapId": "",
+      "hostUserId": "user_kingsley",
+      "participantUserId": "user_vimalarjun",
+      "title": "Machine Learning Model Deployment & FastAPI Endpoints",
+      "meetingUrl": "https://meet.google.com/ml-swap-study",
+      "sessionDate": "2026-10-25",
+      "startTime": "17:00",
+      "endTime": "18:30",
+      "isPublic": true,
+      "isPrivate": false,
+      "isStudyGroup": true,
+      "status": "scheduled",
+      "notes": "Collaborative study group on serving PyTorch models with ONNX and async API microservices.",
+      "created_at": "2026-10-12T15:30:00.000000"
+    },
+    "session_arul_security": {
+      "id": "session_arul_security",
+      "swapId": "",
+      "hostUserId": "user_arul",
+      "participantUserId": "user_vimalarjun",
+      "title": "Web Application Security Auditing & OWASP Top 10",
+      "meetingUrl": "https://meet.google.com/sec-audit-2026",
+      "sessionDate": "2026-09-28",
+      "startTime": "18:00",
+      "endTime": "19:30",
+      "isPublic": true,
+      "isPrivate": false,
+      "isStudyGroup": false,
+      "status": "completed",
+      "notes": "Completed session on JWT security rules, CORS headers, SQL injection defenses, and input sanitization.",
+      "created_at": "2026-09-20T14:00:00.000000"
+    }
+  },
+  "messages": {
+    "msg_srini_1": {
+      "id": "msg_srini_1",
+      "senderId": "user_srinivasan",
+      "receiverId": "user_vimalarjun",
+      "content": "Hi Vimal! Thanks for reviewing my system design document. That caching strategy was super insightful.",
+      "timestamp": "2026-10-12T14:15:00.000000",
+      "isRead": true
+    },
+    "msg_vimal_1": {
+      "id": "msg_vimal_1",
+      "senderId": "user_vimalarjun",
+      "receiverId": "user_srinivasan",
+      "content": "You're very welcome, Srinivasan! Your React performance tips saved us a bunch of re-render issues as well.",
+      "timestamp": "2026-10-12T14:20:00.000000",
+      "isRead": true
+    },
+    "msg_sriram_1": {
+      "id": "msg_sriram_1",
+      "senderId": "user_sriram",
+      "receiverId": "user_vimalarjun",
+      "content": "Hey Vimal, the Docker Compose setup for our upcoming session is ready on GitHub. Let me know if you need any adjustments!",
+      "timestamp": "2026-10-13T16:00:00.000000",
+      "isRead": true
+    },
+    "msg_vimal_2": {
+      "id": "msg_vimal_2",
+      "senderId": "user_vimalarjun",
+      "receiverId": "user_sriram",
+      "content": "Looks solid Sri Ram! I've scheduled our learning session for October 18th at 6 PM. Looking forward to it.",
+      "timestamp": "2026-10-13T16:10:00.000000",
+      "isRead": true
+    },
+    "msg_kingsley_1": {
+      "id": "msg_kingsley_1",
+      "senderId": "user_kingsley",
+      "receiverId": "user_vimalarjun",
+      "content": "Hello Vimal! I added the PyTorch neural network cheat sheet in the Resource Library. Hope our study group finds it helpful.",
+      "timestamp": "2026-10-14T09:30:00.000000",
+      "isRead": true
+    },
+    "msg_arul_1": {
+      "id": "msg_arul_1",
+      "senderId": "user_arul",
+      "receiverId": "user_vimalarjun",
+      "content": "Great exchange session last week on API security! Let's do another one next month on cloud penetration testing.",
+      "timestamp": "2026-10-14T11:00:00.000000",
+      "isRead": true
+    }
+  },
+  "library_resources": {
+    "lib_vimal_sysdesign": {
+      "id": "lib_vimal_sysdesign",
+      "title": "Complete System Design Blueprint & Scalability Notes",
+      "description": "Comprehensive study guide covering load balancers, database sharding, caching layers (Redis), and event-driven architecture.",
+      "category": "Notes",
+      "skillTag": "System Design",
+      "resourceType": "link",
+      "fileUrl": "https://github.com/donnemartin/system-design-primer",
+      "fileName": "system-design-primer.md",
+      "fileSize": 2450000,
+      "uploaderId": "user_vimalarjun",
+      "likes": 34,
+      "downloads": 128,
+      "created_at": "2024-08-15T10:00:00.000000"
+    },
+    "lib_kingsley_pytorch": {
+      "id": "lib_kingsley_pytorch",
+      "title": "PyTorch & Deep Learning Foundations Cheatsheet",
+      "description": "Essential tensor manipulation routines, autograd mechanics, loss functions, and CNN/Transformer architectures.",
+      "category": "Cheatsheet",
+      "skillTag": "Machine Learning",
+      "resourceType": "link",
+      "fileUrl": "https://pytorch.org/tutorials/",
+      "fileName": "pytorch_foundations.pdf",
+      "fileSize": 4120000,
+      "uploaderId": "user_kingsley",
+      "likes": 27,
+      "downloads": 94,
+      "created_at": "2024-09-10T14:30:00.000000"
+    },
+    "lib_srini_react19": {
+      "id": "lib_srini_react19",
+      "title": "React 19 & Next.js App Router Architecture Guide",
+      "description": "In-depth guide for building production React 19 apps with Server Actions, Suspense streaming, and state management patterns.",
+      "category": "Guide",
+      "skillTag": "React",
+      "resourceType": "link",
+      "fileUrl": "https://react.dev/blog/2024/04/25/react-19",
+      "fileName": "react19_architecture_guide.md",
+      "fileSize": 1850000,
+      "uploaderId": "user_srinivasan",
+      "likes": 42,
+      "downloads": 156,
+      "created_at": "2024-10-01T09:15:00.000000"
+    },
+    "lib_sriram_k8s": {
+      "id": "lib_sriram_k8s",
+      "title": "Kubernetes & Production Docker Deployment Recipes",
+      "description": "Ready-to-use production YAML manifests for microservices, Ingress controllers, Helm charts, and health check probes.",
+      "category": "Code",
+      "skillTag": "Kubernetes",
+      "resourceType": "link",
+      "fileUrl": "https://kubernetes.io/docs/concepts/",
+      "fileName": "k8s_production_recipes.zip",
+      "fileSize": 5600000,
+      "uploaderId": "user_sriram",
+      "likes": 39,
+      "downloads": 112,
+      "created_at": "2024-10-05T16:45:00.000000"
+    },
+    "lib_arul_secnotes": {
+      "id": "lib_arul_secnotes",
+      "title": "OWASP Top 10 Web Application Security Checklist 2026",
+      "description": "Practical security checklist covering CORS, CSP policies, sanitized SQL/NoSQL queries, and defensive authentication.",
+      "category": "Cheatsheet",
+      "skillTag": "Cybersecurity",
+      "resourceType": "link",
+      "fileUrl": "https://owasp.org/www-project-top-ten/",
+      "fileName": "owasp_security_checklist_2026.pdf",
+      "fileSize": 3200000,
+      "uploaderId": "user_arul",
+      "likes": 48,
+      "downloads": 180,
+      "created_at": "2024-09-22T11:20:00.000000"
+    }
+  },
+  "swaps": {
+    "swap_vimal_sriram": {
+      "id": "swap_vimal_sriram",
+      "fromUserId": "user_sriram",
+      "toUserId": "user_vimalarjun",
+      "offeredSkill": "Docker & Kubernetes",
+      "requestedSkill": "System Design & Python",
+      "status": "accepted",
+      "createdAt": "2024-08-10T12:00:00.000000"
+    },
+    "swap_vimal_srini": {
+      "id": "swap_vimal_srini",
+      "fromUserId": "user_srinivasan",
+      "toUserId": "user_vimalarjun",
+      "offeredSkill": "React 19 & TypeScript",
+      "requestedSkill": "Python & Cloud Architecture",
+      "status": "accepted",
+      "createdAt": "2024-08-14T15:00:00.000000"
+    },
+    "swap_vimal_kingsley": {
+      "id": "swap_vimal_kingsley",
+      "fromUserId": "user_kingsley",
+      "toUserId": "user_vimalarjun",
+      "offeredSkill": "Machine Learning & PyTorch",
+      "requestedSkill": "Cloud Architecture & Flask",
+      "status": "accepted",
+      "createdAt": "2024-08-20T17:30:00.000000"
+    },
+    "swap_vimal_arul": {
+      "id": "swap_vimal_arul",
+      "fromUserId": "user_arul",
+      "toUserId": "user_vimalarjun",
+      "offeredSkill": "Cybersecurity & Web Auditing",
+      "requestedSkill": "Python & System Design",
+      "status": "accepted",
+      "createdAt": "2024-09-01T11:00:00.000000"
+    },
+    "2dad8bb4-6dc7-4fab-a3d7-f8ddeaa74d29": {
+      "swapId": "SWP000001",
+      "fromUserId": "user_vimalarjun",
+      "toUserId": "user_kingsley",
+      "offeredSkill": "Python",
+      "requestedSkill": "Flask",
+      "message": "Hi! I'd love to exchange skills with you. I can help you master Python and I'm really excited to learn Flask from you. Let me know what time works best for you!",
+      "status": "pending",
+      "createdAt": "Sentinel: Value used to set a document field to the server timestamp.",
+      "updatedAt": "Sentinel: Value used to set a document field to the server timestamp.",
+      "metadata": {
+        "fromUserName": "Vimal Arjun",
+        "fromUserPhoto": "/static/default-profile.png",
+        "toUserName": "Kingsley_210",
+        "toUserPhoto": "/static/default-profile.png"
+      }
+    }
+  },
+  "swap_counters": {
+    "swap_counter": {
+      "count": 1,
+      "lastUpdated": "Sentinel: Value used to set a document field to the server timestamp."
+    }
+  },
+  "user_swaps": {
+    "user_vimalarjun_sent": {
+      "userId": "user_vimalarjun",
+      "type": "sent",
+      "swaps": [
+        "SWP000001"
+      ],
+      "createdAt": "Sentinel: Value used to set a document field to the server timestamp.",
+      "updatedAt": "Sentinel: Value used to set a document field to the server timestamp."
+    },
+    "user_kingsley_received": {
+      "userId": "user_kingsley",
+      "type": "received",
+      "swaps": [
+        "SWP000001"
+      ],
+      "createdAt": "Sentinel: Value used to set a document field to the server timestamp.",
+      "updatedAt": "Sentinel: Value used to set a document field to the server timestamp."
+    }
+  }
+}

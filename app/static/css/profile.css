@@ -105,6 +105,7 @@ body {
   padding: 20px;
   color: var(--dark);
   min-height: 100vh;
+  overflow-x: hidden;
 }
 
 .container {
@@ -1327,7 +1328,10 @@ body {
 @media (max-width: 480px) {
   body {
     padding: 10px;
-    background: white;
+    background: #f8fafc;
+  }
+  [data-theme="dark"] body {
+    background: #0b1120 !important;
   }
   
   .container {
