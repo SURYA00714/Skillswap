@@ -16,11 +16,12 @@ def create_app():
     # Uses DATABASE_URL provided by Neon Postgres
     database_url = os.environ.get("DATABASE_URL")
     if database_url:
+        # Standardize PostgreSQL dialect for SQLAlchemy
         if database_url.startswith("postgres://"):
             database_url = database_url.replace("postgres://", "postgresql+psycopg2://", 1)
-        elif database_url.startswith("postgresql://"):
+        elif database_url.startswith("postgresql://") and not database_url.startswith("postgresql+"):
             database_url = database_url.replace("postgresql://", "postgresql+psycopg2://", 1)
-        # Remove unsupported channel_binding if present for standard psycopg2
+        # Remove unsupported channel_binding if present
         database_url = database_url.replace("&channel_binding=require", "").replace("channel_binding=require&", "").replace("?channel_binding=require", "")
         app.config["SQLALCHEMY_DATABASE_URI"] = database_url
     else:
@@ -56,10 +57,21 @@ def create_app():
 
     # Initialize SQLAlchemy
     from .models import db
-    db.init_app(app)
-
-    with app.app_context():
-        db.create_all()
+    try:
+        db.init_app(app)
+        with app.app_context():
+            db.create_all()
+    except Exception as db_err:
+        print(f"⚠️ Primary DB initialization notice ({db_err}). Falling back to local store.")
+        # Fallback to local SQLite if remote PostgreSQL driver is missing or failed on cold start
+        sqlite_fallback = "/tmp/swapskills_fallback.db" if os.environ.get("VERCEL") or os.environ.get("AWS_LAMBDA_FUNCTION_NAME") else os.path.abspath(os.path.join(app.root_path, "..", "instance", "swapskills.db"))
+        app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{sqlite_fallback}"
+        try:
+            db.init_app(app)
+            with app.app_context():
+                db.create_all()
+        except Exception:
+            pass
 
     # Register routes blueprint
     from .routes import main
