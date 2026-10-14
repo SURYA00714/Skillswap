@@ -33,6 +33,79 @@
   --transition-smooth: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* Theme Toggle Button (Standardized Pill Switch) */
+.theme-toggle-btn {
+  background: #e5e7eb;
+  border: none;
+  width: 104px;
+  height: 42px;
+  border-radius: 24px;
+  display: inline-flex;
+  align-items: center;
+  padding: 4px;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.3s ease;
+  box-shadow: inset 0 2px 5px rgba(0,0,0,0.12), 0 1px 2px rgba(255,255,255,0.8);
+  flex-shrink: 0;
+  user-select: none;
+  font-family: inherit;
+  overflow: hidden;
+}
+
+.theme-toggle-btn .theme-toggle-thumb {
+  width: 34px;
+  height: 34px;
+  background: #ffffff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.18);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  color: #9ca3af;
+  font-size: 15px;
+  position: absolute;
+  left: 4px;
+  z-index: 2;
+}
+
+.theme-toggle-btn .theme-toggle-text {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: #9ca3af;
+  line-height: 1.15;
+  text-align: center;
+  width: 100%;
+  padding-left: 36px;
+  transition: all 0.3s ease;
+  z-index: 1;
+}
+
+[data-theme="dark"] .theme-toggle-btn {
+  background: #2b313a;
+  box-shadow: inset 0 2px 5px rgba(0,0,0,0.5), 0 1px 1px rgba(255,255,255,0.05);
+}
+
+[data-theme="dark"] .theme-toggle-btn .theme-toggle-thumb {
+  background: #ffffff;
+  color: #94a3b8;
+  transform: translateX(62px);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+}
+
+[data-theme="dark"] .theme-toggle-btn .theme-toggle-text {
+  color: #64748b;
+  padding-left: 0;
+  padding-right: 36px;
+}
+
+.theme-toggle-btn:hover {
+  filter: brightness(1.05);
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -1806,4 +1879,108 @@ body {
     box-shadow: none !important;
     border: 2px solid #e5e7eb !important;
   }
+}
+
+/* ===== DARK MODE OVERRIDES FOR SWAP REQUESTS PAGE ===== */
+[data-theme="dark"] body {
+  background: #0b1120;
+  color: #f1f5f9;
+}
+
+[data-theme="dark"] .requests-header,
+[data-theme="dark"] .view-toggle-container,
+[data-theme="dark"] .filters-section,
+[data-theme="dark"] .request-card,
+[data-theme="dark"] .modal-content,
+[data-theme="dark"] .detail-section {
+  background: #0f172a;
+  border-color: #1e293b;
+  color: #f1f5f9;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="dark"] .header-title h1,
+[data-theme="dark"] .user-name,
+[data-theme="dark"] .modal-header h3,
+[data-theme="dark"] .empty-title,
+[data-theme="dark"] .stat-number {
+  color: #f8fafc;
+}
+
+[data-theme="dark"] .header-subtitle,
+[data-theme="dark"] .user-email,
+[data-theme="dark"] .stat-label,
+[data-theme="dark"] .empty-desc,
+[data-theme="dark"] .time-ago {
+  color: #94a3b8;
+}
+
+[data-theme="dark"] .toggle-btn {
+  color: #94a3b8;
+}
+
+[data-theme="dark"] .toggle-btn.active {
+  color: #ffffff;
+  background: #6366f1;
+}
+
+[data-theme="dark"] .search-box input,
+[data-theme="dark"] .filter-group select,
+[data-theme="dark"] .filter-select {
+  background: #1e293b;
+  border-color: #334155;
+  color: #f8fafc;
+}
+
+[data-theme="dark"] .search-box input:focus,
+[data-theme="dark"] .filter-group select:focus {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25);
+}
+
+[data-theme="dark"] .skill-item {
+  background: #1e293b;
+  border-color: #334155;
+  color: #f1f5f9;
+}
+
+[data-theme="dark"] .skill-item .skill-name {
+  color: #f8fafc;
+}
+
+[data-theme="dark"] .skill-item .skill-type {
+  color: #818cf8;
+}
+
+[data-theme="dark"] .exchange-arrow {
+  color: #6366f1;
+}
+
+[data-theme="dark"] .card-footer {
+  border-top-color: #1e293b;
+}
+
+[data-theme="dark"] .btn-action.btn-secondary,
+[data-theme="dark"] .btn-back {
+  background: #1e293b;
+  border-color: #334155;
+  color: #f8fafc;
+}
+
+[data-theme="dark"] .btn-action.btn-secondary:hover,
+[data-theme="dark"] .btn-back:hover {
+  background: #334155;
+  color: #ffffff;
+}
+
+[data-theme="dark"] .modal-overlay {
+  background: rgba(0, 0, 0, 0.75);
+}
+
+[data-theme="dark"] .close-btn {
+  color: #94a3b8;
+}
+
+[data-theme="dark"] .close-btn:hover {
+  color: #ffffff;
 }

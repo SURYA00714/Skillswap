@@ -9,6 +9,11 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
+  <div style="position: absolute; top: 20px; right: 20px; z-index: 100;">
+    <button class="theme-toggle-btn" title="Toggle Light / Dark Mode" aria-label="Toggle Light / Dark Mode">
+      <i class="fas fa-moon"></i>
+    </button>
+  </div>
   <div class="auth-container">
     <div class="auth-card">
       <div class="auth-header">
@@ -92,6 +97,7 @@
   <script>
     window.FIREBASE_API_KEY = "{{ FIREBASE_API_KEY }}";
   </script>
+  <script src="{{ url_for('static', filename='js/theme.js') }}"></script>
   <!-- Your JS -->
   <script src="{{ url_for('static', filename='js/auth.js') }}"></script>
 </body>

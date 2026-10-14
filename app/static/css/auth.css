@@ -23,6 +23,79 @@
   --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* Theme Toggle Button (Standardized Pill Switch) */
+.theme-toggle-btn {
+  background: #e5e7eb;
+  border: none;
+  width: 104px;
+  height: 42px;
+  border-radius: 24px;
+  display: inline-flex;
+  align-items: center;
+  padding: 4px;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.3s ease;
+  box-shadow: inset 0 2px 5px rgba(0,0,0,0.12), 0 1px 2px rgba(255,255,255,0.8);
+  flex-shrink: 0;
+  user-select: none;
+  font-family: inherit;
+  overflow: hidden;
+}
+
+.theme-toggle-btn .theme-toggle-thumb {
+  width: 34px;
+  height: 34px;
+  background: #ffffff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.18);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  color: #9ca3af;
+  font-size: 15px;
+  position: absolute;
+  left: 4px;
+  z-index: 2;
+}
+
+.theme-toggle-btn .theme-toggle-text {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: #9ca3af;
+  line-height: 1.15;
+  text-align: center;
+  width: 100%;
+  padding-left: 36px;
+  transition: all 0.3s ease;
+  z-index: 1;
+}
+
+[data-theme="dark"] .theme-toggle-btn {
+  background: #2b313a;
+  box-shadow: inset 0 2px 5px rgba(0,0,0,0.5), 0 1px 1px rgba(255,255,255,0.05);
+}
+
+[data-theme="dark"] .theme-toggle-btn .theme-toggle-thumb {
+  background: #ffffff;
+  color: #94a3b8;
+  transform: translateX(62px);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+}
+
+[data-theme="dark"] .theme-toggle-btn .theme-toggle-text {
+  color: #64748b;
+  padding-left: 0;
+  padding-right: 36px;
+}
+
+.theme-toggle-btn:hover {
+  filter: brightness(1.05);
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -457,4 +530,75 @@ body {
   font-size: 12px;
   margin-top: 4px;
   display: block;
+}
+
+/* ===== DARK MODE OVERRIDES FOR AUTH PAGES (SIGNIN / SIGNUP) ===== */
+[data-theme="dark"] body {
+  background: #0b1120;
+  color: #f1f5f9;
+}
+
+[data-theme="dark"] .auth-card {
+  background: #0f172a;
+  border: 1px solid #1e293b;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+  color: #f1f5f9;
+}
+
+[data-theme="dark"] .auth-header h2,
+[data-theme="dark"] .logo span {
+  color: #f8fafc;
+}
+
+[data-theme="dark"] .auth-header p,
+[data-theme="dark"] .auth-footer p,
+[data-theme="dark"] .input-group label,
+[data-theme="dark"] .phone-hint {
+  color: #94a3b8;
+}
+
+[data-theme="dark"] .input-group input {
+  background: #1e293b;
+  border-color: #334155;
+  color: #f8fafc;
+}
+
+[data-theme="dark"] .input-group input:focus {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25);
+}
+
+[data-theme="dark"] .btn-google {
+  background: #1e293b;
+  border-color: #334155;
+  color: #f8fafc;
+}
+
+[data-theme="dark"] .btn-google:hover {
+  background: #334155;
+  color: #ffffff;
+}
+
+[data-theme="dark"] .divider::before {
+  background: #1e293b;
+}
+
+[data-theme="dark"] .divider span {
+  background: #0f172a;
+  color: #64748b;
+}
+
+[data-theme="dark"] .forgot-password a,
+[data-theme="dark"] .auth-footer a {
+  color: #818cf8;
+}
+
+[data-theme="dark"] .debug-info {
+  background: #1e293b;
+  border-color: #334155;
+  color: #94a3b8;
+}
+
+[data-theme="dark"] .debug-info strong {
+  color: #f8fafc;
 }

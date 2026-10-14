@@ -44,6 +44,9 @@
           </div>
           <span>My Profile</span>
         </a>
+        <button class="theme-toggle-btn" title="Toggle Light / Dark Mode" aria-label="Toggle Light / Dark Mode">
+          <i class="fas fa-moon"></i>
+        </button>
       </nav>
     </div>
   </header>
@@ -703,5 +706,6 @@ function handleMessageClick() {
     window.location.href = `/chat/{{ target_user_id }}`;
 }
 </script>
+<script src="{{ url_for('static', filename='js/theme.js') }}"></script>
 </body>
 </html>

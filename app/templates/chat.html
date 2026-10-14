@@ -42,6 +42,9 @@
                     <i class="fas fa-sign-out-alt"></i>
                     <span>Logout</span>
                 </a>
+                <button class="theme-toggle-btn" title="Toggle Light / Dark Mode" aria-label="Toggle Light / Dark Mode">
+                    <i class="fas fa-moon"></i>
+                </button>
             </nav>
 
             <!-- Mobile Menu Button -->
@@ -202,6 +205,7 @@
         const moreActionsBtn = document.getElementById('moreActionsBtn');
     </script>
     
+    <script src="{{ url_for('static', filename='js/theme.js') }}"></script>
     <script src="{{ url_for('static', filename='js/chat.js') }}"></script>
 </body>
 </html>
