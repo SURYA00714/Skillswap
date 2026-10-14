@@ -26,6 +26,128 @@
   --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* Dark Theme Variables for Landing */
+[data-theme="dark"] {
+  --primary: #818cf8;
+  --primary-dark: #6366f1;
+  --primary-light: #a5b4fc;
+  --secondary: #f472b6;
+  --accent: #fbbf24;
+  --success: #34d399;
+  --warning: #fbbf24;
+  --error: #f87171;
+  --text: #f1f5f9;
+  --text-light: #94a3b8;
+  --text-lighter: #64748b;
+  --background: #0f172a;
+  --surface: #1e293b;
+  --surface-dark: #334155;
+  --border: #334155;
+  --border-light: #1e293b;
+  --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.6);
+}
+
+[data-theme="dark"] .landing-header {
+  background: rgba(15, 23, 42, 0.95);
+  border-bottom-color: #334155;
+}
+
+[data-theme="dark"] .features,
+[data-theme="dark"] .how-it-works,
+[data-theme="dark"] .stats,
+[data-theme="dark"] .testimonials,
+[data-theme="dark"] .user-directory,
+[data-theme="dark"] .landing-footer {
+  background-color: var(--background) !important;
+  color: var(--text) !important;
+}
+
+[data-theme="dark"] .feature-card,
+[data-theme="dark"] .step-card,
+[data-theme="dark"] .stat-card,
+[data-theme="dark"] .cta-card,
+[data-theme="dark"] .user-card,
+[data-theme="dark"] .testimonial-card {
+  background: var(--surface) !important;
+  border-color: var(--border) !important;
+  color: var(--text) !important;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3) !important;
+}
+
+/* Premium Pill Theme Toggle Switch */
+.theme-toggle-btn {
+  background: #e2e8f0;
+  border: 1px solid #cbd5e1;
+  width: 98px;
+  height: 38px;
+  border-radius: 20px;
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 5px;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.06);
+  flex-shrink: 0;
+  user-select: none;
+  font-family: inherit;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.theme-toggle-thumb {
+  width: 30px;
+  height: 30px;
+  background: #ffffff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.18);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  color: #f59e0b;
+  font-size: 14px;
+  position: absolute;
+  left: 4px;
+  z-index: 2;
+}
+
+.theme-toggle-text {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: #64748b;
+  line-height: 1.15;
+  text-align: center;
+  width: 100%;
+  padding-left: 32px;
+  transition: all 0.3s ease;
+  z-index: 1;
+}
+
+/* Dark Mode Pill State */
+[data-theme="dark"] .theme-toggle-btn {
+  background: #1e293b;
+  border-color: #334155;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.4);
+}
+
+[data-theme="dark"] .theme-toggle-btn .theme-toggle-thumb {
+  background: #0f172a;
+  color: #cbd5e1;
+  transform: translateX(58px);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.5);
+}
+
+[data-theme="dark"] .theme-toggle-btn .theme-toggle-text {
+  color: #94a3b8;
+  padding-left: 0;
+  padding-right: 32px;
+}
 /* Base Styles */
 * {
   margin: 0;

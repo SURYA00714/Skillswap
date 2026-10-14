@@ -76,5 +76,11 @@ def create_app():
     # Register routes blueprint
     from .routes import main
     app.register_blueprint(main)
+
+    # Inject Firebase API Key to templates safely from environment
+    @app.context_processor
+    def inject_firebase_key():
+        key = os.environ.get("FIREBASE_API_KEY") or "AIzaSyDS8tGustKzem7u8U5ntcLMimgLJC_fQWI"
+        return dict(FIREBASE_API_KEY=key)
     
     return app

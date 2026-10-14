@@ -30,12 +30,17 @@
   // Run immediately to prevent flash of wrong theme
   initTheme();
 
-  // Attach event listener once DOM is ready
+  // Attach event listeners once DOM is ready
   document.addEventListener('DOMContentLoaded', function() {
     initTheme();
-    document.querySelectorAll('.theme-toggle-btn').forEach(btn => {
-      btn.removeEventListener('click', toggleTheme);
-      btn.addEventListener('click', toggleTheme);
+    
+    // Delegate click event so all theme buttons work reliably everywhere
+    document.addEventListener('click', function(e) {
+      const btn = e.target.closest('.theme-toggle-btn');
+      if (btn) {
+        e.preventDefault();
+        toggleTheme();
+      }
     });
 
     // Mobile menu toggle logic helper if present
