@@ -24,8 +24,46 @@ STORE_PATH = _get_store_path()
 
 _memory_store = {}
 
+def _get_pg_connection():
+    db_url = os.environ.get("DATABASE_URL")
+    if not db_url:
+        return None
+    db_url = db_url.replace("&channel_binding=require", "").replace("channel_binding=require&", "").replace("?channel_binding=require", "")
+    try:
+        import psycopg2
+        conn = psycopg2.connect(db_url, connect_timeout=3)
+        conn.autocommit = True
+        return conn
+    except Exception:
+        try:
+            import psycopg
+            conn = psycopg.connect(db_url, connect_timeout=3, autocommit=True)
+            return conn
+        except Exception:
+            return None
+
 def _load_store():
     global _memory_store
+
+    # 1. Attempt to fetch latest shared store from PostgreSQL if configured
+    try:
+        conn = _get_pg_connection()
+        if conn:
+            with conn.cursor() as cur:
+                cur.execute("CREATE TABLE IF NOT EXISTS nosql_kv_store (key TEXT PRIMARY KEY, value TEXT);")
+                cur.execute("SELECT value FROM nosql_kv_store WHERE key = 'store';")
+                row = cur.fetchone()
+                if row and row[0]:
+                    pg_data = json.loads(row[0])
+                    if isinstance(pg_data, dict) and pg_data.get("users"):
+                        _memory_store = pg_data
+                        conn.close()
+                        return _memory_store
+            conn.close()
+    except Exception:
+        pass
+
+    # 2. In-memory check
     if _memory_store and _memory_store.get("users"):
         return _memory_store
         
@@ -79,6 +117,8 @@ def _save_store(data):
     global _memory_store
     _memory_store = data
     path = _get_store_path()
+    
+    # 1. Save to local filesystem
     try:
         os.makedirs(os.path.dirname(path), exist_ok=True)
         with open(path, "w", encoding="utf-8") as f:
@@ -86,11 +126,49 @@ def _save_store(data):
     except Exception:
         pass
 
+    # 2. Persist to shared PostgreSQL for cross-container serverless synchronization
+    try:
+        conn = _get_pg_connection()
+        if conn:
+            with conn.cursor() as cur:
+                cur.execute("CREATE TABLE IF NOT EXISTS nosql_kv_store (key TEXT PRIMARY KEY, value TEXT);")
+                json_str = json.dumps(data, default=str)
+                cur.execute("""
+                    INSERT INTO nosql_kv_store (key, value) VALUES ('store', %s)
+                    ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value;
+                """, (json_str,))
+            conn.close()
+    except Exception:
+        pass
+
+class ArrayUnion:
+    def __init__(self, values):
+        self.values = list(values) if isinstance(values, (list, tuple)) else [values]
+
+class Increment:
+    def __init__(self, amount):
+        self.amount = amount
+
 class DocumentSnapshot:
-    def __init__(self, doc_id, data):
+    def __init__(self, doc_id, data, collection_name=None):
         self.id = doc_id
         self._data = data or {}
         self.exists = data is not None
+        self.collection_name = collection_name
+        self._reference = DocumentReference(collection_name, doc_id) if collection_name else None
+
+    @property
+    def reference(self):
+        if self._reference is not None:
+            return self._reference
+        if self.collection_name:
+            self._reference = DocumentReference(self.collection_name, self.id)
+            return self._reference
+        return DocumentReference('swaps', self.id)
+
+    @reference.setter
+    def reference(self, val):
+        self._reference = val
 
     def to_dict(self):
         return dict(self._data) if self._data else {}
@@ -107,20 +185,35 @@ class DocumentReference:
         store = _load_store()
         col = store.get(self.collection_name, {})
         data = col.get(self.id)
-        return DocumentSnapshot(self.id, data)
+        return DocumentSnapshot(self.id, data, collection_name=self.collection_name)
 
     def set(self, data, merge=False):
         store = _load_store()
         col = store.setdefault(self.collection_name, {})
+        target = dict(col.get(self.id, {})) if merge and self.id in col else {}
+        
         clean_data = dict(data)
-        # handle special server timestamps
         for k, v in clean_data.items():
-            if str(v) == "SERVER_TIMESTAMP":
-                clean_data[k] = datetime.utcnow().isoformat()
-        if merge and self.id in col:
-            col[self.id].update(clean_data)
-        else:
-            col[self.id] = clean_data
+            if str(v) == "SERVER_TIMESTAMP" or v == "SERVER_TIMESTAMP":
+                target[k] = datetime.utcnow().isoformat()
+            elif isinstance(v, ArrayUnion):
+                existing_list = target.get(k, [])
+                if not isinstance(existing_list, list):
+                    existing_list = []
+                for val in v.values:
+                    if val not in existing_list:
+                        existing_list.append(val)
+                target[k] = existing_list
+            elif isinstance(v, Increment):
+                existing_val = target.get(k, 0)
+                try:
+                    target[k] = (existing_val or 0) + v.amount
+                except Exception:
+                    target[k] = v.amount
+            else:
+                target[k] = v
+                
+        col[self.id] = target
         _save_store(store)
         return self
 
@@ -179,7 +272,7 @@ class Query:
                         match = False
                         break
             if match:
-                results.append(DocumentSnapshot(doc_id, data))
+                results.append(DocumentSnapshot(doc_id, data, collection_name=self.collection_name))
 
         if self.order_by_field:
             results.sort(key=lambda s: str(s.get(self.order_by_field, "")), reverse=self.descending)
@@ -198,6 +291,11 @@ class CollectionReference:
 
     def document(self, doc_id=None):
         return DocumentReference(self.name, doc_id)
+
+    def add(self, data):
+        doc_ref = self.document()
+        doc_ref.set(data)
+        return (None, doc_ref)
 
     def where(self, field, op, val):
         return Query(self.name, [(field, op, val)])
@@ -241,6 +339,8 @@ class Batch:
 
 class FirestoreClient:
     SERVER_TIMESTAMP = "SERVER_TIMESTAMP"
+    ArrayUnion = ArrayUnion
+    Increment = Increment
 
     def collection(self, name):
         return CollectionReference(name)

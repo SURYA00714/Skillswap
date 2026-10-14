@@ -127,11 +127,11 @@
               </div>
 
               <!-- Information Visibility Preferences -->
-              <div class="form-group" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px 16px;">
-                <label style="font-weight: 700; color: #1e293b; margin-bottom: 8px; display: flex; align-items: center; gap: 8px;">
-                  <i class="fas fa-eye" style="color: #2563eb;"></i> What Information Is Visible to Others
+              <div class="form-group visibility-box" style="border-radius: 10px; padding: 14px 16px;">
+                <label style="font-weight: 700; margin-bottom: 8px; display: flex; align-items: center; gap: 8px;">
+                  <i class="fas fa-eye" style="color: var(--primary);"></i> What Information Is Visible to Others
                 </label>
-                <div style="display: flex; flex-direction: column; gap: 8px; font-size: 0.9rem; color: #475569;">
+                <div style="display: flex; flex-direction: column; gap: 8px; font-size: 0.9rem;">
                   <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
                     <input type="checkbox" name="vis_email" {% if user_data.visibility_settings and user_data.visibility_settings.get('show_email') is not false %}checked{% elif not user_data.visibility_settings %}checked{% endif %} disabled style="width: 16px; height: 16px;">
                     <span>Email address</span>
@@ -842,11 +842,11 @@
         </div>
       </div>
 
-      <div class="form-actions" id="formActions" style="display: none; gap: 14px; margin-top: 30px; padding: 20px 24px; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px; box-shadow: 0 4px 15px rgba(0,0,0,0.06); align-items: center; justify-content: flex-end;">
-        <button type="button" id="cancelEditBtn" class="btn-discard" style="background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; padding: 12px 24px; border-radius: 10px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 8px;">
+      <div class="form-actions" id="formActions" style="display: none; gap: 14px; margin-top: 30px; padding: 20px 24px; border-radius: 14px; align-items: center; justify-content: flex-end;">
+        <button type="button" id="cancelEditBtn" class="btn-discard" style="padding: 12px 24px; border-radius: 10px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 8px;">
           <i class="fas fa-undo"></i> Discard Changes
         </button>
-        <button type="submit" class="btn-save" style="background: #2563eb; color: #ffffff; border: none; padding: 12px 28px; border-radius: 10px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 8px;">
+        <button type="submit" class="btn-save" style="background: var(--primary); color: #ffffff; border: none; padding: 12px 28px; border-radius: 10px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 8px;">
           <i class="fas fa-check"></i> Save Changes
         </button>
       </div>

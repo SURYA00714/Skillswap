@@ -189,7 +189,8 @@ body {
   font-size: 14px;
 }
 
-.input-group input {
+.input-group input,
+.input-group select {
   width: 100%;
   padding: 14px 16px;
   border: 2px solid var(--border);
@@ -197,9 +198,12 @@ body {
   font-size: 16px;
   transition: var(--transition);
   background: var(--surface);
+  color: var(--text);
+  font-family: inherit;
 }
 
-.input-group input:focus {
+.input-group input:focus,
+.input-group select:focus {
   outline: none;
   border-color: var(--primary);
   box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
@@ -557,15 +561,22 @@ body {
   color: #94a3b8;
 }
 
-[data-theme="dark"] .input-group input {
-  background: #1e293b;
-  border-color: #334155;
-  color: #f8fafc;
+[data-theme="dark"] .input-group input,
+[data-theme="dark"] .input-group select {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+  color: #f8fafc !important;
 }
 
-[data-theme="dark"] .input-group input:focus {
-  border-color: #6366f1;
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25);
+[data-theme="dark"] .input-group select option {
+  background: #0f172a !important;
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] .input-group input:focus,
+[data-theme="dark"] .input-group select:focus {
+  border-color: #6366f1 !important;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25) !important;
 }
 
 [data-theme="dark"] .btn-google {

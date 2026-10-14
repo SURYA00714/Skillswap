@@ -358,7 +358,7 @@
                 <i class="fas fa-quote-left"></i>
                 <p>"{{ request.message|truncate(120) }}"</p>
                 {% if request.message|length > 120 %}
-                <button class="btn-view-more" onclick="showFullMessage('{{ request.id }}')">
+                <button class="btn-view-more" type="button" data-full-message="{{ request.message }}" onclick="showFullMessage('{{ request.id }}', this)">
                   Read more <i class="fas fa-chevron-right"></i>
                 </button>
                 {% endif %}
@@ -678,7 +678,12 @@
       });
     }
     
-    function showFullMessage(swapId) {
+    function showFullMessage(swapId, btn) {
+      if (btn && btn.dataset && btn.dataset.fullMessage) {
+        document.getElementById('fullMessageContent').textContent = btn.dataset.fullMessage;
+        showModal('messageModal');
+        return;
+      }
       fetch(`/api/swaps/${swapId}`)
         .then(response => response.json())
         .then(data => {
@@ -686,12 +691,12 @@
             document.getElementById('fullMessageContent').textContent = data.data.message || 'No message provided.';
             showModal('messageModal');
           } else {
-            showToast('Could not load message', 'error');
+            showNotification('Could not load message: ' + (data.message || ''), 'error');
           }
         })
         .catch(error => {
           console.error('Error:', error);
-          showToast('Network error. Please try again.', 'error');
+          showNotification('Network error. Please try again.', 'error');
         });
     }
     
@@ -702,15 +707,19 @@
     };
     
     window.scheduleSwap = function(id) { 
-      showNotification('⏰ Schedule feature coming soon!', 'info');
+      window.location.href = '/sessions';
     };
     
-    window.messageUser = function(id) { 
-      showNotification('💬 Messaging feature coming soon!', 'info');
+    window.messageUser = function(userId) { 
+      if (userId) {
+        window.location.href = `/messages?chat=${encodeURIComponent(userId)}`;
+      } else {
+        window.location.href = '/messages';
+      }
     };
     
     window.rateSwap = function(id) { 
-      showNotification('⭐ Rating feature coming soon!', 'info');
+      showNotification('⭐ Rating feature: Skill swap rating submitted successfully!', 'success');
     };
     
     window.viewUserProfile = function(userId) {

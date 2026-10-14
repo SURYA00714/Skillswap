@@ -43,7 +43,7 @@ function initMessaging() {
                 
                 // Check URL for direct chat parameter
                 const urlParams = new URLSearchParams(window.location.search);
-                const chatWith = urlParams.get('chat');
+                const chatWith = urlParams.get('chat') || urlParams.get('user_id');
                 if (chatWith && chatWith !== currentUserId) {
                     openChatFromUrl(chatWith);
                 }

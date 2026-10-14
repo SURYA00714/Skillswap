@@ -1177,23 +1177,38 @@ def debug_swaps():
 def get_swap_details(swap_id):
     """Get detailed swap information"""
     try:
-        swap_doc = db.collection('swaps').where('swapId', '==', swap_id).limit(1).stream()
+        swap_data = None
+        doc_id = None
         
-        for doc in swap_doc:
+        # 1. Query by custom swapId
+        swap_query = db.collection('swaps').where('swapId', '==', swap_id).limit(1).stream()
+        for doc in swap_query:
             swap_data = doc.to_dict()
-            swap_data['id'] = doc.id
-            
-            # Get user details
-            from_user = db.collection('users').document(swap_data['fromUserId']).get()
-            to_user = db.collection('users').document(swap_data['toUserId']).get()
-            
-            swap_data['fromUser'] = from_user.to_dict() if from_user.exists else {}
-            swap_data['toUser'] = to_user.to_dict() if to_user.exists else {}
-            
+            doc_id = doc.id
+            break
+
+        # 2. Fallback to direct document id lookup
+        if not swap_data:
+            doc_ref = db.collection('swaps').document(swap_id)
+            doc_snap = doc_ref.get()
+            if doc_snap.exists:
+                swap_data = doc_snap.to_dict()
+                doc_id = doc_snap.id
+
+        if swap_data:
+            swap_data['id'] = doc_id
+            from_uid = swap_data.get('fromUserId')
+            to_uid = swap_data.get('toUserId')
+            from_user = db.collection('users').document(from_uid).get() if from_uid else None
+            to_user = db.collection('users').document(to_uid).get() if to_uid else None
+
+            swap_data['fromUser'] = from_user.to_dict() if (from_user and from_user.exists) else {}
+            swap_data['toUser'] = to_user.to_dict() if (to_user and to_user.exists) else {}
+
             return jsonify({'status': 'success', 'data': swap_data})
-        
+
         return jsonify({'status': 'error', 'message': 'Swap not found'}), 404
-        
+
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)}), 500
 

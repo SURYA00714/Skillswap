@@ -1883,7 +1883,7 @@ body {
 
 /* ===== DARK MODE OVERRIDES FOR SWAP REQUESTS PAGE ===== */
 [data-theme="dark"] body {
-  background: #0b1120;
+  background: #0b1120 !important;
   color: #f1f5f9;
 }
 
@@ -1893,94 +1893,163 @@ body {
 [data-theme="dark"] .request-card,
 [data-theme="dark"] .modal-content,
 [data-theme="dark"] .detail-section {
-  background: #0f172a;
-  border-color: #1e293b;
-  color: #f1f5f9;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  background: #0f172a !important;
+  border: 1px solid #1e293b !important;
+  color: #f1f5f9 !important;
+  box-shadow: 0 4px 25px rgba(0, 0, 0, 0.4) !important;
+}
+
+[data-theme="dark"] .user-info-header {
+  background: #1e293b !important;
+  border: 1px solid #334155 !important;
+  color: #f1f5f9 !important;
+}
+
+[data-theme="dark"] .user-info-header:hover {
+  background: #334155 !important;
+  border-color: #6366f1 !important;
+}
+
+[data-theme="dark"] .user-info-header span {
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] .user-avatar-header {
+  border-color: #334155 !important;
+}
+
+/* Stat Cards in Dark Mode */
+[data-theme="dark"] .stat-card {
+  background: #0f172a !important;
+  border: 1px solid #1e293b !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35) !important;
+}
+
+[data-theme="dark"] .stat-card:hover {
+  background: #1e293b !important;
+  border-color: #6366f1 !important;
+  transform: translateY(-8px) scale(1.02);
+}
+
+[data-theme="dark"] .stat-number {
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] .stat-label {
+  color: #94a3b8 !important;
+}
+
+[data-theme="dark"] .view-tab {
+  color: #94a3b8 !important;
+}
+
+[data-theme="dark"] .view-tab:not(.active) {
+  background: #1e293b !important;
+  border: 1px solid #334155 !important;
+}
+
+[data-theme="dark"] .view-tab:not(.active):hover {
+  background: #334155 !important;
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] .view-tab.active {
+  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%) !important;
+  color: #ffffff !important;
 }
 
 [data-theme="dark"] .header-title h1,
 [data-theme="dark"] .user-name,
 [data-theme="dark"] .modal-header h3,
-[data-theme="dark"] .empty-title,
-[data-theme="dark"] .stat-number {
-  color: #f8fafc;
+[data-theme="dark"] .empty-title {
+  color: #f8fafc !important;
 }
 
 [data-theme="dark"] .header-subtitle,
 [data-theme="dark"] .user-email,
-[data-theme="dark"] .stat-label,
 [data-theme="dark"] .empty-desc,
 [data-theme="dark"] .time-ago {
-  color: #94a3b8;
+  color: #94a3b8 !important;
 }
 
-[data-theme="dark"] .toggle-btn {
-  color: #94a3b8;
+[data-theme="dark"] .request-message {
+  background: #1e293b !important;
+  border-left: 3px solid #6366f1 !important;
+  color: #cbd5e1 !important;
 }
 
-[data-theme="dark"] .toggle-btn.active {
-  color: #ffffff;
-  background: #6366f1;
+[data-theme="dark"] .request-message p {
+  color: #cbd5e1 !important;
+}
+
+[data-theme="dark"] .btn-view-more {
+  color: #818cf8 !important;
+}
+
+[data-theme="dark"] .btn-view-more:hover {
+  color: #a5b4fc !important;
+}
+
+[data-theme="dark"] .skill-badge {
+  background: #1e293b !important;
+  border: 1px solid #334155 !important;
+  color: #f1f5f9 !important;
+}
+
+[data-theme="dark"] .skill-badge span {
+  color: #f1f5f9 !important;
+}
+
+[data-theme="dark"] .skill-badge.primary {
+  border-left: 3px solid #6366f1 !important;
+}
+
+[data-theme="dark"] .skill-badge.secondary {
+  border-left: 3px solid #10b981 !important;
 }
 
 [data-theme="dark"] .search-box input,
 [data-theme="dark"] .filter-group select,
 [data-theme="dark"] .filter-select {
-  background: #1e293b;
-  border-color: #334155;
-  color: #f8fafc;
+  background: #1e293b !important;
+  border-color: #334155 !important;
+  color: #f8fafc !important;
 }
 
 [data-theme="dark"] .search-box input:focus,
 [data-theme="dark"] .filter-group select:focus {
-  border-color: #6366f1;
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25);
-}
-
-[data-theme="dark"] .skill-item {
-  background: #1e293b;
-  border-color: #334155;
-  color: #f1f5f9;
-}
-
-[data-theme="dark"] .skill-item .skill-name {
-  color: #f8fafc;
-}
-
-[data-theme="dark"] .skill-item .skill-type {
-  color: #818cf8;
-}
-
-[data-theme="dark"] .exchange-arrow {
-  color: #6366f1;
-}
-
-[data-theme="dark"] .card-footer {
-  border-top-color: #1e293b;
+  border-color: #6366f1 !important;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25) !important;
 }
 
 [data-theme="dark"] .btn-action.btn-secondary,
 [data-theme="dark"] .btn-back {
-  background: #1e293b;
-  border-color: #334155;
-  color: #f8fafc;
+  background: #1e293b !important;
+  border-color: #334155 !important;
+  color: #f8fafc !important;
 }
 
 [data-theme="dark"] .btn-action.btn-secondary:hover,
 [data-theme="dark"] .btn-back:hover {
-  background: #334155;
-  color: #ffffff;
+  background: #334155 !important;
+  color: #ffffff !important;
 }
 
 [data-theme="dark"] .modal-overlay {
-  background: rgba(0, 0, 0, 0.75);
+  background: rgba(0, 0, 0, 0.8) !important;
 }
 
-[data-theme="dark"] .close-btn {
-  color: #94a3b8;
+[data-theme="dark"] .modal-content {
+  background: #0f172a !important;
+  border: 1px solid #1e293b !important;
 }
 
-[data-theme="dark"] .close-btn:hover {
-  color: #ffffff;
+[data-theme="dark"] .close-btn,
+[data-theme="dark"] .modal-close {
+  color: #94a3b8 !important;
+}
+
+[data-theme="dark"] .close-btn:hover,
+[data-theme="dark"] .modal-close:hover {
+  color: #ffffff !important;
 }
