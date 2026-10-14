@@ -7,6 +7,7 @@
     <title>Messages - SkillSwap</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/messages.css') }}">
     <style>
         /* Ensure body has no scroll */
@@ -112,7 +113,7 @@
                     </div>
                 </div>
                 <div class="header-actions" style="display:flex;align-items:center;gap:8px;">
-                    <button class="theme-toggle-btn" style="width:34px;height:34px;font-size:14px;" title="Toggle Light / Dark Mode" aria-label="Toggle Light / Dark Mode">
+                    <button class="theme-toggle-btn" title="Toggle Light / Dark Mode" aria-label="Toggle Light / Dark Mode">
                         <i class="fas fa-moon"></i>
                     </button>
                     <a href="{{ url_for('main.app') }}" class="icon-btn" title="Back to Home" style="display:inline-flex;align-items:center;justify-content:center;text-decoration:none;color:inherit;">

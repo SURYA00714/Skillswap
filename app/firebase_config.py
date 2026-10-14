@@ -8,10 +8,13 @@ import uuid
 from datetime import datetime
 
 # Store data in instance/nosql_store.json if file-backed, or memory / /tmp on Vercel
+def _get_bundle_path():
+    return os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "instance", "nosql_store.json"))
+
 def _get_store_path():
     if os.environ.get("VERCEL") or os.environ.get("AWS_LAMBDA_FUNCTION_NAME"):
         return "/tmp/nosql_store.json"
-    return os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "instance", "nosql_store.json"))
+    return _get_bundle_path()
 
 STORE_PATH = _get_store_path()
 
@@ -19,16 +22,53 @@ _memory_store = {}
 
 def _load_store():
     global _memory_store
+    if _memory_store and _memory_store.get("users"):
+        return _memory_store
+        
     path = _get_store_path()
+    bundle_path = _get_bundle_path()
+
+    # Pre-populate serverless /tmp from bundled seed data if missing
+    if path != bundle_path and not os.path.exists(path) and os.path.exists(bundle_path):
+        try:
+            with open(bundle_path, "r", encoding="utf-8") as bf:
+                seed_data = json.load(bf)
+                if isinstance(seed_data, dict):
+                    _save_store(seed_data)
+                    return _memory_store
+        except Exception:
+            pass
+
     if os.path.exists(path):
         try:
             with open(path, "r", encoding="utf-8") as f:
                 data = json.load(f)
                 if isinstance(data, dict):
+                    # Ensure pre-defined users and posts are merged if missing
+                    if not data.get("users") and os.path.exists(bundle_path):
+                        try:
+                            with open(bundle_path, "r", encoding="utf-8") as bf:
+                                bundle_data = json.load(bf)
+                                for col, items in bundle_data.items():
+                                    data.setdefault(col, {}).update(items)
+                        except Exception:
+                            pass
                     _memory_store = data
                     return _memory_store
         except Exception:
             pass
+
+    # Fallback to bundle directly
+    if os.path.exists(bundle_path):
+        try:
+            with open(bundle_path, "r", encoding="utf-8") as bf:
+                data = json.load(bf)
+                if isinstance(data, dict):
+                    _memory_store = data
+                    return _memory_store
+        except Exception:
+            pass
+
     return _memory_store
 
 def _save_store(data):
@@ -40,7 +80,6 @@ def _save_store(data):
         with open(path, "w", encoding="utf-8") as f:
             json.dump(data, f, default=str, indent=2)
     except Exception:
-        # If filesystem write fails on serverless, in-memory store remains active
         pass
 
 class DocumentSnapshot:
