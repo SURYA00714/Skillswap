@@ -6,6 +6,10 @@ let currentChatUserId = null;
 let conversations = [];
 let messagesListener = null;
 let lastMessageDate = null;
+let activeCategory = 'all';
+let chatPollInterval = null;
+let conversationsPollInterval = null;
+let renderedMessageIds = new Set();
 
 // DOM elements
 const loadingOverlay = document.getElementById('loadingOverlay');
@@ -37,9 +41,16 @@ function initMessaging() {
                     sidebarAvatar.src = data.data.photo_url;
                 }
                 
-                loadConversations();
+                loadConversations(true);
                 setupEventListeners();
                 checkAuth();
+
+                // Setup background conversation refresh every 6 seconds
+                if (!conversationsPollInterval) {
+                    conversationsPollInterval = setInterval(() => {
+                        loadConversations(false);
+                    }, 6000);
+                }
                 
                 // Check URL for direct chat parameter
                 const urlParams = new URLSearchParams(window.location.search);
@@ -107,70 +118,98 @@ function checkAuth() {
     }
 }
 
-// Load conversations - FIXED VERSION
-async function loadConversations() {
+// Load conversations - FIXED & CATEGORIZED
+async function loadConversations(showOverlay = true) {
     try {
-        showLoading();
+        if (showOverlay) showLoading();
         
         const response = await fetch('/api/conversations');
         const data = await response.json();
         
-        console.log('Conversations API response:', data);
-        
         if (data.status === 'success') {
-            conversations = data.conversations;
+            conversations = data.conversations || [];
             renderConversations(conversations);
-            
-            if (conversations.length === 0) {
+        } else {
+            if (showOverlay) {
                 conversationsList.innerHTML = `
                     <div class="no-conversations">
-                        <i class="fas fa-comments"></i>
-                        <h3>No conversations yet</h3>
-                        <p>Start a conversation by searching for users</p>
+                        <i class="fas fa-exclamation-circle"></i>
+                        <h3>Error loading conversations</h3>
+                        <p>${data.message || 'Please try again'}</p>
                     </div>
                 `;
             }
-        } else {
+        }
+    } catch (error) {
+        console.error('Error loading conversations:', error);
+        if (showOverlay) {
             conversationsList.innerHTML = `
                 <div class="no-conversations">
                     <i class="fas fa-exclamation-circle"></i>
                     <h3>Error loading conversations</h3>
-                    <p>${data.message || 'Please try again'}</p>
+                    <p>Please check your connection</p>
                 </div>
             `;
         }
-    } catch (error) {
-        console.error('Error loading conversations:', error);
-        conversationsList.innerHTML = `
-            <div class="no-conversations">
-                <i class="fas fa-exclamation-circle"></i>
-                <h3>Error loading conversations</h3>
-                <p>Please check your connection</p>
-            </div>
-        `;
     } finally {
-        hideLoading();
+        if (showOverlay) hideLoading();
     }
 }
 
-// Render conversations list - FIXED VERSION
+// Render conversations list - CATEGORIZED
 function renderConversations(conversationsToRender) {
-    if (conversationsToRender.length === 0) {
-        conversationsList.innerHTML = `
-            <div class="no-conversations">
-                <i class="fas fa-comments"></i>
-                <h3>No conversations yet</h3>
-                <p>Start a conversation by searching for users</p>
-            </div>
-        `;
+    const allConvs = conversations || [];
+    const unreadCount = allConvs.filter(c => (c.unread_count || 0) > 0).length;
+    const totalCount = allConvs.length;
+
+    // Update Category Badges
+    const countAllEl = document.getElementById('countAllConversations');
+    const countUnreadEl = document.getElementById('countUnreadConversations');
+    if (countAllEl) countAllEl.textContent = `(${totalCount})`;
+    if (countUnreadEl) {
+        if (unreadCount > 0) {
+            countUnreadEl.textContent = unreadCount;
+            countUnreadEl.style.display = 'inline-block';
+        } else {
+            countUnreadEl.style.display = 'none';
+        }
+    }
+
+    // Filter by active category
+    let listToDisplay = conversationsToRender || [];
+    if (activeCategory === 'unread') {
+        listToDisplay = listToDisplay.filter(c => (c.unread_count || 0) > 0);
+    }
+
+    if (listToDisplay.length === 0) {
+        if (activeCategory === 'unread') {
+            conversationsList.innerHTML = `
+                <div class="no-conversations" style="padding: 30px 20px; text-align: center; color: var(--text-secondary);">
+                    <i class="fas fa-envelope-open" style="font-size: 2rem; margin-bottom: 10px; opacity: 0.6;"></i>
+                    <h3 style="font-size: 1rem; margin-bottom: 5px;">No unread messages</h3>
+                    <p style="font-size: 0.85rem;">You are all caught up!</p>
+                </div>
+            `;
+        } else {
+            conversationsList.innerHTML = `
+                <div class="no-conversations" style="padding: 30px 20px; text-align: center; color: var(--text-secondary);">
+                    <i class="fas fa-comments" style="font-size: 2rem; margin-bottom: 10px; opacity: 0.6;"></i>
+                    <h3 style="font-size: 1rem; margin-bottom: 5px;">No conversations yet</h3>
+                    <p style="font-size: 0.85rem;">Search for users to start chatting</p>
+                </div>
+            `;
+        }
         return;
     }
     
     conversationsList.innerHTML = '';
     
-    conversationsToRender.forEach(conv => {
+    listToDisplay.forEach(conv => {
         const conversationElement = document.createElement('div');
         conversationElement.className = 'conversation-item';
+        if (currentChatUserId === conv.user_id) {
+            conversationElement.classList.add('active');
+        }
         conversationElement.dataset.userId = conv.user_id;
         
         // Determine message preview
@@ -251,7 +290,7 @@ async function openChatFromUrl(userId) {
     }
 }
 
-// Open chat with user - FIXED VERSION
+// Open chat with user - FIXED & REAL-TIME
 async function openChat(userId, userName, userPhoto) {
     if (currentChatUserId === userId) {
         return;
@@ -259,6 +298,12 @@ async function openChat(userId, userName, userPhoto) {
     
     currentChatUserId = userId;
     
+    // Clear any existing chat poll interval
+    if (chatPollInterval) {
+        clearInterval(chatPollInterval);
+        chatPollInterval = null;
+    }
+
     showLoading();
     
     // Update UI
@@ -285,19 +330,27 @@ async function openChat(userId, userName, userPhoto) {
     
     // Clear previous listener
     if (messagesListener) {
-        messagesListener();
+        try { messagesListener(); } catch (e) {}
         messagesListener = null;
     }
     
-    // Clear messages container
+    // Clear messages container and ID tracker
     messagesContainer.innerHTML = '';
+    renderedMessageIds.clear();
     
     try {
         // Load messages
         await loadMessages(userId);
         
-        // Set up real-time listener
+        // Try real-time listener if supported
         setupMessagesListener(userId);
+
+        // Start guaranteed active polling fallback every 3 seconds for two real accounts
+        chatPollInterval = setInterval(() => {
+            if (currentChatUserId === userId) {
+                pollChatMessages(userId);
+            }
+        }, 3000);
         
         // On mobile, switch to chat view
         if (window.innerWidth <= 768) {
@@ -313,16 +366,19 @@ async function openChat(userId, userName, userPhoto) {
     }
 }
 
-// Load messages for a conversation - FIXED VERSION
+// Load messages for a conversation - FIXED
 async function loadMessages(userId) {
     try {
         const response = await fetch(`/api/messages/${userId}`);
         const data = await response.json();
         
-        console.log('Messages API response:', data);
-        
         if (data.status === 'success') {
-            renderMessages(data.messages);
+            renderedMessageIds.clear();
+            const msgs = data.messages || [];
+            msgs.forEach(m => {
+                if (m.id) renderedMessageIds.add(m.id);
+            });
+            renderMessages(msgs);
         } else {
             messagesContainer.innerHTML = `
                 <div class="no-messages">
@@ -334,9 +390,38 @@ async function loadMessages(userId) {
         console.error('Error loading messages:', error);
         messagesContainer.innerHTML = `
             <div class="no-messages">
-                <p>Error loading messages. Please try again.</p>
+                <p>Error loading messages. Please check your connection.</p>
             </div>
         `;
+    }
+}
+
+// Background polling for real-time messages between accounts
+async function pollChatMessages(userId) {
+    if (!currentChatUserId || currentChatUserId !== userId) return;
+    try {
+        const response = await fetch(`/api/messages/${userId}`);
+        const data = await response.json();
+        if (data.status === 'success' && Array.isArray(data.messages)) {
+            let hasNew = false;
+            data.messages.forEach(msg => {
+                const msgId = msg.id || (msg.senderId + '_' + (msg.timestamp || ''));
+                if (!renderedMessageIds.has(msgId)) {
+                    renderedMessageIds.add(msgId);
+                    const noMessages = messagesContainer.querySelector('.no-messages');
+                    if (noMessages) noMessages.remove();
+                    renderMessage(msg);
+                    hasNew = true;
+                }
+            });
+            if (hasNew) {
+                setTimeout(() => {
+                    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                }, 50);
+            }
+        }
+    } catch (e) {
+        // Silent during polling
     }
 }
 
@@ -558,15 +643,42 @@ function setupMessagesListener(userId) {
     }
 }
 
-// Send message - FIXED VERSION (removed spinner)
+// Send message - OPTIMISTIC & REAL-TIME
 async function sendMessage() {
     const content = messageInput.value.trim();
     if (!content || !currentChatUserId) return;
     
+    // Create optimistic message
+    const tempId = 'temp_' + Date.now();
+    renderedMessageIds.add(tempId);
+    
+    const now = new Date();
+    const optimisticMsg = {
+        id: tempId,
+        senderId: currentUserId,
+        receiverId: currentChatUserId,
+        content: content,
+        timestamp: now.toISOString(),
+        datetime: now.toISOString(),
+        read: false
+    };
+    
+    // Remove "no messages" placeholder
+    const noMessages = messagesContainer.querySelector('.no-messages');
+    if (noMessages) noMessages.remove();
+    
+    // Render immediately in chat container
+    renderMessage(optimisticMsg);
+    setTimeout(() => {
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }, 50);
+    
+    // Clear input immediately for smooth UX
+    messageInput.value = '';
+    messageInput.style.height = 'auto';
+    sendMessageBtn.disabled = true;
+    
     try {
-        // Disable send button while sending
-        sendMessageBtn.disabled = true;
-        
         const response = await fetch('/api/send-message', {
             method: 'POST',
             headers: {
@@ -581,26 +693,19 @@ async function sendMessage() {
         const data = await response.json();
         
         if (data.status === 'success') {
-            // Clear input
-            messageInput.value = '';
-            messageInput.style.height = 'auto';
-            sendMessageBtn.disabled = true;
-            
-            // Update conversations list
-            loadConversations();
-            
-            // Show success notification
-            showNotification('Message sent', 'success');
-            
+            if (data.messageId) {
+                renderedMessageIds.add(data.messageId);
+            }
+            // Update conversations list quietly without full page spinner
+            loadConversations(false);
         } else {
             showNotification(data.message || 'Error sending message', 'error');
         }
     } catch (error) {
         console.error('Error sending message:', error);
-        showNotification('Error sending message. Please try again.', 'error');
+        showNotification('Network issue sending message. Will retry.', 'error');
     } finally {
-        // Re-enable send button
-        sendMessageBtn.disabled = false;
+        sendMessageBtn.disabled = !messageInput.value.trim();
     }
 }
 
@@ -638,9 +743,10 @@ async function clearChat() {
                     <p>Chat cleared</p>
                 </div>
             `;
+            renderedMessageIds.clear();
             
             // Update conversations list
-            loadConversations();
+            loadConversations(false);
             
             showNotification('Chat cleared successfully', 'success');
         } else {
@@ -652,8 +758,34 @@ async function clearChat() {
     }
 }
 
-// Setup event listeners - FIXED VERSION
+// Setup event listeners - CATEGORIZED & RESPONSIVE
 function setupEventListeners() {
+    // Category Tabs: All vs Unread
+    const tabCatAll = document.getElementById('tabCatAll');
+    const tabCatUnread = document.getElementById('tabCatUnread');
+    if (tabCatAll && tabCatUnread) {
+        tabCatAll.addEventListener('click', () => {
+            activeCategory = 'all';
+            tabCatAll.style.background = 'var(--primary, #4361ee)';
+            tabCatAll.style.color = '#fff';
+            tabCatAll.style.borderColor = 'var(--primary, #4361ee)';
+            tabCatUnread.style.background = 'transparent';
+            tabCatUnread.style.color = 'var(--text-secondary, #64748b)';
+            tabCatUnread.style.borderColor = 'var(--border-color, #e2e8f0)';
+            renderConversations(conversations);
+        });
+        tabCatUnread.addEventListener('click', () => {
+            activeCategory = 'unread';
+            tabCatUnread.style.background = 'var(--primary, #4361ee)';
+            tabCatUnread.style.color = '#fff';
+            tabCatUnread.style.borderColor = 'var(--primary, #4361ee)';
+            tabCatAll.style.background = 'transparent';
+            tabCatAll.style.color = 'var(--text-secondary, #64748b)';
+            tabCatAll.style.borderColor = 'var(--border-color, #e2e8f0)';
+            renderConversations(conversations);
+        });
+    }
+
     // New chat button
     const newChatBtn = document.getElementById('newChatBtn');
     if (newChatBtn) {
@@ -673,12 +805,35 @@ function setupEventListeners() {
     // Search conversations
     if (searchConversations) {
         searchConversations.addEventListener('input', (e) => {
-            const query = e.target.value.toLowerCase();
+            const query = e.target.value.toLowerCase().trim();
             
             if (!query) {
                 renderConversations(conversations);
                 return;
             }
+
+            // Local filter first
+            const matched = conversations.filter(c => 
+                (c.user_name && c.user_name.toLowerCase().includes(query)) ||
+                (c.last_message && c.last_message.toLowerCase().includes(query))
+            );
+            if (matched.length > 0) {
+                renderConversations(matched);
+            }
+            
+            // Search for all platform users via API
+            fetch(`/api/search-users?q=${encodeURIComponent(query)}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success' && data.results && data.results.length > 0) {
+                        displaySearchResults(data.results);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error searching users:', error);
+                });
+        });
+    }
             
             // Search for users via API
             fetch(`/api/search-users?q=${encodeURIComponent(query)}`)

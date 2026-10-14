@@ -356,9 +356,10 @@
               {% if request.message %}
               <div class="request-message">
                 <i class="fas fa-quote-left"></i>
-                <p>"{{ request.message|truncate(120) }}"</p>
+                <p id="msg-preview-{{ request.firestore_id }}">"{{ request.message|truncate(120) }}"</p>
+                <div id="msg-full-{{ request.firestore_id }}" style="display:none;">{{ request.message }}</div>
                 {% if request.message|length > 120 %}
-                <button class="btn-view-more" type="button" data-full-message="{{ request.message }}" onclick="showFullMessage('{{ request.id }}', this)">
+                <button class="btn-view-more" type="button" onclick="showFullMessage('{{ request.firestore_id }}', this)">
                   Read more <i class="fas fa-chevron-right"></i>
                 </button>
                 {% endif %}
@@ -545,19 +546,24 @@
   </div>
 
   <!-- Full Message Modal -->
-  <div class="modal-overlay" id="messageModal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3>
-          <i class="fas fa-envelope"></i>
+  <div class="modal-overlay" id="messageModal" onclick="if(event.target === this) closeModal('messageModal')">
+    <div class="modal-content" style="max-width: 550px; border-radius: 20px; padding: 24px; background: var(--bg-card, #ffffff); border: 1px solid var(--border-color, rgba(0,0,0,0.1));">
+      <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid var(--border-color, rgba(0,0,0,0.1)); padding-bottom: 12px;">
+        <h3 style="margin: 0; display: flex; align-items: center; gap: 8px; font-size: 1.15rem; color: var(--text-color, #1e293b);">
+          <i class="fas fa-envelope-open-text" style="color: var(--primary, #4361ee);"></i>
           Full Message
         </h3>
-        <button class="modal-close" onclick="closeModal('messageModal')">
+        <button class="modal-close" type="button" onclick="closeModal('messageModal')" style="background: none; border: none; font-size: 1.4rem; cursor: pointer; color: var(--text-secondary, #64748b);">
           <i class="fas fa-times"></i>
         </button>
       </div>
-      <div class="modal-body">
-        <p id="fullMessageContent"></p>
+      <div class="modal-body" style="line-height: 1.6; font-size: 0.95rem; color: var(--text-color, #1e293b); white-space: pre-wrap;">
+        <p id="fullMessageContent" style="margin: 0;"></p>
+      </div>
+      <div style="margin-top: 20px; text-align: right;">
+        <button type="button" class="btn-primary" onclick="closeModal('messageModal')" style="padding: 8px 18px; border-radius: 8px; border: none; background: var(--primary, #4361ee); color: #fff; cursor: pointer; font-weight: 600;">
+          Close
+        </button>
       </div>
     </div>
   </div>
@@ -679,16 +685,28 @@
     }
     
     function showFullMessage(swapId, btn) {
-      if (btn && btn.dataset && btn.dataset.fullMessage) {
-        document.getElementById('fullMessageContent').textContent = btn.dataset.fullMessage;
+      // 1. Check local hidden full message div
+      const localFull = document.getElementById('msg-full-' + swapId);
+      if (localFull && localFull.textContent.trim()) {
+        const target = document.getElementById('fullMessageContent');
+        if (target) target.textContent = localFull.textContent.trim();
         showModal('messageModal');
         return;
       }
+      // 2. Check data attribute
+      if (btn && btn.dataset && btn.dataset.fullMessage) {
+        const target = document.getElementById('fullMessageContent');
+        if (target) target.textContent = btn.dataset.fullMessage;
+        showModal('messageModal');
+        return;
+      }
+      // 3. Fallback to API
       fetch(`/api/swaps/${swapId}`)
         .then(response => response.json())
         .then(data => {
-          if (data.status === 'success') {
-            document.getElementById('fullMessageContent').textContent = data.data.message || 'No message provided.';
+          if (data.status === 'success' && data.data) {
+            const target = document.getElementById('fullMessageContent');
+            if (target) target.textContent = data.data.message || 'No message provided.';
             showModal('messageModal');
           } else {
             showNotification('Could not load message: ' + (data.message || ''), 'error');

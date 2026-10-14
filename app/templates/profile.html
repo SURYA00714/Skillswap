@@ -283,16 +283,48 @@
             <div class="card-body">
               <div id="educationContainer">
                 {% if user_data.education %}
+                  {% if user_data.education is string %}
+                  <div class="education-item" data-index="0">
+                    <div class="education-view">
+                      <h4><i class="fas fa-graduation-cap"></i> {{ user_data.education }}</h4>
+                      {% if user_data.qualifications %}
+                      <p class="institution"><i class="fas fa-university"></i> {{ user_data.qualifications }}</p>
+                      {% endif %}
+                    </div>
+                  </div>
+                  {% else %}
                   {% for edu in user_data.education %}
                   <div class="education-item" data-index="{{ loop.index0 }}">
                     <div class="education-view">
-                      <h4>{{ edu.degree_type }} in {{ edu.field_of_study }}</h4>
-                      <p class="institution">{{ edu.institution_name }}</p>
+                      {% if edu is string %}
+                      <h4><i class="fas fa-graduation-cap"></i> {{ edu }}</h4>
+                      {% else %}
+                      <h4>
+                        <i class="fas fa-graduation-cap"></i>
+                        {% if edu.degree_type and edu.field_of_study %}
+                          {{ edu.degree_type }} in {{ edu.field_of_study }}
+                        {% elif edu.degree_type %}
+                          {{ edu.degree_type }}
+                        {% elif edu.field_of_study %}
+                          {{ edu.field_of_study }}
+                        {% elif edu.institution_name %}
+                          {{ edu.institution_name }}
+                        {% else %}
+                          Higher Education
+                        {% endif %}
+                      </h4>
+                      {% if edu.institution_name %}
+                      <p class="institution"><i class="fas fa-university"></i> {{ edu.institution_name }}</p>
+                      {% endif %}
+                      {% if edu.start_date or edu.end_date %}
                       <p class="details">
+                        <i class="fas fa-calendar-alt"></i>
                         {{ edu.start_date }} - {% if edu.current %}Present{% else %}{{ edu.end_date }}{% endif %}
                         {% if edu.grade %} | Grade: {{ edu.grade }}{% endif %}
                       </p>
+                      {% endif %}
                       {% if edu.description %}<p class="description">{{ edu.description }}</p>{% endif %}
+                      {% endif %}
                     </div>
                     <div class="education-edit" style="display: none;">
                       <div class="form-group enhanced">
@@ -383,6 +415,11 @@
                     </div>
                   </div>
                   {% endfor %}
+                  {% endif %}
+                {% else %}
+                  <div class="empty-section-message" style="color: var(--text-muted, #94a3b8); padding: 12px 0; font-size: 14px;">
+                    <i class="fas fa-graduation-cap" style="opacity: 0.5; margin-right: 6px;"></i> No education details added yet. Click <strong>Edit Profile</strong> to add.
+                  </div>
                 {% endif %}
               </div>
               <button type="button" id="addEducationBtn" class="btn-secondary" style="display: none;">
@@ -740,7 +777,7 @@
               <h3>Profile Photo</h3>
             </div>
             <div class="card-body">
-              <div class="profile-image-container" id="profileImageContainer">
+              <div class="profile-image-container" id="profileImageContainer" style="cursor: pointer;" title="Click to upload avatar">
                 <img src="{{ user_data.photo_url or '/static/default-profile.svg' }}" alt="Profile" class="profile-photo" id="profileImage" onerror="this.src='/static/default-profile.svg'">
                 <div class="profile-image-overlay">
                   <i class="fas fa-camera"></i>
@@ -748,9 +785,14 @@
                 </div>
               </div>
               
-              <div class="upload-actions">
-                <button type="button" id="uploadImageBtn" class="btn-upload" disabled>
+              <input type="file" id="profileFileInput" accept="image/*" style="display: none;">
+
+              <div class="upload-actions" style="display: flex; flex-direction: column; gap: 8px; width: 100%;">
+                <button type="button" id="uploadImageBtn" class="btn-upload">
                   <i class="fas fa-cloud-upload-alt"></i> Upload New Photo
+                </button>
+                <button type="button" id="removePhotoBtn" class="btn-secondary" style="font-size: 0.85rem; padding: 6px 12px; background: transparent; border: 1px solid var(--border-color, #e2e8f0); color: var(--text-secondary, #64748b); border-radius: 8px; cursor: pointer;">
+                  <i class="fas fa-undo"></i> Reset to Default
                 </button>
                 <div class="upload-progress" id="uploadProgress" style="display: none;">
                   <div class="progress-bar">

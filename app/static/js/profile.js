@@ -1790,18 +1790,34 @@ class ProfileManager {
             });
         });
         
-        // Upload image button
-        this.uploadImageBtn.addEventListener('click', this.openCloudinaryWidget.bind(this));
+        // Upload image button & direct file picker
+        if (this.uploadImageBtn) {
+            this.uploadImageBtn.addEventListener('click', () => this.openCloudinaryWidget());
+        }
+        
+        const removePhotoBtn = document.getElementById('removePhotoBtn');
+        if (removePhotoBtn) {
+            removePhotoBtn.addEventListener('click', () => this.handleResetAvatar());
+        }
+
+        const profileFileInput = document.getElementById('profileFileInput');
+        if (profileFileInput) {
+            profileFileInput.addEventListener('change', (e) => {
+                const file = e.target.files && e.target.files[0];
+                if (file) this.handleDirectAvatarUpload(file);
+            });
+        }
         
         // Click outside to close suggestions
         document.addEventListener('click', this.handleClickOutside.bind(this));
         
-        // Profile image click to upload (only in edit mode)
-        document.querySelector('.profile-image-container').addEventListener('click', () => {
-            if (this.isEditMode) {
+        // Profile image click to upload
+        const imgContainer = document.querySelector('.profile-image-container');
+        if (imgContainer) {
+            imgContainer.addEventListener('click', () => {
                 this.openCloudinaryWidget();
-            }
-        });
+            });
+        }
         
         // Form submission
         document.getElementById('profileForm').addEventListener('submit', this.handleFormSubmit.bind(this));
@@ -1893,16 +1909,19 @@ class ProfileManager {
         this.isEditMode = !this.isEditMode;
         
         // Toggle form fields
-        const formElements = document.querySelectorAll('input, select, textarea, button');
         formElements.forEach(el => {
-            if (el.type !== 'hidden' && el.name !== 'photo_url' && !el.classList.contains('btn-edit')) {
+            if (el.id === 'uploadImageBtn' || el.id === 'removePhotoBtn' || el.id === 'profileFileInput' || el.classList.contains('theme-toggle-btn')) {
+                el.disabled = false;
+                return;
+            }
+            if (el.type !== 'hidden' && el.name !== 'photo_url' && !el.classList.contains('btn-edit') && !el.classList.contains('btn-home') && !el.classList.contains('btn-swap')) {
                 el.disabled = !this.isEditMode;
             }
         });
         
         // Toggle buttons
         if (this.autoDetectBtn) this.autoDetectBtn.disabled = !this.isEditMode;
-        if (this.uploadImageBtn) this.uploadImageBtn.disabled = !this.isEditMode;
+        if (this.uploadImageBtn) this.uploadImageBtn.disabled = false;
         
         // Toggle UI elements
         if (this.isEditMode) {
@@ -2652,8 +2671,94 @@ class ProfileManager {
     }
 
     openCloudinaryWidget() {
-        if (this.cloudinaryWidget) {
-            this.cloudinaryWidget.open();
+        if (this.cloudinaryWidget && typeof this.cloudinaryWidget.open === 'function') {
+            try {
+                this.cloudinaryWidget.open();
+                return;
+            } catch (err) {
+                console.warn('Cloudinary widget open error, using file picker', err);
+            }
+        }
+        const fileInput = document.getElementById('profileFileInput');
+        if (fileInput) {
+            fileInput.click();
+        }
+    }
+
+    async handleDirectAvatarUpload(file) {
+        if (!file) return;
+        if (file.size > 5 * 1024 * 1024) {
+            this.showNotification('File is too large. Max size is 5MB.', 'error');
+            return;
+        }
+
+        if (this.uploadProgress) {
+            this.uploadProgress.style.display = 'flex';
+            if (this.progressFill) this.progressFill.style.width = '45%';
+            if (this.progressText) this.progressText.textContent = 'Uploading...';
+        }
+
+        try {
+            const formData = new FormData();
+            formData.append('file', file);
+            const res = await fetch('/api/upload-avatar', {
+                method: 'POST',
+                body: formData
+            });
+            const data = await res.json();
+            if (res.ok && data.status === 'success' && data.photo_url) {
+                if (this.progressFill) this.progressFill.style.width = '100%';
+                if (this.progressText) this.progressText.textContent = '100%';
+
+                const profileImage = document.getElementById('profileImage');
+                const photoUrlInput = document.getElementById('photoUrlInput');
+                if (profileImage) profileImage.src = data.photo_url;
+                if (photoUrlInput) photoUrlInput.value = data.photo_url;
+
+                const topAvatar = document.querySelector('.user-avatar');
+                if (topAvatar) topAvatar.src = data.photo_url;
+
+                this.showNotification('Profile avatar updated successfully!', 'success');
+            } else {
+                this.showNotification(data.message || 'Failed to upload avatar', 'error');
+            }
+        } catch (err) {
+            console.error('Direct avatar upload error:', err);
+            this.showNotification('Failed to upload avatar. Network error.', 'error');
+        } finally {
+            setTimeout(() => {
+                if (this.uploadProgress) {
+                    this.uploadProgress.style.display = 'none';
+                    if (this.progressFill) this.progressFill.style.width = '0%';
+                    if (this.progressText) this.progressText.textContent = '0%';
+                }
+            }, 1200);
+        }
+    }
+
+    async handleResetAvatar() {
+        if (!confirm('Reset your profile avatar to the default image?')) return;
+        try {
+            const res = await fetch('/api/upload-avatar', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ photo_url: '/static/default-profile.svg' })
+            });
+            const data = await res.json();
+            if (res.ok && data.status === 'success') {
+                const profileImage = document.getElementById('profileImage');
+                const photoUrlInput = document.getElementById('photoUrlInput');
+                if (profileImage) profileImage.src = '/static/default-profile.svg';
+                if (photoUrlInput) photoUrlInput.value = '/static/default-profile.svg';
+                const topAvatar = document.querySelector('.user-avatar');
+                if (topAvatar) topAvatar.src = '/static/default-profile.svg';
+                this.showNotification('Avatar reset to default.', 'info');
+            } else {
+                this.showNotification(data.message || 'Failed to reset avatar', 'error');
+            }
+        } catch (err) {
+            console.error('Reset avatar error:', err);
+            this.showNotification('Network error while resetting avatar', 'error');
         }
     }
 

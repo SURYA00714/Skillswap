@@ -131,6 +131,18 @@
                 <input type="text" id="searchConversations" placeholder="Search conversations...">
             </div>
 
+            <!-- Conversation Categories -->
+            <div class="conversation-categories" style="display: flex; gap: 8px; padding: 10px 16px; border-bottom: 1px solid var(--border-color, rgba(0,0,0,0.08)); background: var(--bg-secondary, transparent);">
+                <button type="button" class="category-tab active" data-category="all" id="tabCatAll" style="flex: 1; padding: 7px 12px; border-radius: 20px; border: 1px solid var(--primary, #4361ee); background: var(--primary, #4361ee); color: #fff; font-size: 0.82rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.2s;">
+                    <span>All</span>
+                    <span id="countAllConversations" style="opacity: 0.9; font-size: 0.75rem;">(0)</span>
+                </button>
+                <button type="button" class="category-tab" data-category="unread" id="tabCatUnread" style="flex: 1; padding: 7px 12px; border-radius: 20px; border: 1px solid var(--border-color, #e2e8f0); background: transparent; color: var(--text-secondary, #64748b); font-size: 0.82rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.2s;">
+                    <span>Unread</span>
+                    <span id="countUnreadConversations" style="background: #ef4444; color: #fff; padding: 1px 7px; border-radius: 10px; font-size: 0.72rem; display: none;">0</span>
+                </button>
+            </div>
+
             <!-- Conversations List -->
             <div class="conversations-list" id="conversationsList">
                 <div class="loading-state">

@@ -99,6 +99,9 @@
                                 </div>
                                 {% endfor %}
                             </div>
+                            <div class="custom-skill-input-wrap" style="margin-top: 10px; width: 100%;">
+                                <input type="text" id="customYourSkill" placeholder="Or type a custom skill you offer..." style="width: 100%; padding: 10px 14px; border-radius: 8px; border: 1px solid var(--border-color, #e2e8f0); font-size: 0.9rem; background: var(--input-bg, #fff); color: var(--text-color, #1e293b);" oninput="document.getElementById('your_skill').value = this.value; updatePreview('offered', this.value); validateForm();">
+                            </div>
                             <input type="hidden" name="your_skill" id="your_skill" required>
                         </div>
 
@@ -115,6 +118,9 @@
                                     <span>{{ skill }}</span>
                                 </div>
                                 {% endfor %}
+                            </div>
+                            <div class="custom-skill-input-wrap" style="margin-top: 10px; width: 100%;">
+                                <input type="text" id="customTheirSkill" placeholder="Or type a skill you want to learn..." style="width: 100%; padding: 10px 14px; border-radius: 8px; border: 1px solid var(--border-color, #e2e8f0); font-size: 0.9rem; background: var(--input-bg, #fff); color: var(--text-color, #1e293b);" oninput="document.getElementById('their_skill').value = this.value; updatePreview('requested', this.value); validateForm();">
                             </div>
                             <input type="hidden" name="their_skill" id="their_skill" required>
                         </div>

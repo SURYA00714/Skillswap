@@ -228,6 +228,9 @@ class DocumentReference:
             _save_store(store)
 
 class Query:
+    ASCENDING = "ASCENDING"
+    DESCENDING = "DESCENDING"
+
     def __init__(self, collection_name, filters=None, limit_val=None, order_by_field=None, descending=False):
         self.collection_name = collection_name
         self.filters = filters or []
@@ -341,6 +344,7 @@ class FirestoreClient:
     SERVER_TIMESTAMP = "SERVER_TIMESTAMP"
     ArrayUnion = ArrayUnion
     Increment = Increment
+    Query = Query
 
     def collection(self, name):
         return CollectionReference(name)

@@ -404,6 +404,42 @@ def save_onboarding():
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)}), 500
 
+def _normalize_user_education(user_data):
+    """Ensure education is a list of structured entries to prevent character-level iteration"""
+    edu = user_data.get('education')
+    if isinstance(edu, str):
+        edu_str = edu.strip()
+        if edu_str:
+            user_data['education'] = [{
+                'degree_type': edu_str,
+                'field_of_study': '',
+                'institution_name': user_data.get('qualifications') or '',
+                'start_date': '',
+                'end_date': '',
+                'current': False,
+                'description': ''
+            }]
+        else:
+            user_data['education'] = []
+    elif not isinstance(edu, list):
+        user_data['education'] = []
+    else:
+        normalized = []
+        for item in edu:
+            if isinstance(item, str):
+                normalized.append({
+                    'degree_type': item,
+                    'field_of_study': '',
+                    'institution_name': '',
+                    'start_date': '',
+                    'end_date': '',
+                    'current': False,
+                    'description': ''
+                })
+            elif isinstance(item, dict):
+                normalized.append(item)
+        user_data['education'] = normalized
+
 # ------------------ Profile Routes ------------------
 @main.route('/profile')
 def profile():
@@ -456,6 +492,7 @@ def profile():
             'skills': []
         }
     
+    _normalize_user_education(user_data)
     user_data['photo_url'] = get_avatar_url(
         user_data.get('photo_url'),
         user_data.get('name', ''),
@@ -531,6 +568,51 @@ def save_extended_profile():
         
     except Exception as e:
         print(f"Error saving extended profile: {str(e)}")
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+@main.route('/api/upload-avatar', methods=['POST'])
+def api_upload_avatar():
+    """Upload or update user profile avatar"""
+    current_user_id = session.get('user_id')
+    if not current_user_id:
+        return jsonify({'status': 'error', 'message': 'Not authenticated'}), 401
+
+    try:
+        photo_url = None
+        # Check if file was uploaded directly
+        if 'file' in request.files:
+            file = request.files['file']
+            if file and file.filename != '':
+                import base64
+                file_bytes = file.read()
+                mimetype = file.content_type or 'image/jpeg'
+                b64 = base64.b64encode(file_bytes).decode('utf-8')
+                photo_url = f"data:{mimetype};base64,{b64}"
+                
+        # Check if photo_url was passed in json/form
+        if not photo_url:
+            data = request.get_json(silent=True) or request.form
+            photo_url = data.get('photo_url') or data.get('avatar_url')
+
+        if not photo_url:
+            return jsonify({'status': 'error', 'message': 'No image provided'}), 400
+
+        # Update in database
+        db.collection('users').document(current_user_id).set({
+            'photo_url': photo_url,
+            'profilePhotoUrl': photo_url,
+            'updatedAt': firestore.SERVER_TIMESTAMP
+        }, merge=True)
+
+        session['photo_url'] = photo_url
+
+        return jsonify({
+            'status': 'success',
+            'message': 'Avatar updated successfully',
+            'photo_url': photo_url
+        })
+    except Exception as e:
+        print(f"Error uploading avatar: {str(e)}")
         return jsonify({'status': 'error', 'message': str(e)}), 500
 
 # NEW ROUTE: Get user data for AJAX requests
@@ -699,6 +781,7 @@ def get_relative_time(dt):
 
 # ------------------ Swap Routes ------------------
 @main.route('/request_swap/<target_user_id>', methods=['GET', 'POST'])
+@main.route('/request-swap/<target_user_id>', methods=['GET', 'POST'])
 def request_swap(target_user_id):
     """Request a skill swap with another user"""
     current_user_id = session.get('user_id')
@@ -831,10 +914,20 @@ def request_swap(target_user_id):
             target_user_data.get('email', '')
         )
 
+        target_offered = target_user_data.get('offeredSkill', []) or []
+        target_requested = target_user_data.get('requestedSkill', []) or []
+        all_target_skills = list(dict.fromkeys(target_offered + target_requested))
+        if not all_target_skills:
+            all_target_skills = ['General Knowledge & Guidance', 'Software Mentorship', 'Discussion & Advice']
+
+        curr_offered = current_user_data.get('offeredSkill', []) or []
+        if not curr_offered:
+            curr_offered = ['General Knowledge / Mentorship', 'Peer Review / Collaboration']
+
         return render_template(
             'swap_request.html',
-            current_user_skills=current_user_data.get('offeredSkill', []),
-            target_user_requested_skills=target_user_data.get('requestedSkill', []),
+            current_user_skills=curr_offered,
+            target_user_requested_skills=all_target_skills,
             target_user_id=target_user_id,
             target_user_name=target_user_data.get('name', 'User'),
             target_user_data=target_user_data,
@@ -886,6 +979,7 @@ def view_swap_profile(user_id):
         if field not in user_data:
             user_data[field] = default_value
 
+    _normalize_user_education(user_data)
     return render_template(
         "swap_profile.html",
         user_data=user_data,
@@ -1566,43 +1660,49 @@ def api_conversations_v2():
         conversations_list = list(conversations.values())
         
         # Format timestamps and sort
+        def _parse_ts(ts):
+            if not ts:
+                return datetime.utcnow()
+            if hasattr(ts, 'to_date'):
+                return ts.to_date()
+            if hasattr(ts, 'seconds'):
+                return datetime.fromtimestamp(ts.seconds)
+            if isinstance(ts, datetime):
+                return ts
+            if isinstance(ts, str):
+                try:
+                    return datetime.fromisoformat(ts.replace('Z', '+00:00'))
+                except Exception:
+                    pass
+            return datetime.utcnow()
+
         for conv in conversations_list:
-            timestamp = conv.get('timestamp')
-            if timestamp:
-                if hasattr(timestamp, 'to_date'):
-                    dt = timestamp.to_date()
-                elif hasattr(timestamp, 'seconds'):
-                    dt = datetime.fromtimestamp(timestamp.seconds)
-                else:
-                    dt = datetime.now()
-                
-                # Store datetime for sorting
-                conv['raw_timestamp'] = dt
-                
-                # Format for display
-                now = datetime.now()
-                time_diff = now - dt
-                
-                if time_diff.days == 0:
-                    conv['timestamp_formatted'] = dt.strftime('%I:%M %p')
-                elif time_diff.days == 1:
-                    conv['timestamp_formatted'] = 'Yesterday'
-                elif time_diff.days < 7:
-                    conv['timestamp_formatted'] = dt.strftime('%A')
-                else:
-                    conv['timestamp_formatted'] = dt.strftime('%b %d')
+            dt = _parse_ts(conv.get('timestamp'))
+            conv['_sort_time'] = dt
+            now = datetime.utcnow()
+            time_diff = now - (dt.replace(tzinfo=None) if hasattr(dt, 'tzinfo') and dt.tzinfo else dt)
+
+            if time_diff.days == 0:
+                conv['timestamp_formatted'] = dt.strftime('%I:%M %p')
+            elif time_diff.days == 1:
+                conv['timestamp_formatted'] = 'Yesterday'
+            elif time_diff.days < 7:
+                conv['timestamp_formatted'] = dt.strftime('%A')
             else:
-                conv['raw_timestamp'] = datetime.now()
-                conv['timestamp_formatted'] = 'Recently'
-            
+                conv['timestamp_formatted'] = dt.strftime('%b %d')
+
+            conv['timestamp'] = dt.isoformat()
+
             # Truncate last message
-            last_message = conv['last_message']
+            last_message = conv.get('last_message', '')
             if len(last_message) > 40:
                 conv['last_message'] = last_message[:37] + '...'
-        
+
         # Sort by timestamp (newest first)
-        conversations_list.sort(key=lambda x: x.get('raw_timestamp', datetime.now()), reverse=True)
-        
+        conversations_list.sort(key=lambda x: x.get('_sort_time', datetime.utcnow()), reverse=True)
+        for c in conversations_list:
+            c.pop('_sort_time', None)
+
         return jsonify({
             'status': 'success',
             'conversations': conversations_list
@@ -1629,25 +1729,32 @@ def api_messages_v2(user_id):
             .order_by('timestamp', direction=firestore.Query.ASCENDING)\
             .stream()
         
+        def _parse_msg_ts(ts):
+            if not ts:
+                return datetime.utcnow()
+            if hasattr(ts, 'to_date'):
+                return ts.to_date()
+            if hasattr(ts, 'seconds'):
+                return datetime.fromtimestamp(ts.seconds)
+            if isinstance(ts, datetime):
+                return ts
+            if isinstance(ts, str):
+                try:
+                    return datetime.fromisoformat(ts.replace('Z', '+00:00'))
+                except Exception:
+                    pass
+            return datetime.utcnow()
+
         messages = []
         for doc in messages_query:
             message_data = doc.to_dict()
             message_data['id'] = doc.id
             
-            # Convert timestamp for frontend
-            timestamp = message_data.get('timestamp')
-            if timestamp:
-                if hasattr(timestamp, 'to_date'):
-                    dt = timestamp.to_date()
-                elif hasattr(timestamp, 'seconds'):
-                    dt = datetime.fromtimestamp(timestamp.seconds)
-                else:
-                    dt = datetime.now()
-                
-                message_data['timestamp'] = dt.isoformat()
-                message_data['time_formatted'] = dt.strftime('%I:%M %p')
-                message_data['date_formatted'] = dt.strftime('%b %d, %Y')
-                message_data['datetime'] = dt
+            dt = _parse_msg_ts(message_data.get('timestamp'))
+            message_data['timestamp'] = dt.isoformat()
+            message_data['time_formatted'] = dt.strftime('%I:%M %p')
+            message_data['date_formatted'] = dt.strftime('%b %d, %Y')
+            message_data['datetime'] = dt.isoformat()
             
             messages.append(message_data)
         
@@ -1955,370 +2062,6 @@ def api_unread_count():
     except Exception as e:
         print(f"Error getting unread count: {str(e)}")
         return jsonify({'status': 'error', 'message': str(e)}), 500
-
-
-
-# new 
-# ------------------ Message Routes - FIXED VERSION ------------------
-
-@main.route('/api/conversations')
-def api_conversations():
-    """Get all conversations for current user - FIXED VERSION"""
-    current_user_id = session.get('user_id')
-    if not current_user_id:
-        return jsonify({'status': 'error', 'message': 'Not authenticated'}), 401
-    
-    try:
-        # Get all messages where current user is either sender or receiver
-        messages_ref = db.collection('messages')
-        
-        # Get messages where user is sender
-        sent_messages = messages_ref.where('senderId', '==', current_user_id).stream()
-        # Get messages where user is receiver
-        received_messages = messages_ref.where('receiverId', '==', current_user_id).stream()
-        
-        conversations_dict = {}
-        
-        # Process sent messages
-        for msg in sent_messages:
-            msg_data = msg.to_dict()
-            other_user_id = msg_data.get('receiverId')
-            
-            if other_user_id == current_user_id:
-                continue
-                
-            if other_user_id not in conversations_dict:
-                # Get user info
-                user_doc = db.collection('users').document(other_user_id).get()
-                user_data = user_doc.to_dict() if user_doc.exists else {}
-                
-                conversations_dict[other_user_id] = {
-                    'user_id': other_user_id,
-                    'user_name': user_data.get('name', 'Unknown'),
-                    'user_photo': user_data.get('photo_url', '/static/default-profile.png'),
-                    'last_message': msg_data.get('content', ''),
-                    'timestamp': msg_data.get('timestamp'),
-                    'is_sent_by_me': True,
-                    'unread_count': 0
-                }
-            else:
-                # Update if newer message
-                conv = conversations_dict[other_user_id]
-                msg_time = msg_data.get('timestamp')
-                conv_time = conv.get('timestamp')
-                
-                if msg_time and conv_time:
-                    # Compare timestamps
-                    msg_seconds = msg_time.seconds if hasattr(msg_time, 'seconds') else 0
-                    conv_seconds = conv_time.seconds if hasattr(conv_time, 'seconds') else 0
-                    
-                    if msg_seconds > conv_seconds:
-                        conv['last_message'] = msg_data.get('content', '')
-                        conv['timestamp'] = msg_time
-                        conv['is_sent_by_me'] = True
-        
-        # Process received messages
-        for msg in received_messages:
-            msg_data = msg.to_dict()
-            other_user_id = msg_data.get('senderId')
-            
-            if other_user_id == current_user_id:
-                continue
-                
-            if other_user_id not in conversations_dict:
-                # Get user info
-                user_doc = db.collection('users').document(other_user_id).get()
-                user_data = user_doc.to_dict() if user_doc.exists else {}
-                
-                # Count unread messages
-                unread_query = db.collection('messages')\
-                    .where('senderId', '==', other_user_id)\
-                    .where('receiverId', '==', current_user_id)\
-                    .where('read', '==', False)\
-                    .stream()
-                unread_count = len(list(unread_query))
-                
-                conversations_dict[other_user_id] = {
-                    'user_id': other_user_id,
-                    'user_name': user_data.get('name', 'Unknown'),
-                    'user_photo': user_data.get('photo_url', '/static/default-profile.png'),
-                    'last_message': msg_data.get('content', ''),
-                    'timestamp': msg_data.get('timestamp'),
-                    'is_sent_by_me': False,
-                    'unread_count': unread_count
-                }
-            else:
-                # Update if newer message
-                conv = conversations_dict[other_user_id]
-                msg_time = msg_data.get('timestamp')
-                conv_time = conv.get('timestamp')
-                
-                if msg_time and conv_time:
-                    # Compare timestamps
-                    msg_seconds = msg_time.seconds if hasattr(msg_time, 'seconds') else 0
-                    conv_seconds = conv_time.seconds if hasattr(conv_time, 'seconds') else 0
-                    
-                    if msg_seconds > conv_seconds:
-                        conv['last_message'] = msg_data.get('content', '')
-                        conv['timestamp'] = msg_time
-                        conv['is_sent_by_me'] = False
-        
-        # Convert to list and format
-        conversations_list = []
-        for conv in conversations_dict.values():
-            # Format timestamp
-            timestamp = conv.get('timestamp')
-            if timestamp:
-                if hasattr(timestamp, 'to_date'):
-                    dt = timestamp.to_date()
-                elif hasattr(timestamp, 'seconds'):
-                    dt = datetime.fromtimestamp(timestamp.seconds)
-                else:
-                    dt = datetime.now()
-                
-                # Calculate relative time
-                now = datetime.now()
-                diff = now - dt
-                
-                if diff.days == 0:
-                    conv['timestamp_formatted'] = dt.strftime('%I:%M %p')
-                elif diff.days == 1:
-                    conv['timestamp_formatted'] = 'Yesterday'
-                elif diff.days < 7:
-                    conv['timestamp_formatted'] = dt.strftime('%A')
-                else:
-                    conv['timestamp_formatted'] = dt.strftime('%b %d')
-            else:
-                conv['timestamp_formatted'] = 'Recently'
-            
-            conversations_list.append(conv)
-        
-        # Sort by timestamp (newest first)
-        conversations_list.sort(key=lambda x: x.get('timestamp').seconds if hasattr(x.get('timestamp'), 'seconds') else 0, reverse=True)
-        
-        return jsonify({
-            'status': 'success',
-            'conversations': conversations_list
-        })
-        
-    except Exception as e:
-        print(f"Error fetching conversations: {str(e)}")
-        import traceback
-        traceback.print_exc()
-        return jsonify({'status': 'error', 'message': str(e)}), 500
-
-@main.route('/api/messages/<user_id>')
-def api_messages(user_id):
-    """Get messages between current user and target user - FIXED VERSION"""
-    current_user_id = session.get('user_id')
-    if not current_user_id:
-        return jsonify({'status': 'error', 'message': 'Not authenticated'}), 401
-    
-    try:
-        # Get messages using two separate queries to avoid composite index issues
-        messages = []
-        
-        # Get messages where current user is sender and target is receiver
-        sent_query = db.collection('messages')\
-            .where('senderId', '==', current_user_id)\
-            .where('receiverId', '==', user_id)\
-            .order_by('timestamp')
-        
-        sent_messages = sent_query.stream()
-        for doc in sent_messages:
-            msg_data = doc.to_dict()
-            msg_data['id'] = doc.id
-            messages.append(msg_data)
-        
-        # Get messages where current user is receiver and target is sender
-        received_query = db.collection('messages')\
-            .where('senderId', '==', user_id)\
-            .where('receiverId', '==', current_user_id)\
-            .order_by('timestamp')
-        
-        received_messages = received_query.stream()
-        for doc in received_messages:
-            msg_data = doc.to_dict()
-            msg_data['id'] = doc.id
-            messages.append(msg_data)
-        
-        # Sort all messages by timestamp
-        messages.sort(key=lambda x: x.get('timestamp').seconds if hasattr(x.get('timestamp'), 'seconds') else 0)
-        
-        # Format messages for frontend
-        formatted_messages = []
-        for msg in messages:
-            formatted_msg = msg.copy()
-            
-            # Convert timestamp
-            timestamp = msg.get('timestamp')
-            if timestamp:
-                if hasattr(timestamp, 'to_date'):
-                    dt = timestamp.to_date()
-                elif hasattr(timestamp, 'seconds'):
-                    dt = datetime.fromtimestamp(timestamp.seconds)
-                else:
-                    dt = datetime.now()
-                
-                formatted_msg['datetime'] = dt.isoformat()
-                formatted_msg['timestamp'] = dt.isoformat()
-            
-            formatted_messages.append(formatted_msg)
-        
-        # Mark received messages as read
-        unread_query = db.collection('messages')\
-            .where('senderId', '==', user_id)\
-            .where('receiverId', '==', current_user_id)\
-            .where('read', '==', False)\
-            .stream()
-        
-        batch = db.batch()
-        for doc in unread_query:
-            doc_ref = db.collection('messages').document(doc.id)
-            batch.update(doc_ref, {
-                'read': True,
-                'readAt': firestore.SERVER_TIMESTAMP
-            })
-        
-        if batch._write_pbs:  # Only commit if there are updates
-            batch.commit()
-        
-        # Get user info
-        user_doc = db.collection('users').document(user_id).get()
-        user_data = user_doc.to_dict() if user_doc.exists else {}
-        
-        return jsonify({
-            'status': 'success',
-            'messages': formatted_messages,
-            'user_info': {
-                'name': user_data.get('name', 'User'),
-                'photo_url': user_data.get('photo_url', '/static/default-profile.png'),
-                'user_id': user_id
-            }
-        })
-        
-    except Exception as e:
-        print(f"Error fetching messages: {str(e)}")
-        return jsonify({'status': 'error', 'message': str(e)}), 500
-
-@main.route('/api/send-message', methods=['POST'])
-def api_send_message():
-    """Send a new message - FIXED VERSION"""
-    current_user_id = session.get('user_id')
-    if not current_user_id:
-        return jsonify({'status': 'error', 'message': 'Not authenticated'}), 401
-    
-    try:
-        data = request.get_json()
-        receiver_id = data.get('receiverId')
-        content = data.get('content', '').strip()
-        
-        if not receiver_id:
-            return jsonify({'status': 'error', 'message': 'Receiver ID is required'}), 400
-        
-        if not content:
-            return jsonify({'status': 'error', 'message': 'Message content is required'}), 400
-        
-        # Get sender info
-        sender_doc = db.collection('users').document(current_user_id).get()
-        sender_data = sender_doc.to_dict() if sender_doc.exists else {}
-        
-        # Get receiver info
-        receiver_doc = db.collection('users').document(receiver_id).get()
-        receiver_data = receiver_doc.to_dict() if receiver_doc.exists else {}
-        
-        # Create message document
-        message_data = {
-            'senderId': current_user_id,
-            'receiverId': receiver_id,
-            'content': content,
-            'timestamp': firestore.SERVER_TIMESTAMP,
-            'read': False,
-            'type': 'text',
-            'senderName': sender_data.get('name', 'Unknown'),
-            'receiverName': receiver_data.get('name', 'Unknown')
-        }
-        
-        # Add to Firestore
-        message_ref = db.collection('messages').document()
-        message_ref.set(message_data)
-        
-        return jsonify({
-            'status': 'success',
-            'message': 'Message sent successfully',
-            'messageId': message_ref.id
-        })
-        
-    except Exception as e:
-        print(f"Error sending message: {str(e)}")
-        return jsonify({'status': 'error', 'message': str(e)}), 500
-
-@main.route('/api/search-users', methods=['GET'])
-def api_search_users_for_messages():
-    """Search users for starting new conversations - FIXED VERSION"""
-    current_user_id = session.get('user_id')
-    if not current_user_id:
-        return jsonify({'status': 'error', 'message': 'Not authenticated'}), 401
-    
-    try:
-        query = request.args.get('q', '').strip().lower()
-        
-        # Get all users
-        users_ref = db.collection('users')
-        users_query = users_ref.where('profileVisibility', '==', 'Public').stream()
-        
-        search_results = []
-        
-        for doc in users_query:
-            user = doc.to_dict()
-            user_id = doc.id
-            
-            # Skip current user
-            if user_id == current_user_id:
-                continue
-            
-            # Get user data for search
-            user_name = user.get('name', '').lower()
-            user_headline = user.get('headline', '').lower()
-            offered_skills = [skill.lower() for skill in user.get('offeredSkill', [])]
-            
-            # Check if matches search query
-            matches = False
-            if not query:
-                matches = True  # Show all users if no query
-            else:
-                # Search in name
-                if query in user_name:
-                    matches = True
-                # Search in headline
-                elif query in user_headline:
-                    matches = True
-                # Search in skills
-                elif any(query in skill for skill in offered_skills):
-                    matches = True
-            
-            if matches:
-                search_results.append({
-                    'user_id': user_id,
-                    'name': user.get('name', 'Anonymous'),
-                    'headline': user.get('headline', ''),
-                    'photo_url': user.get('photo_url', '/static/default-profile.png'),
-                    'offeredSkills': user.get('offeredSkill', [])[:3]
-                })
-        
-        # Sort by name
-        search_results.sort(key=lambda x: x['name'].lower())
-        
-        return jsonify({
-            'status': 'success',
-            'count': len(search_results),
-            'results': search_results[:20]
-        })
-        
-    except Exception as e:
-        print(f"Error searching users: {str(e)}")
-        return jsonify({'status': 'error', 'message': str(e)}), 500
-
 
 # ==============================================================================
 # FEATURE 1: SMART SKILL MATCHING (Deterministic Algorithm & Reciprocal Ranking)
