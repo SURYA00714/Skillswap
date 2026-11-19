@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Feedback & Admin Moderation Module - SkillSwap</title>
+  <link rel="stylesheet" href="../shared/common.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    .admin-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px;
+      box-shadow: var(--shadow);
+    }
+    .stat-number {
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: var(--primary);
+      margin-top: 4px;
+    }
+    .report-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--error);
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .stars-selector i {
+      font-size: 22px;
+      color: #cbd5e1;
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+    .stars-selector i.active {
+      color: #f59e0b;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="mod-header">
+    <div class="mod-header-inner">
+      <a href="./feedback_and_admin.html" class="mod-brand">
+        <i class="fas fa-shield-alt"></i> SkillSwap Feedback & Admin
+      </a>
+      <div style="display: flex; align-items: center; gap: 14px;">
+        <span class="badge badge-success"><i class="fas fa-check-circle"></i> Live Server Ready</span>
+        <button class="theme-toggle-btn" title="Toggle Theme" aria-label="Toggle Theme">
+          <span class="theme-toggle-thumb"><i class="fas fa-moon"></i></span>
+          <span class="theme-toggle-text">Theme</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="mod-container">
+    <!-- Hero Banner -->
+    <div class="mod-hero" style="background: linear-gradient(135deg, #1e293b 0%, #334155 100%);">
+      <div>
+        <h2 style="font-size: 1.6rem; font-weight: 700; margin-bottom: 6px;">Module 7: Peer Feedback & Admin Moderation</h2>
+        <p style="opacity: 0.9; font-size: 0.95rem;">Rate swap partners, review platform health metrics, and moderate community reports.</p>
+      </div>
+      <span style="background: rgba(255,255,255,0.15); padding: 6px 14px; border-radius: 20px; font-size: 0.85rem; font-weight: 600;">
+        <i class="fas fa-user-shield"></i> Admin Role Active
+      </span>
+    </div>
+
+    <!-- Platform Stats (Admin View) -->
+    <div class="admin-stats">
+      <div class="stat-card">
+        <span style="font-size: 0.8rem; font-weight: 700; color: var(--text-light); text-transform: uppercase;">Active Users</span>
+        <div class="stat-number">1,248</div>
+      </div>
+      <div class="stat-card">
+        <span style="font-size: 0.8rem; font-weight: 700; color: var(--text-light); text-transform: uppercase;">Completed Swaps</span>
+        <div class="stat-number" style="color: var(--success);">3,890</div>
+      </div>
+      <div class="stat-card">
+        <span style="font-size: 0.8rem; font-weight: 700; color: var(--text-light); text-transform: uppercase;">Avg Platform Rating</span>
+        <div class="stat-number" style="color: #f59e0b;">4.85 ★</div>
+      </div>
+      <div class="stat-card">
+        <span style="font-size: 0.8rem; font-weight: 700; color: var(--text-light); text-transform: uppercase;">Pending Reports</span>
+        <div class="stat-number" id="reportsCount" style="color: var(--error);">2</div>
+      </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+      <!-- Section 1: Leave Ratings & Feedback -->
+      <div class="mod-card">
+        <div class="mod-card-header">
+          <h3><i class="fas fa-star" style="color: #f59e0b;"></i> Rate a Learning Partner</h3>
+        </div>
+
+        <form id="feedbackForm">
+          <div class="form-group">
+            <label for="revieweeName">Learning Partner</label>
+            <select id="revieweeName" class="form-control">
+              <option value="Sarah Chen">Sarah Chen (UI/UX Design Session)</option>
+              <option value="Carlos Mendez">Carlos Mendez (Spanish Language Session)</option>
+              <option value="David Kim">David Kim (Data Structures Session)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Rating</label>
+            <div class="stars-selector" id="starsBox">
+              <i class="fas fa-star active" onclick="setRating(1)"></i>
+              <i class="fas fa-star active" onclick="setRating(2)"></i>
+              <i class="fas fa-star active" onclick="setRating(3)"></i>
+              <i class="fas fa-star active" onclick="setRating(4)"></i>
+              <i class="fas fa-star active" onclick="setRating(5)"></i>
+              <span id="ratingNumberText" style="font-size: 0.9rem; font-weight: 700; margin-left: 8px;">5.0 Stars</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="reviewComment">Detailed Testimonial</label>
+            <textarea id="reviewComment" class="form-control" rows="3" placeholder="How was the session? Did they explain concepts clearly?" required></textarea>
+          </div>
+
+          <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;">
+            <i class="fas fa-check"></i> Submit Partner Review
+          </button>
+        </form>
+
+        <!-- Recent Reviews List -->
+        <div style="margin-top: 24px; border-top: 1px solid var(--border); padding-top: 16px;">
+          <h4 style="font-size: 0.9rem; font-weight: 700; margin-bottom: 10px; color: var(--text-light); text-transform: uppercase;">Recent Submissions</h4>
+          <div id="reviewsList" style="display: flex; flex-direction: column; gap: 10px;">
+            <div style="background: var(--surface-dark); padding: 10px 12px; border-radius: 8px; font-size: 0.85rem;">
+              <div style="display: flex; justify-content: space-between; font-weight: 600; margin-bottom: 4px;">
+                <span>Carlos Mendez</span>
+                <span style="color: #f59e0b;">5.0 ★</span>
+              </div>
+              <p style="color: var(--text-light);">"Excellent teacher! Patiently explained Docker volumes and compose files."</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 2: Admin Moderation & Reported Content -->
+      <div class="mod-card">
+        <div class="mod-card-header">
+          <h3><i class="fas fa-flag" style="color: var(--error);"></i> Reports & Moderation Queue</h3>
+          <span class="badge badge-warning">Needs Review</span>
+        </div>
+
+        <div id="reportsContainer">
+          <div class="report-card" id="rep1">
+            <div>
+              <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                <strong style="font-size: 0.95rem;">Spam / Inappropriate Link</strong>
+                <span class="badge" style="background: #fee2e2; color: #b91c1c;">High Priority</span>
+              </div>
+              <p style="font-size: 0.8rem; color: var(--text-light);">Reported User: <strong>spambot_33</strong></p>
+              <p style="font-size: 0.8rem; margin-top: 4px; color: var(--text);">"User sent commercial solicitation links in direct swap messages."</p>
+            </div>
+            <div style="display: flex; gap: 6px;">
+              <button onclick="dismissReport('rep1')" class="btn btn-outline" style="font-size: 0.75rem; padding: 6px 10px;">Dismiss</button>
+              <button onclick="suspendUser('rep1', 'spambot_33')" class="btn btn-danger" style="font-size: 0.75rem; padding: 6px 10px;">Suspend User</button>
+            </div>
+          </div>
+
+          <div class="report-card" id="rep2">
+            <div>
+              <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                <strong style="font-size: 0.95rem;">No-Show Session</strong>
+                <span class="badge" style="background: #fef3c7; color: #b45309;">Medium Priority</span>
+              </div>
+              <p style="font-size: 0.8rem; color: var(--text-light);">Reported User: <strong>ghost_user4</strong></p>
+              <p style="font-size: 0.8rem; margin-top: 4px; color: var(--text);">"Missed confirmed 1-on-1 tutoring session twice without notice."</p>
+            </div>
+            <div style="display: flex; gap: 6px;">
+              <button onclick="dismissReport('rep2')" class="btn btn-outline" style="font-size: 0.75rem; padding: 6px 10px;">Dismiss</button>
+              <button onclick="warnUser('rep2', 'ghost_user4')" class="btn btn-primary" style="font-size: 0.75rem; padding: 6px 10px;">Issue Warning</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="../shared/theme.js"></script>
+  <script>
+    let currentRating = 5;
+
+    function setRating(val) {
+      currentRating = val;
+      const stars = document.querySelectorAll('#starsBox i');
+      stars.forEach((s, idx) => {
+        if (idx < val) s.classList.add('active');
+        else s.classList.remove('active');
+      });
+      document.getElementById('ratingNumberText').textContent = `${val}.0 Stars`;
+    }
+
+    function dismissReport(id) {
+      const el = document.getElementById(id);
+      if (el) el.remove();
+      updateCount();
+      alert('Report dismissed.');
+    }
+
+    function suspendUser(id, user) {
+      const el = document.getElementById(id);
+      if (el) el.remove();
+      updateCount();
+      alert(`User ${user} has been suspended from SkillSwap.`);
+    }
+
+    function warnUser(id, user) {
+      const el = document.getElementById(id);
+      if (el) el.remove();
+      updateCount();
+      alert(`A formal conduct warning was issued to ${user}.`);
+    }
+
+    function updateCount() {
+      const remaining = document.querySelectorAll('#reportsContainer .report-card').length;
+      document.getElementById('reportsCount').textContent = remaining;
+      if (remaining === 0) {
+        document.getElementById('reportsContainer').innerHTML = `
+          <div style="text-align: center; padding: 30px; color: var(--text-light); font-size: 0.9rem;">
+            <i class="fas fa-check-circle" style="color: var(--success); font-size: 28px; margin-bottom: 8px;"></i>
+            <p>All reports resolved! Moderation queue is empty.</p>
+          </div>
+        `;
+      }
+    }
+
+    document.getElementById('feedbackForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const name = document.getElementById('revieweeName').value;
+      const comment = document.getElementById('reviewComment').value.trim();
+
+      const list = document.getElementById('reviewsList');
+      const item = document.createElement('div');
+      item.style.cssText = 'background: var(--surface-dark); padding: 10px 12px; border-radius: 8px; font-size: 0.85rem;';
+      item.innerHTML = `
+        <div style="display: flex; justify-content: space-between; font-weight: 600; margin-bottom: 4px;">
+          <span>${name}</span>
+          <span style="color: #f59e0b;">${currentRating}.0 ★</span>
+        </div>
+        <p style="color: var(--text-light);">"${comment}"</p>
+      `;
+      list.prepend(item);
+      document.getElementById('reviewComment').value = '';
+      alert('Feedback and rating submitted successfully!');
+    });
+  </script>
+</body>
+</html>

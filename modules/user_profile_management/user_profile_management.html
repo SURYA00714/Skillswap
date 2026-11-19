@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>User Profile Management Module - SkillSwap</title>
+  <link rel="stylesheet" href="../shared/common.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    .profile-layout {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 24px;
+    }
+    @media (max-width: 840px) {
+      .profile-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+    .avatar-preview {
+      width: 110px;
+      height: 110px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 42px;
+      font-weight: 700;
+      margin: 0 auto 16px;
+      box-shadow: var(--shadow-md);
+      position: relative;
+      overflow: hidden;
+    }
+    .avatar-preview img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="mod-header">
+    <div class="mod-header-inner">
+      <a href="./user_profile_management.html" class="mod-brand">
+        <i class="fas fa-id-card"></i> SkillSwap Profile Manager
+      </a>
+      <div style="display: flex; align-items: center; gap: 14px;">
+        <span class="badge badge-success"><i class="fas fa-check-circle"></i> Live Server Ready</span>
+        <button class="theme-toggle-btn" title="Toggle Theme" aria-label="Toggle Theme">
+          <span class="theme-toggle-thumb"><i class="fas fa-moon"></i></span>
+          <span class="theme-toggle-text">Theme</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="mod-container">
+    <!-- Hero Banner -->
+    <div class="mod-hero" style="background: linear-gradient(135deg, #4361ee 0%, #3a0ca3 100%);">
+      <div>
+        <h2 style="font-size: 1.6rem; font-weight: 700; margin-bottom: 6px;">Module 2: User Profile Management</h2>
+        <p style="opacity: 0.9; font-size: 0.95rem;">Create, edit, and preview personal information and user details in real time.</p>
+      </div>
+      <button class="btn" onclick="resetToDemo()" style="background: rgba(255,255,255,0.2); color: #fff;">
+        <i class="fas fa-undo"></i> Reset Demo Data
+      </button>
+    </div>
+
+    <div class="profile-layout">
+      <!-- Left Column: Display User Details (Live Preview Card) -->
+      <div>
+        <div class="mod-card" style="text-align: center;">
+          <div class="avatar-preview" id="avatarBox">
+            <span id="avatarInitials">AM</span>
+          </div>
+          <h3 id="previewName" style="font-size: 1.25rem; font-weight: 700;">Alex Morgan</h3>
+          <p id="previewTitle" style="color: var(--primary); font-weight: 600; font-size: 0.9rem; margin-bottom: 4px;">Senior Full-Stack Engineer</p>
+          <p id="previewLocation" style="color: var(--text-light); font-size: 0.85rem; margin-bottom: 12px;">
+            <i class="fas fa-map-marker-alt"></i> Bengaluru, Karnataka
+          </p>
+          <div style="display: flex; justify-content: center; gap: 6px; color: #f59e0b; font-size: 0.9rem; margin-bottom: 16px;">
+            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i>
+            <span style="color: var(--text); font-weight: 700; margin-left: 4px;">4.9 (18 reviews)</span>
+          </div>
+
+          <p id="previewBio" style="font-size: 0.85rem; color: var(--text-light); line-height: 1.5; margin-bottom: 16px; text-align: left; background: var(--surface-dark); padding: 12px; border-radius: 8px;">
+            Passionate software developer and open-source contributor. Excited to teach Python & React in exchange for UI/UX Design and Spanish!
+          </p>
+
+          <div style="border-top: 1px solid var(--border); padding-top: 14px; text-align: left; font-size: 0.85rem;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+              <span style="color: var(--text-light);">Education:</span>
+              <strong id="previewEducation">B.Tech Computer Science</strong>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+              <span style="color: var(--text-light);">Employment:</span>
+              <strong id="previewEmployment">Full-Time Remote</strong>
+            </div>
+            <div style="display: flex; justify-content: space-between;">
+              <span style="color: var(--text-light);">Visibility:</span>
+              <span class="badge badge-success" id="previewVisibility">Public</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Create & Update Profile Form -->
+      <div>
+        <div class="mod-card">
+          <div class="mod-card-header">
+            <h3><i class="fas fa-user-edit"></i> Edit Personal Information</h3>
+            <span style="font-size: 0.8rem; color: var(--text-light);"><i class="fas fa-sync-alt"></i> Auto-saves to LocalStorage</span>
+          </div>
+
+          <form id="profileForm">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+              <div class="form-group">
+                <label for="fullName">Full Name</label>
+                <input type="text" id="fullName" class="form-control" required>
+              </div>
+              <div class="form-group">
+                <label for="headline">Professional Headline</label>
+                <input type="text" id="headline" class="form-control" placeholder="e.g. Frontend Specialist">
+              </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+              <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" class="form-control" readonly style="opacity: 0.7;">
+              </div>
+              <div class="form-group">
+                <label for="location">Location (City, Country)</label>
+                <input type="text" id="location" class="form-control" placeholder="City, State / Country">
+              </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+              <div class="form-group">
+                <label for="education">Highest Education</label>
+                <input type="text" id="education" class="form-control" placeholder="Degree / Institution">
+              </div>
+              <div class="form-group">
+                <label for="employmentType">Employment Status</label>
+                <select id="employmentType" class="form-control">
+                  <option value="Full-Time Remote">Full-Time Remote</option>
+                  <option value="Student">Student</option>
+                  <option value="Freelancer">Freelancer</option>
+                  <option value="Employed">Employed</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="bio">Bio & Learning Philosophy</label>
+              <textarea id="bio" class="form-control" rows="3" placeholder="Tell potential learning partners about yourself..."></textarea>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+              <div class="form-group">
+                <label for="avatarUrl">Profile Photo Image URL (Optional)</label>
+                <input type="url" id="avatarUrl" class="form-control" placeholder="https://example.com/photo.jpg">
+              </div>
+              <div class="form-group">
+                <label for="visibility">Profile Visibility</label>
+                <select id="visibility" class="form-control">
+                  <option value="Public">Public (Discoverable to all)</option>
+                  <option value="Members Only">Members Only</option>
+                  <option value="Private">Private</option>
+                </select>
+              </div>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px;">
+              <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save"></i> Save Profile Details
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="../shared/theme.js"></script>
+  <script>
+    const STORAGE_KEY = 'swapskills_user_profile_data';
+
+    const defaultProfile = {
+      fullName: 'Alex Morgan',
+      headline: 'Senior Full-Stack Engineer',
+      email: 'alex@example.com',
+      location: 'Bengaluru, Karnataka',
+      education: 'B.Tech Computer Science',
+      employmentType: 'Full-Time Remote',
+      bio: 'Passionate software developer and open-source contributor. Excited to teach Python & React in exchange for UI/UX Design and Spanish!',
+      avatarUrl: '',
+      visibility: 'Public'
+    };
+
+    function loadProfile() {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      return saved ? JSON.parse(saved) : defaultProfile;
+    }
+
+    function saveProfile(data) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      updateUI(data);
+    }
+
+    function updateUI(p) {
+      // Inputs
+      document.getElementById('fullName').value = p.fullName || '';
+      document.getElementById('headline').value = p.headline || '';
+      document.getElementById('email').value = p.email || '';
+      document.getElementById('location').value = p.location || '';
+      document.getElementById('education').value = p.education || '';
+      document.getElementById('employmentType').value = p.employmentType || 'Full-Time Remote';
+      document.getElementById('bio').value = p.bio || '';
+      document.getElementById('avatarUrl').value = p.avatarUrl || '';
+      document.getElementById('visibility').value = p.visibility || 'Public';
+
+      // Live Previews
+      document.getElementById('previewName').textContent = p.fullName || 'Anonymous';
+      document.getElementById('previewTitle').textContent = p.headline || 'Skill Enthusiast';
+      document.getElementById('previewLocation').innerHTML = `<i class="fas fa-map-marker-alt"></i> ${p.location || 'Location Not Set'}`;
+      document.getElementById('previewBio').textContent = p.bio || 'No bio provided yet.';
+      document.getElementById('previewEducation').textContent = p.education || 'N/A';
+      document.getElementById('previewEmployment').textContent = p.employmentType || 'N/A';
+      document.getElementById('previewVisibility').textContent = p.visibility || 'Public';
+
+      // Avatar
+      const box = document.getElementById('avatarBox');
+      if (p.avatarUrl && p.avatarUrl.trim()) {
+        box.innerHTML = `<img src="${p.avatarUrl}" alt="Avatar" onerror="this.onerror=null; fallbackInitials('${p.fullName}');">`;
+      } else {
+        fallbackInitials(p.fullName);
+      }
+    }
+
+    function fallbackInitials(name) {
+      const box = document.getElementById('avatarBox');
+      const parts = (name || 'AM').trim().split(' ');
+      const initials = parts.length > 1 ? (parts[0][0] + parts[1][0]).toUpperCase() : parts[0].slice(0, 2).toUpperCase();
+      box.innerHTML = `<span id="avatarInitials">${initials}</span>`;
+    }
+
+    function resetToDemo() {
+      saveProfile(defaultProfile);
+      alert('Reset to default demo profile.');
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const profile = loadProfile();
+      updateUI(profile);
+
+      // Live update on input
+      ['fullName', 'headline', 'location', 'bio', 'education', 'employmentType', 'visibility'].forEach(id => {
+        document.getElementById(id).addEventListener('input', () => {
+          document.getElementById('previewName').textContent = document.getElementById('fullName').value || 'Anonymous';
+          document.getElementById('previewTitle').textContent = document.getElementById('headline').value;
+          document.getElementById('previewLocation').innerHTML = `<i class="fas fa-map-marker-alt"></i> ${document.getElementById('location').value}`;
+          document.getElementById('previewBio').textContent = document.getElementById('bio').value;
+          document.getElementById('previewEducation').textContent = document.getElementById('education').value;
+          document.getElementById('previewEmployment').textContent = document.getElementById('employmentType').value;
+          document.getElementById('previewVisibility').textContent = document.getElementById('visibility').value;
+        });
+      });
+
+      document.getElementById('profileForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const updated = {
+          fullName: document.getElementById('fullName').value,
+          headline: document.getElementById('headline').value,
+          email: document.getElementById('email').value,
+          location: document.getElementById('location').value,
+          education: document.getElementById('education').value,
+          employmentType: document.getElementById('employmentType').value,
+          bio: document.getElementById('bio').value,
+          avatarUrl: document.getElementById('avatarUrl').value,
+          visibility: document.getElementById('visibility').value
+        };
+        saveProfile(updated);
+        alert('Profile saved successfully!');
+      });
+    });
+  </script>
+</body>
+</html>

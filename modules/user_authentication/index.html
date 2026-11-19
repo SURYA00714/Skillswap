@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>User Authentication & Security Module - SkillSwap</title>
+  <link rel="stylesheet" href="./css/auth.css">
+  <link rel="stylesheet" href="./css/module.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    body {
+      background: var(--background);
+      color: var(--text);
+      display: block;
+      padding: 0;
+      min-height: 100vh;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Navigation Bar -->
+  <header style="background: var(--surface); border-bottom: 1px solid var(--border); box-shadow: var(--shadow); position: sticky; top: 0; z-index: 100;">
+    <div style="max-width: 1024px; margin: 0 auto; padding: 16px 20px; display: flex; align-items: center; justify-content: space-between;">
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <div style="width: 38px; height: 38px; background: var(--primary); color: white; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px;">
+          <i class="fas fa-cubes"></i>
+        </div>
+        <div>
+          <h1 style="font-size: 1.15rem; font-weight: 700; margin: 0; line-height: 1.2;">SwapSkills Module Suite</h1>
+          <span style="font-size: 0.75rem; color: var(--text-light); font-weight: 500;">User Authentication & Security Module (Standalone)</span>
+        </div>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 16px;">
+        <button class="theme-toggle-btn" title="Toggle Light / Dark Mode" aria-label="Toggle Light / Dark Mode">
+          <span class="theme-toggle-thumb"><i class="fas fa-moon"></i></span>
+          <span class="theme-toggle-text">Theme</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="module-container">
+    <!-- Hero / Module Banner -->
+    <div style="background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); border-radius: var(--radius-lg); padding: 36px 30px; color: #ffffff; box-shadow: var(--shadow-lg); margin-bottom: 32px;">
+      <div style="display: inline-block; background: rgba(255,255,255,0.2); backdrop-filter: blur(8px); padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 12px;">
+        <i class="fas fa-bolt"></i> Live Server Ready &bull; Zero Server Setup
+      </div>
+      <h2 style="font-size: 2rem; font-weight: 800; margin-bottom: 12px; line-height: 1.2;">
+        User Authentication & Security Module
+      </h2>
+      <p style="font-size: 1rem; opacity: 0.92; max-width: 650px; line-height: 1.6; margin-bottom: 20px;">
+        A standalone, modular edition of the SwapSkills authentication workflow. Contains user registration, login with password recovery, secure logout session teardown, and comprehensive account security settings.
+      </p>
+      
+      <div style="display: flex; flex-wrap: wrap; gap: 12px; font-size: 0.85rem; margin-bottom: 20px;">
+        <span style="background: rgba(0,0,0,0.2); padding: 6px 12px; border-radius: 8px;">
+          <i class="fas fa-check-circle" style="color: #6ee7b7;"></i> Vanilla JS & CSS Vars
+        </span>
+        <span style="background: rgba(0,0,0,0.2); padding: 6px 12px; border-radius: 8px;">
+          <i class="fas fa-check-circle" style="color: #6ee7b7;"></i> LocalStorage Auth State
+        </span>
+        <span style="background: rgba(0,0,0,0.2); padding: 6px 12px; border-radius: 8px;">
+          <i class="fas fa-check-circle" style="color: #6ee7b7;"></i> Dark & Light Modes
+        </span>
+      </div>
+
+      <!-- All-in-One Direct Launch CTA -->
+      <div>
+        <a href="./user_authentication.html" class="btn" style="background: #ffffff; color: #4f46e5; font-weight: 700; padding: 12px 24px; border-radius: 8px; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+          <i class="fas fa-layer-group"></i> Launch All-in-One Unified File (user_authentication.html)
+        </a>
+      </div>
+    </div>
+
+    <!-- Quick Session Status Indicator -->
+    <div style="background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px 24px; margin-bottom: 28px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;">
+      <div style="display: flex; align-items: center; gap: 14px;">
+        <div id="sessionStatusDot" style="width: 14px; height: 14px; border-radius: 50%; background: var(--success); box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.2);"></div>
+        <div>
+          <div style="font-size: 0.8rem; color: var(--text-light); text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;">Active Simulation Session</div>
+          <div id="sessionUserDisplay" style="font-size: 1rem; font-weight: 600; color: var(--text);">alex@example.com (Demo User)</div>
+        </div>
+      </div>
+      <div style="display: flex; gap: 10px;">
+        <a href="./security.html" class="btn btn-primary" style="padding: 8px 16px; font-size: 0.85rem; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
+          <i class="fas fa-shield-alt"></i> Manage Security
+        </a>
+        <a href="./logout.html" class="btn" style="padding: 8px 16px; font-size: 0.85rem; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; background: var(--surface-dark); border: 1px solid var(--border); color: var(--text);">
+          <i class="fas fa-sign-out-alt"></i> Sign Out
+        </a>
+      </div>
+    </div>
+
+    <h3 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 4px; color: var(--text);">Module Executable Pages</h3>
+    <p style="font-size: 0.9rem; color: var(--text-light); margin-bottom: 18px;">Click any card below to launch and test that page directly in your browser:</p>
+
+    <!-- Navigation Hub Grid -->
+    <div class="hub-grid">
+      <!-- 1. User Registration -->
+      <a href="./register.html" class="hub-card">
+        <div class="icon-wrapper">
+          <i class="fas fa-user-plus"></i>
+        </div>
+        <span class="badge">Module 1.1</span>
+        <h3 style="margin-top: 12px;">User Registration</h3>
+        <p>Interactive sign-up with real-time password strength meter, confirm password match check, gender select, and user creation.</p>
+        <span style="color: var(--primary); font-size: 0.85rem; font-weight: 600;">Launch register.html <i class="fas fa-arrow-right"></i></span>
+      </a>
+
+      <!-- 2. User Login -->
+      <a href="./login.html" class="hub-card">
+        <div class="icon-wrapper" style="background: rgba(16, 185, 129, 0.1); color: var(--success);">
+          <i class="fas fa-sign-in-alt"></i>
+        </div>
+        <span class="badge">Module 1.2</span>
+        <h3 style="margin-top: 12px;">User Login</h3>
+        <p>Email & password authentication, remember me, simulated password reset modal, and Google social login.</p>
+        <span style="color: var(--success); font-size: 0.85rem; font-weight: 600;">Launch login.html <i class="fas fa-arrow-right"></i></span>
+      </a>
+
+      <!-- 3. Account Security -->
+      <a href="./security.html" class="hub-card">
+        <div class="icon-wrapper" style="background: rgba(236, 72, 153, 0.1); color: var(--secondary);">
+          <i class="fas fa-shield-alt"></i>
+        </div>
+        <span class="badge">Module 1.3</span>
+        <h3 style="margin-top: 12px;">Authentication & Security</h3>
+        <p>Password change form, Two-Factor Authentication (2FA) toggle, active logged-in device manager, and security audit log.</p>
+        <span style="color: var(--secondary); font-size: 0.85rem; font-weight: 600;">Launch security.html <i class="fas fa-arrow-right"></i></span>
+      </a>
+
+      <!-- 4. User Logout -->
+      <a href="./logout.html" class="hub-card">
+        <div class="icon-wrapper" style="background: rgba(239, 68, 68, 0.1); color: var(--error);">
+          <i class="fas fa-power-off"></i>
+        </div>
+        <span class="badge">Module 1.4</span>
+        <h3 style="margin-top: 12px;">User Logout</h3>
+        <p>Token and session clearing screen with immediate feedback, redirect countdown, and single-click re-login option.</p>
+        <span style="color: var(--error); font-size: 0.85rem; font-weight: 600;">Launch logout.html <i class="fas fa-arrow-right"></i></span>
+      </a>
+    </div>
+
+    <!-- How to Run in Live Server -->
+    <div style="background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; margin-top: 32px;">
+      <h4 style="font-size: 1rem; font-weight: 700; margin-bottom: 8px; display: flex; align-items: center; gap: 8px;">
+        <i class="fas fa-terminal" style="color: var(--primary);"></i> How to run with VS Code Live Server or static server
+      </h4>
+      <p style="font-size: 0.85rem; color: var(--text-light); line-height: 1.6; margin-bottom: 12px;">
+        Right-click on <code>modules/user_authentication/index.html</code> (or any of the individual html files) and choose <strong>"Open with Live Server"</strong>, or run in terminal:
+      </p>
+      <pre style="background: var(--surface-dark); padding: 12px 16px; border-radius: 8px; font-size: 0.85rem; overflow-x: auto; color: var(--text); border: 1px solid var(--border);"><code># Option A: Python Built-in Server
+cd modules/user_authentication && python3 -m http.server 5500
+
+# Option B: Node http-server or npx serve
+npx serve modules/user_authentication</code></pre>
+    </div>
+  </main>
+
+  <!-- Scripts -->
+  <script src="./js/theme.js"></script>
+  <script src="./js/auth-standalone.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const user = getCurrentUser();
+      const userEl = document.getElementById('sessionUserDisplay');
+      const dotEl = document.getElementById('sessionStatusDot');
+
+      if (user && user.email) {
+        if (userEl) userEl.textContent = `${user.email} (${user.fullName || 'Member'})`;
+        if (dotEl) {
+          dotEl.style.background = 'var(--success)';
+          dotEl.style.boxShadow = '0 0 0 4px rgba(16, 185, 129, 0.2)';
+        }
+      } else {
+        if (userEl) userEl.textContent = 'No user signed in (Guest)';
+        if (dotEl) {
+          dotEl.style.background = 'var(--text-lighter)';
+          dotEl.style.boxShadow = 'none';
+        }
+      }
+    });
+  </script>
+</body>
+</html>

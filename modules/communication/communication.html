@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Communication Module - SkillSwap</title>
+  <link rel="stylesheet" href="../shared/common.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    .comm-layout {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 20px;
+      height: 600px;
+    }
+    @media (max-width: 768px) {
+      .comm-layout {
+        grid-template-columns: 1fr;
+        height: auto;
+      }
+    }
+    .chat-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .messages-area {
+      flex: 1;
+      padding: 16px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      background: var(--surface-dark);
+    }
+    .msg-bubble {
+      max-width: 70%;
+      padding: 10px 14px;
+      border-radius: 14px;
+      font-size: 0.9rem;
+      line-height: 1.4;
+    }
+    .msg-bubble.outgoing {
+      align-self: flex-end;
+      background: var(--primary);
+      color: #fff;
+      border-bottom-right-radius: 2px;
+    }
+    .msg-bubble.incoming {
+      align-self: flex-start;
+      background: var(--surface);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-bottom-left-radius: 2px;
+    }
+    .session-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(16, 185, 129, 0.15);
+      color: #10b981;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="mod-header">
+    <div class="mod-header-inner">
+      <a href="./communication.html" class="mod-brand">
+        <i class="fas fa-comments"></i> SkillSwap Communication Module
+      </a>
+      <div style="display: flex; align-items: center; gap: 14px;">
+        <span class="badge badge-success"><i class="fas fa-check-circle"></i> Live Server Ready</span>
+        <button class="theme-toggle-btn" title="Toggle Theme" aria-label="Toggle Theme">
+          <span class="theme-toggle-thumb"><i class="fas fa-moon"></i></span>
+          <span class="theme-toggle-text">Theme</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="mod-container">
+    <!-- Hero Banner -->
+    <div class="mod-hero" style="background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);">
+      <div>
+        <h2 style="font-size: 1.6rem; font-weight: 700; margin-bottom: 6px;">Module 6: Peer Messaging & Session Scheduling</h2>
+        <p style="opacity: 0.9; font-size: 0.95rem;">Exchange direct messages and organize live 1-on-1 learning video sessions.</p>
+      </div>
+      <button class="btn" onclick="openScheduleModal()" style="background: #ffffff; color: #4f46e5; font-weight: 700;">
+        <i class="fas fa-calendar-plus"></i> Schedule Learning Session
+      </button>
+    </div>
+
+    <!-- Active Scheduled Sessions Bar -->
+    <div class="mod-card" style="margin-bottom: 20px; padding: 16px 20px;">
+      <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div style="width: 40px; height: 40px; background: rgba(99, 102, 241, 0.15); color: var(--primary); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px;">
+            <i class="fas fa-video"></i>
+          </div>
+          <div>
+            <h4 id="nextSessionTitle" style="font-size: 0.95rem; font-weight: 700;">Upcoming: Figma Components & Variants with Sarah</h4>
+            <p id="nextSessionTime" style="font-size: 0.8rem; color: var(--text-light);"><i class="fas fa-clock"></i> Tomorrow at 5:00 PM (60 mins) &bull; Google Meet</p>
+          </div>
+        </div>
+        <div style="display: flex; gap: 10px;">
+          <a href="https://meet.google.com" target="_blank" class="btn btn-success" style="font-size: 0.85rem; padding: 6px 14px;">
+            <i class="fas fa-video"></i> Join Meet
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Two-Panel Chat Layout -->
+    <div class="comm-layout">
+      <!-- Conversation Threads Sidebar -->
+      <div class="mod-card" style="padding: 16px; margin-bottom: 0; display: flex; flex-direction: column;">
+        <h4 style="font-size: 0.95rem; font-weight: 700; margin-bottom: 12px; color: var(--text);">Conversations</h4>
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <div onclick="selectPartner('Sarah Chen')" style="padding: 10px 12px; background: var(--primary-light); border-radius: 8px; cursor: pointer; border-left: 3px solid var(--primary);">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <strong style="font-size: 0.9rem;">Sarah Chen</strong>
+              <span style="font-size: 0.7rem; color: var(--text-light);">10:32 AM</span>
+            </div>
+            <p style="font-size: 0.8rem; color: var(--text-light); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px;">
+              Looking forward to our session!
+            </p>
+          </div>
+
+          <div onclick="selectPartner('Carlos Mendez')" style="padding: 10px 12px; background: var(--surface-dark); border-radius: 8px; cursor: pointer;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <strong style="font-size: 0.9rem;">Carlos Mendez</strong>
+              <span style="font-size: 0.7rem; color: var(--text-light);">Yesterday</span>
+            </div>
+            <p style="font-size: 0.8rem; color: var(--text-light); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px;">
+              Gracias! The Docker compose file worked.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Live Chat Container -->
+      <div class="chat-box">
+        <!-- Chat Header -->
+        <div style="padding: 14px 18px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: var(--surface);">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <div style="width: 36px; height: 36px; border-radius: 50%; background: var(--primary); color: #fff; font-weight: 700; display: flex; align-items: center; justify-content: center; font-size: 14px;">
+              <span id="activeAvatar">SC</span>
+            </div>
+            <div>
+              <h4 id="activeChatPartner" style="font-size: 0.95rem; font-weight: 700;">Sarah Chen</h4>
+              <span style="font-size: 0.75rem; color: var(--success);"><i class="fas fa-circle" style="font-size: 8px;"></i> Online</span>
+            </div>
+          </div>
+          <button onclick="openScheduleModal()" class="btn btn-outline" style="font-size: 0.8rem; padding: 6px 12px;">
+            <i class="fas fa-calendar-alt"></i> Set Session
+          </button>
+        </div>
+
+        <!-- Messages Area -->
+        <div class="messages-area" id="chatMessages">
+          <div class="msg-bubble incoming">
+            Hi Alex! I accepted your swap request for UI/UX &bull; Python.
+          </div>
+          <div class="msg-bubble outgoing">
+            Awesome Sarah! Looking forward to diving into Figma. Have you worked with Python APIs before?
+          </div>
+          <div class="msg-bubble incoming">
+            A little bit with Flask, but I really want to learn FastAPI and async concepts!
+          </div>
+          <div class="msg-bubble outgoing">
+            Perfect! Let's schedule our first 1-hour session for tomorrow.
+          </div>
+        </div>
+
+        <!-- Message Input -->
+        <form id="msgInputForm" style="padding: 12px; background: var(--surface); border-top: 1px solid var(--border); display: flex; gap: 10px;">
+          <input type="text" id="chatInputText" class="form-control" placeholder="Type a message to your partner..." required autocomplete="off">
+          <button type="submit" class="btn btn-primary" style="padding: 0 18px;">
+            <i class="fas fa-paper-plane"></i>
+          </button>
+        </form>
+      </div>
+    </div>
+  </main>
+
+  <script src="../shared/theme.js"></script>
+  <script>
+    function selectPartner(name) {
+      document.getElementById('activeChatPartner').textContent = name;
+      document.getElementById('activeAvatar').textContent = name.split(' ').map(n=>n[0]).join('');
+      const msgs = document.getElementById('chatMessages');
+      msgs.innerHTML = `
+        <div class="msg-bubble incoming">Hello! Ready to coordinate our learning schedule.</div>
+      `;
+    }
+
+    function openScheduleModal() {
+      const partner = document.getElementById('activeChatPartner').textContent;
+      const topic = prompt(`Enter session topic with ${partner}:`, 'Advanced Python & Figma Design Review');
+      if (topic) {
+        document.getElementById('nextSessionTitle').textContent = `Upcoming: ${topic} with ${partner}`;
+        alert(`Session booked with ${partner}! Video room link generated.`);
+      }
+    }
+
+    document.getElementById('msgInputForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const input = document.getElementById('chatInputText');
+      const text = input.value.trim();
+      if (!text) return;
+
+      const msgs = document.getElementById('chatMessages');
+      const bubble = document.createElement('div');
+      bubble.className = 'msg-bubble outgoing';
+      bubble.textContent = text;
+      msgs.appendChild(bubble);
+      input.value = '';
+      msgs.scrollTop = msgs.scrollHeight;
+
+      // Simulated auto-reply after 1 second
+      setTimeout(() => {
+        const reply = document.createElement('div');
+        reply.className = 'msg-bubble incoming';
+        reply.textContent = "Sounds great! I'll prepare some examples.";
+        msgs.appendChild(reply);
+        msgs.scrollTop = msgs.scrollHeight;
+      }, 1000);
+    });
+  </script>
+</body>
+</html>

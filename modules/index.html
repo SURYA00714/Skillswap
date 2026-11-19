@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SkillSwap - Modular Architecture Suite</title>
+  <link rel="stylesheet" href="./shared/common.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    .module-card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+      margin-top: 24px;
+    }
+    .mod-portal-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      text-decoration: none;
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      box-shadow: var(--shadow);
+      transition: var(--transition);
+    }
+    .mod-portal-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-lg);
+      border-color: var(--primary);
+    }
+    .mod-icon-badge {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      margin-bottom: 16px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Header -->
+  <header class="mod-header">
+    <div class="mod-header-inner">
+      <div class="mod-brand">
+        <i class="fas fa-cubes"></i> SkillSwap Modular Architecture
+      </div>
+      <div style="display: flex; align-items: center; gap: 14px;">
+        <span class="badge badge-success"><i class="fas fa-check-circle"></i> 7 Modules Ready</span>
+        <button class="theme-toggle-btn" title="Toggle Theme" aria-label="Toggle Theme">
+          <span class="theme-toggle-thumb"><i class="fas fa-moon"></i></span>
+          <span class="theme-toggle-text">Theme</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="mod-container">
+    <div class="mod-hero" style="background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);">
+      <div>
+        <h2 style="font-size: 1.8rem; font-weight: 800; margin-bottom: 6px;">SwapSkills Modular Suite</h2>
+        <p style="opacity: 0.9; font-size: 0.95rem;">Every module is structured into its own folder and individually executable in Live Server as pure HTML.</p>
+      </div>
+      <span style="background: rgba(255,255,255,0.2); padding: 8px 14px; border-radius: 20px; font-size: 0.85rem; font-weight: 700;">
+        <i class="fas fa-bolt"></i> Live Server Ready
+      </span>
+    </div>
+
+    <div class="module-card-grid">
+      <!-- Module 1 -->
+      <a href="./user_authentication/user_authentication.html" class="mod-portal-card">
+        <div>
+          <div class="mod-icon-badge" style="background: rgba(99, 102, 241, 0.15); color: #6366f1;">
+            <i class="fas fa-user-lock"></i>
+          </div>
+          <span class="badge badge-success">Module 1</span>
+          <h3 style="margin: 10px 0 6px;">User Authentication Module</h3>
+          <p style="font-size: 0.85rem; color: var(--text-light); line-height: 1.5;">Registration, login with password recovery, secure logout teardown, and account security.</p>
+        </div>
+        <div style="color: var(--primary); font-weight: 600; font-size: 0.85rem; margin-top: 16px;">
+          Launch user_authentication.html &rarr;
+        </div>
+      </a>
+
+      <!-- Module 2 -->
+      <a href="./user_profile_management/user_profile_management.html" class="mod-portal-card">
+        <div>
+          <div class="mod-icon-badge" style="background: rgba(67, 97, 238, 0.15); color: #4361ee;">
+            <i class="fas fa-id-card"></i>
+          </div>
+          <span class="badge badge-success">Module 2</span>
+          <h3 style="margin: 10px 0 6px;">User Profile Management Module</h3>
+          <p style="font-size: 0.85rem; color: var(--text-light); line-height: 1.5;">Create & update personal info, bio, education, employment, and real-time live preview.</p>
+        </div>
+        <div style="color: var(--primary); font-weight: 600; font-size: 0.85rem; margin-top: 16px;">
+          Launch user_profile_management.html &rarr;
+        </div>
+      </a>
+
+      <!-- Module 3 -->
+      <a href="./skill_management/skill_management.html" class="mod-portal-card">
+        <div>
+          <div class="mod-icon-badge" style="background: rgba(114, 9, 183, 0.15); color: #7209b7;">
+            <i class="fas fa-layer-group"></i>
+          </div>
+          <span class="badge badge-success">Module 3</span>
+          <h3 style="margin: 10px 0 6px;">Skill Management Module</h3>
+          <p style="font-size: 0.85rem; color: var(--text-light); line-height: 1.5;">Add skills you teach (offered), skills you want to learn, and manage proficiencies.</p>
+        </div>
+        <div style="color: var(--primary); font-weight: 600; font-size: 0.85rem; margin-top: 16px;">
+          Launch skill_management.html &rarr;
+        </div>
+      </a>
+
+      <!-- Module 4 -->
+      <a href="./skill_search_and_matching/skill_search_and_matching.html" class="mod-portal-card">
+        <div>
+          <div class="mod-icon-badge" style="background: rgba(14, 165, 233, 0.15); color: #0ea5e9;">
+            <i class="fas fa-search-location"></i>
+          </div>
+          <span class="badge badge-success">Module 4</span>
+          <h3 style="margin: 10px 0 6px;">Skill Search & Matching Module</h3>
+          <p style="font-size: 0.85rem; color: var(--text-light); line-height: 1.5;">Instant search, category filters, and smart 100% reciprocal match detection.</p>
+        </div>
+        <div style="color: var(--primary); font-weight: 600; font-size: 0.85rem; margin-top: 16px;">
+          Launch skill_search_and_matching.html &rarr;
+        </div>
+      </a>
+
+      <!-- Module 5 -->
+      <a href="./skill_swap_request/skill_swap_request.html" class="mod-portal-card">
+        <div>
+          <div class="mod-icon-badge" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">
+            <i class="fas fa-handshake"></i>
+          </div>
+          <span class="badge badge-success">Module 5</span>
+          <h3 style="margin: 10px 0 6px;">Skill Swap Request Module</h3>
+          <p style="font-size: 0.85rem; color: var(--text-light); line-height: 1.5;">Send swap proposals, accept or decline incoming offers, and filter status tabs.</p>
+        </div>
+        <div style="color: var(--primary); font-weight: 600; font-size: 0.85rem; margin-top: 16px;">
+          Launch skill_swap_request.html &rarr;
+        </div>
+      </a>
+
+      <!-- Module 6 -->
+      <a href="./communication/communication.html" class="mod-portal-card">
+        <div>
+          <div class="mod-icon-badge" style="background: rgba(99, 102, 241, 0.15); color: #6366f1;">
+            <i class="fas fa-comments"></i>
+          </div>
+          <span class="badge badge-success">Module 6</span>
+          <h3 style="margin: 10px 0 6px;">Communication Module</h3>
+          <p style="font-size: 0.85rem; color: var(--text-light); line-height: 1.5;">Peer-to-peer messaging, chat threads, and 1-on-1 video learning session scheduling.</p>
+        </div>
+        <div style="color: var(--primary); font-weight: 600; font-size: 0.85rem; margin-top: 16px;">
+          Launch communication.html &rarr;
+        </div>
+      </a>
+
+      <!-- Module 7 -->
+      <a href="./feedback_and_admin/feedback_and_admin.html" class="mod-portal-card">
+        <div>
+          <div class="mod-icon-badge" style="background: rgba(245, 158, 11, 0.15); color: #f59e0b;">
+            <i class="fas fa-star-half-alt"></i>
+          </div>
+          <span class="badge badge-success">Module 7</span>
+          <h3 style="margin: 10px 0 6px;">Feedback & Admin Module</h3>
+          <p style="font-size: 0.85rem; color: var(--text-light); line-height: 1.5;">Star ratings & feedback, platform health analytics, and content moderation queue.</p>
+        </div>
+        <div style="color: var(--primary); font-weight: 600; font-size: 0.85rem; margin-top: 16px;">
+          Launch feedback_and_admin.html &rarr;
+        </div>
+      </a>
+    </div>
+  </main>
+
+  <script src="./shared/theme.js"></script>
+</body>
+</html>

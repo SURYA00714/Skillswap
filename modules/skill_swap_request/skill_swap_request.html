@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Skill Swap Request Module - SkillSwap</title>
+  <link rel="stylesheet" href="../shared/common.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    .tabs-nav {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 8px;
+    }
+    .tab-btn {
+      background: transparent;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text-light);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: inherit;
+    }
+    .tab-btn.active {
+      background: var(--primary-light);
+      color: var(--primary);
+    }
+    .request-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px 20px;
+      margin-bottom: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+      transition: var(--transition);
+    }
+    .request-item:hover {
+      border-color: var(--primary);
+      box-shadow: var(--shadow);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="mod-header">
+    <div class="mod-header-inner">
+      <a href="./skill_swap_request.html" class="mod-brand">
+        <i class="fas fa-handshake"></i> SkillSwap Request Module
+      </a>
+      <div style="display: flex; align-items: center; gap: 14px;">
+        <span class="badge badge-success"><i class="fas fa-check-circle"></i> Live Server Ready</span>
+        <button class="theme-toggle-btn" title="Toggle Theme" aria-label="Toggle Theme">
+          <span class="theme-toggle-thumb"><i class="fas fa-moon"></i></span>
+          <span class="theme-toggle-text">Theme</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="mod-container">
+    <!-- Hero Banner -->
+    <div class="mod-hero" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+      <div>
+        <h2 style="font-size: 1.6rem; font-weight: 700; margin-bottom: 6px;">Module 5: Skill Swap Requests</h2>
+        <p style="opacity: 0.9; font-size: 0.95rem;">Send proposals, review incoming requests, and track exchange status.</p>
+      </div>
+      <button class="btn" onclick="openNewRequestModal()" style="background: #ffffff; color: #059669; font-weight: 700;">
+        <i class="fas fa-paper-plane"></i> Send New Swap Request
+      </button>
+    </div>
+
+    <!-- Filter Tabs -->
+    <div class="tabs-nav">
+      <button class="tab-btn active" onclick="filterTab('all', this)">
+        <i class="fas fa-list"></i> All Requests (<span id="allCount">0</span>)
+      </button>
+      <button class="tab-btn" onclick="filterTab('pending', this)">
+        <i class="fas fa-clock" style="color: var(--warning);"></i> Pending (<span id="pendingCount">0</span>)
+      </button>
+      <button class="tab-btn" onclick="filterTab('accepted', this)">
+        <i class="fas fa-check-circle" style="color: var(--success);"></i> Accepted (<span id="acceptedCount">0</span>)
+      </button>
+      <button class="tab-btn" onclick="filterTab('declined', this)">
+        <i class="fas fa-times-circle" style="color: var(--error);"></i> Declined (<span id="declinedCount">0</span>)
+      </button>
+    </div>
+
+    <!-- Requests List -->
+    <div id="requestsListContainer"></div>
+
+    <!-- Send Request Form Card (Collapsible or Modal-like) -->
+    <div class="mod-card" id="newRequestSection" style="margin-top: 30px;">
+      <div class="mod-card-header">
+        <h3><i class="fas fa-paper-plane"></i> Propose a New Skill Swap</h3>
+      </div>
+      <form id="newSwapForm">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+          <div class="form-group">
+            <label for="partnerName">Learning Partner</label>
+            <input type="text" id="partnerName" class="form-control" placeholder="e.g. Sarah Chen" required>
+          </div>
+          <div class="form-group">
+            <label for="requestedSkill">Requested Skill (They Teach You)</label>
+            <input type="text" id="requestedSkill" class="form-control" placeholder="e.g. UI/UX Design" required>
+          </div>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+          <div class="form-group">
+            <label for="offeredSkill">Offered Skill (You Teach Them)</label>
+            <input type="text" id="offeredSkill" class="form-control" placeholder="e.g. Python Backend" required>
+          </div>
+          <div class="form-group">
+            <label for="swapMessage">Introductory Note</label>
+            <input type="text" id="swapMessage" class="form-control" placeholder="Hi! Would love to swap 1-hr weekly sessions.">
+          </div>
+        </div>
+        <div style="display: flex; justify-content: flex-end;">
+          <button type="submit" class="btn btn-primary">
+            <i class="fas fa-paper-plane"></i> Dispatch Swap Request
+          </button>
+        </div>
+      </form>
+    </div>
+  </main>
+
+  <script src="../shared/theme.js"></script>
+  <script>
+    const STORAGE_KEY = 'swapskills_swap_requests';
+
+    const defaultRequests = [
+      {
+        id: 'req_1',
+        partner: 'Sarah Chen',
+        offered: 'Python Backend Development',
+        requested: 'UI/UX Design with Figma',
+        message: 'Hi Sarah, I saw you want to learn Python backend! I can teach FastAPI in return for Figma mentorship.',
+        status: 'pending',
+        timestamp: 'Today at 10:30 AM'
+      },
+      {
+        id: 'req_2',
+        partner: 'Carlos Mendez',
+        offered: 'Docker & DevOps',
+        requested: 'Spanish Conversational Fluency',
+        message: 'Hola Carlos! Let us connect for 2 weekly exchange sessions.',
+        status: 'accepted',
+        timestamp: 'Yesterday at 3:15 PM'
+      },
+      {
+        id: 'req_3',
+        partner: 'David Kim',
+        offered: 'React Native',
+        requested: 'Data Structures & Algorithms',
+        message: 'Looking to brush up on DSA for upcoming interview rounds.',
+        status: 'declined',
+        timestamp: '3 days ago'
+      }
+    ];
+
+    let currentFilter = 'all';
+
+    function loadRequests() {
+      const data = localStorage.getItem(STORAGE_KEY);
+      return data ? JSON.parse(data) : defaultRequests;
+    }
+
+    function saveRequests(list) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+      render();
+    }
+
+    function render() {
+      const list = loadRequests();
+      
+      // Update counters
+      document.getElementById('allCount').textContent = list.length;
+      document.getElementById('pendingCount').textContent = list.filter(r => r.status === 'pending').length;
+      document.getElementById('acceptedCount').textContent = list.filter(r => r.status === 'accepted').length;
+      document.getElementById('declinedCount').textContent = list.filter(r => r.status === 'declined').length;
+
+      const filtered = currentFilter === 'all' ? list : list.filter(r => r.status === currentFilter);
+      const container = document.getElementById('requestsListContainer');
+
+      if (filtered.length === 0) {
+        container.innerHTML = `
+          <div style="text-align: center; padding: 40px; background: var(--surface); border-radius: var(--radius); border: 1px dashed var(--border);">
+            <i class="fas fa-inbox" style="font-size: 32px; color: var(--text-light); margin-bottom: 8px;"></i>
+            <p style="color: var(--text-light); font-size: 0.9rem;">No ${currentFilter === 'all' ? '' : currentFilter} requests found.</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = filtered.map(req => {
+        const badgeClass = req.status === 'accepted' ? 'badge-success' : req.status === 'pending' ? 'badge-warning' : 'badge-danger';
+        return `
+          <div class="request-item">
+            <div style="flex: 1; min-width: 280px;">
+              <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px;">
+                <h4 style="font-size: 1.05rem; font-weight: 700;">${req.partner}</h4>
+                <span class="badge ${badgeClass}" style="text-transform: capitalize;">${req.status}</span>
+                <span style="font-size: 0.75rem; color: var(--text-light);">${req.timestamp}</span>
+              </div>
+              <p style="font-size: 0.85rem; color: var(--text); margin-bottom: 8px;">
+                <strong>You Offer:</strong> <span class="skill-tag" style="font-size: 0.75rem;">${req.offered}</span>
+                <span style="margin: 0 4px; color: var(--text-light);">&harr;</span>
+                <strong>You Get:</strong> <span class="skill-tag wanted" style="font-size: 0.75rem;">${req.requested}</span>
+              </p>
+              <p style="font-size: 0.8rem; color: var(--text-light); font-style: italic;">"${req.message}"</p>
+            </div>
+
+            <!-- Actions -->
+            <div style="display: flex; gap: 8px;">
+              ${req.status === 'pending' ? `
+                <button onclick="updateStatus('${req.id}', 'accepted')" class="btn btn-success" style="font-size: 0.8rem; padding: 6px 14px;">
+                  <i class="fas fa-check"></i> Accept
+                </button>
+                <button onclick="updateStatus('${req.id}', 'declined')" class="btn btn-outline" style="font-size: 0.8rem; padding: 6px 14px; color: var(--error);">
+                  <i class="fas fa-times"></i> Decline
+                </button>
+              ` : `
+                <button onclick="deleteRequest('${req.id}')" style="background: transparent; border: none; color: var(--text-light); cursor: pointer; padding: 6px;" title="Delete">
+                  <i class="fas fa-trash-alt"></i>
+                </button>
+              `}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function updateStatus(id, newStatus) {
+      const list = loadRequests();
+      const item = list.find(r => r.id === id);
+      if (item) {
+        item.status = newStatus;
+        saveRequests(list);
+      }
+    }
+
+    function deleteRequest(id) {
+      const list = loadRequests().filter(r => r.id !== id);
+      saveRequests(list);
+    }
+
+    function filterTab(status, el) {
+      currentFilter = status;
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      el.classList.add('active');
+      render();
+    }
+
+    function openNewRequestModal() {
+      document.getElementById('newRequestSection').scrollIntoView({ behavior: 'smooth' });
+      document.getElementById('partnerName').focus();
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      render();
+
+      document.getElementById('newSwapForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const list = loadRequests();
+        list.unshift({
+          id: 'req_' + Date.now(),
+          partner: document.getElementById('partnerName').value.trim(),
+          offered: document.getElementById('offeredSkill').value.trim(),
+          requested: document.getElementById('requestedSkill').value.trim(),
+          message: document.getElementById('swapMessage').value.trim() || 'Skill swap request.',
+          status: 'pending',
+          timestamp: 'Just now'
+        });
+        saveRequests(list);
+        document.getElementById('newSwapForm').reset();
+        alert('Skill swap request sent!');
+      });
+    });
+  </script>
+</body>
+</html>

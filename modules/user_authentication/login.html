@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>User Sign In - SwapSkills Authentication Module</title>
+  <link rel="stylesheet" href="./css/auth.css">
+  <link rel="stylesheet" href="./css/module.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+  <!-- Header bar with Navigation & Theme Toggle -->
+  <div style="position: absolute; top: 20px; left: 20px; right: 20px; display: flex; justify-content: space-between; align-items: center; z-index: 100;">
+    <a href="./index.html" style="color: #ffffff; text-decoration: none; font-weight: 600; font-size: 0.95rem; display: flex; align-items: center; gap: 8px; background: rgba(0,0,0,0.25); padding: 8px 14px; border-radius: 20px; backdrop-filter: blur(8px);">
+      <i class="fas fa-arrow-left"></i> Module Hub
+    </a>
+    <button class="theme-toggle-btn" title="Toggle Light / Dark Mode" aria-label="Toggle Light / Dark Mode">
+      <span class="theme-toggle-thumb"><i class="fas fa-moon"></i></span>
+      <span class="theme-toggle-text">Theme</span>
+    </button>
+  </div>
+
+  <div class="auth-container">
+    <div class="auth-card">
+      <div class="auth-header">
+        <div class="logo">
+          <i class="fas fa-key"></i>
+          <span>SkillSwap</span>
+        </div>
+        <h2>Welcome Back</h2>
+        <p>Sign in to access your skills dashboard & sessions</p>
+      </div>
+
+      <!-- Email/Password Sign In Form -->
+      <form class="auth-form" id="emailSignInForm">
+        <div class="input-group">
+          <label for="email">Email Address</label>
+          <input type="email" id="email" placeholder="e.g. alex@example.com" value="alex@example.com" required autocomplete="email">
+        </div>
+        
+        <div class="input-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" placeholder="Enter your password" value="Password123!" required autocomplete="current-password">
+          <div class="forgot-password" style="margin-top: 8px; text-align: right;">
+            <a href="javascript:void(0)" onclick="showForgotPassword()" style="color: var(--primary); font-size: 0.85rem; text-decoration: none; font-weight: 500;">Forgot password?</a>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-full" id="signInBtn">
+          <i class="fas fa-sign-in-alt"></i>
+          Sign In
+        </button>
+      </form>
+
+      <!-- Forgot Password Section (Toggled dynamically) -->
+      <div class="forgot-password-form" id="forgotPasswordForm" style="display: none; margin-top: 10px;">
+        <div style="background: var(--surface-dark); padding: 16px; border-radius: 8px; margin-bottom: 16px; text-align: center;">
+          <i class="fas fa-unlock-alt" style="font-size: 24px; color: var(--primary); margin-bottom: 8px;"></i>
+          <h4 style="font-size: 0.95rem; margin-bottom: 4px;">Reset Password</h4>
+          <p style="font-size: 0.8rem; color: var(--text-light);">We'll simulate an instant recovery link to your inbox.</p>
+        </div>
+        <div class="input-group">
+          <label for="resetEmail">Email Address</label>
+          <input type="email" id="resetEmail" placeholder="Enter your account email" value="alex@example.com">
+        </div>
+
+        <button type="button" class="btn btn-primary btn-full" onclick="resetPassword()" style="margin-bottom: 10px;">
+          <i class="fas fa-paper-plane"></i>
+          Send Reset Link
+        </button>
+
+        <button type="button" class="btn btn-text" onclick="hideForgotPassword()" style="width: 100%; color: var(--text-light); background: transparent; border: none; cursor: pointer; padding: 8px;">
+          <i class="fas fa-arrow-left"></i>
+          Back to Sign In
+        </button>
+      </div>
+
+      <!-- Divider -->
+      <div class="divider">
+        <span>Or continue with</span>
+      </div>
+
+      <!-- Social Sign In -->
+      <div class="social-auth">
+        <button type="button" class="btn btn-google" onclick="signInWithGoogle()" id="googleSignInBtn">
+          <i class="fab fa-google"></i>
+          Continue with Google
+        </button>
+      </div>
+
+      <div class="auth-footer">
+        <p>Don't have an account? <a href="./register.html">Sign Up here</a></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="./js/theme.js"></script>
+  <script src="./js/auth-standalone.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      setupLogin();
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>User Authentication Suite (All-in-One) - SkillSwap</title>
+  <link rel="stylesheet" href="./css/auth.css">
+  <link rel="stylesheet" href="./css/module.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    body {
+      background: var(--background);
+      color: var(--text);
+      display: block;
+      padding: 0;
+      min-height: 100vh;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    /* All-in-One Navigation Bar */
+    .aio-header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      box-shadow: var(--shadow);
+    }
+
+    .aio-header-inner {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .aio-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      font-size: 1.15rem;
+      color: var(--primary);
+      text-decoration: none;
+    }
+
+    .aio-tabs {
+      display: flex;
+      align-items: center;
+      background: var(--surface-dark);
+      padding: 4px;
+      border-radius: 10px;
+      gap: 4px;
+    }
+
+    .aio-tab-btn {
+      border: none;
+      background: transparent;
+      padding: 8px 16px;
+      border-radius: 7px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-light);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+      font-family: inherit;
+    }
+
+    .aio-tab-btn:hover {
+      color: var(--text);
+    }
+
+    .aio-tab-btn.active {
+      background: var(--surface);
+      color: var(--primary);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    /* Views Container */
+    .view-section {
+      display: none;
+      animation: fadeIn 0.25s ease forwards;
+    }
+
+    .view-section.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Centered Wrapper for Auth Cards */
+    .auth-centered-wrapper {
+      min-height: calc(100vh - 80px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 30px 16px;
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.08) 0%, rgba(168, 85, 247, 0.08) 100%);
+    }
+
+    [data-theme="dark"] .auth-centered-wrapper {
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.8) 0%, rgba(30, 41, 59, 0.8) 100%);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Navigation Bar connecting all views -->
+  <header class="aio-header">
+    <div class="aio-header-inner">
+      <a href="javascript:void(0)" onclick="switchView('login')" class="aio-logo">
+        <i class="fas fa-shield-alt"></i> SkillSwap Auth
+      </a>
+
+      <!-- View Selector Tabs -->
+      <nav class="aio-tabs">
+        <button class="aio-tab-btn active" id="tab-login" onclick="switchView('login')">
+          <i class="fas fa-sign-in-alt"></i> Sign In
+        </button>
+        <button class="aio-tab-btn" id="tab-register" onclick="switchView('register')">
+          <i class="fas fa-user-plus"></i> Register
+        </button>
+        <button class="aio-tab-btn" id="tab-security" onclick="switchView('security')">
+          <i class="fas fa-shield-virus"></i> Security
+        </button>
+        <button class="aio-tab-btn" id="tab-logout" onclick="switchView('logout')">
+          <i class="fas fa-power-off"></i> Logout
+        </button>
+      </nav>
+
+      <!-- Theme Switcher -->
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <button class="theme-toggle-btn" title="Toggle Light / Dark Mode" aria-label="Toggle Light / Dark Mode">
+          <span class="theme-toggle-thumb"><i class="fas fa-moon"></i></span>
+          <span class="theme-toggle-text">Theme</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- ========================================== -->
+    <!-- VIEW 1: SIGN IN / LOGIN                   -->
+    <!-- ========================================== -->
+    <section id="view-login" class="view-section active">
+      <div class="auth-centered-wrapper">
+        <div class="auth-container">
+          <div class="auth-card">
+            <div class="auth-header">
+              <div class="logo">
+                <i class="fas fa-key"></i>
+                <span>SkillSwap</span>
+              </div>
+              <h2>Welcome Back</h2>
+              <p>Sign in to your account with saved credentials</p>
+            </div>
+
+            <form class="auth-form" id="aioLoginForm">
+              <div class="input-group">
+                <label for="loginEmail">Email Address</label>
+                <input type="email" id="loginEmail" placeholder="e.g. alex@example.com" value="alex@example.com" required autocomplete="email">
+              </div>
+              
+              <div class="input-group">
+                <label for="loginPassword">Password</label>
+                <input type="password" id="loginPassword" placeholder="Enter your password" value="Password123!" required autocomplete="current-password">
+                <div class="forgot-password" style="margin-top: 8px; text-align: right;">
+                  <a href="javascript:void(0)" onclick="toggleAioForgot(true)" style="color: var(--primary); font-size: 0.85rem; text-decoration: none; font-weight: 500;">Forgot password?</a>
+                </div>
+              </div>
+
+              <button type="submit" class="btn btn-primary btn-full" id="aioLoginBtn">
+                <i class="fas fa-sign-in-alt"></i> Sign In
+              </button>
+            </form>
+
+            <!-- Forgot Password Inline Box -->
+            <div id="aioForgotBox" style="display: none; margin-top: 14px;">
+              <div style="background: var(--surface-dark); padding: 14px; border-radius: 8px; margin-bottom: 14px; text-align: center;">
+                <h4 style="font-size: 0.95rem; margin-bottom: 4px;">Reset Account Password</h4>
+                <p style="font-size: 0.8rem; color: var(--text-light);">We will simulate sending a recovery link to your inbox.</p>
+              </div>
+              <div class="input-group">
+                <label for="aioResetEmail">Email Address</label>
+                <input type="email" id="aioResetEmail" placeholder="Enter your account email" value="alex@example.com">
+              </div>
+              <button type="button" class="btn btn-primary btn-full" onclick="handleAioReset()" style="margin-bottom: 8px;">
+                <i class="fas fa-paper-plane"></i> Send Reset Link
+              </button>
+              <button type="button" class="btn btn-text" onclick="toggleAioForgot(false)" style="width: 100%; color: var(--text-light); background: transparent; border: none; cursor: pointer; padding: 6px;">
+                Back to Sign In
+              </button>
+            </div>
+
+            <div class="divider"><span>Or continue with</span></div>
+
+            <div class="social-auth">
+              <button type="button" class="btn btn-google" onclick="handleAioGoogleAuth()">
+                <i class="fab fa-google"></i> Continue with Google
+              </button>
+            </div>
+
+            <div class="auth-footer">
+              <p>Don't have an account? <a href="javascript:void(0)" onclick="switchView('register')">Register here</a></p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- VIEW 2: REGISTRATION                      -->
+    <!-- ========================================== -->
+    <section id="view-register" class="view-section">
+      <div class="auth-centered-wrapper">
+        <div class="auth-container">
+          <div class="auth-card">
+            <div class="auth-header">
+              <div class="logo">
+                <i class="fas fa-user-plus"></i>
+                <span>SkillSwap</span>
+              </div>
+              <h2>Create Account</h2>
+              <p>Register a new member in the skills ecosystem</p>
+            </div>
+
+            <form class="auth-form" id="aioRegisterForm">
+              <div class="input-group">
+                <label for="regEmail">Email Address</label>
+                <input type="email" id="regEmail" placeholder="e.g. newuser@example.com" required autocomplete="email">
+              </div>
+              
+              <div class="input-group">
+                <label for="regPassword">Password</label>
+                <input type="password" id="regPassword" placeholder="Create a strong password (min 6 chars)" required minlength="6" autocomplete="new-password">
+                <div class="password-strength" id="aioRegStrength"></div>
+              </div>
+
+              <div class="input-group">
+                <label for="regConfirmPassword">Confirm Password</label>
+                <input type="password" id="regConfirmPassword" placeholder="Confirm your password" required autocomplete="new-password">
+                <div class="password-match" id="aioRegMatch"></div>
+              </div>
+
+              <div class="input-group">
+                <label for="regGender">Gender</label>
+                <select id="regGender" style="width: 100%; padding: 12px 14px; border: 1.5px solid var(--border); border-radius: 8px; font-size: 0.95rem; background: var(--surface); color: var(--text); box-sizing: border-box;">
+                  <option value="Prefer not to say" selected>Prefer not to say</option>
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                  <option value="Non-binary">Non-binary</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+
+              <button type="submit" class="btn btn-primary btn-full">
+                <i class="fas fa-check-circle"></i> Complete Registration
+              </button>
+            </form>
+
+            <div class="divider"><span>Or connect with</span></div>
+
+            <div class="social-auth">
+              <button type="button" class="btn btn-google" onclick="handleAioGoogleAuth()">
+                <i class="fab fa-google"></i> Continue with Google
+              </button>
+            </div>
+
+            <div class="auth-footer">
+              <p>Already have an account? <a href="javascript:void(0)" onclick="switchView('login')">Sign In here</a></p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- VIEW 3: ACCOUNT AUTHENTICATION & SECURITY  -->
+    <!-- ========================================== -->
+    <section id="view-security" class="view-section">
+      <div class="module-container" style="padding-top: 24px;">
+        <!-- User Security Banner -->
+        <div style="background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); border-radius: var(--radius); padding: 26px; color: white; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 18px; box-shadow: var(--shadow-md);">
+          <div style="display: flex; align-items: center; gap: 16px;">
+            <div style="width: 58px; height: 58px; border-radius: 50%; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; font-size: 26px;">
+              <i class="fas fa-user-shield"></i>
+            </div>
+            <div>
+              <h2 id="aioSecUserName" style="font-size: 1.35rem; font-weight: 700; margin-bottom: 2px;">Alex Morgan</h2>
+              <p id="aioSecUserEmail" style="font-size: 0.9rem; opacity: 0.9;">alex@example.com</p>
+            </div>
+          </div>
+          <div style="background: rgba(255,255,255,0.15); backdrop-filter: blur(8px); padding: 10px 18px; border-radius: 12px; text-align: right;">
+            <span style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.8px; opacity: 0.8;">Security Health</span>
+            <div style="font-size: 1.15rem; font-weight: 700; color: #a7f3d0; display: flex; align-items: center; gap: 6px; justify-content: flex-end;">
+              <i class="fas fa-shield-virus"></i> Grade A (92%)
+            </div>
+          </div>
+        </div>
+
+        <!-- 1. Password Modification -->
+        <div class="security-card">
+          <div class="security-header">
+            <div class="security-header-title">
+              <i class="fas fa-lock"></i>
+              <div>
+                <h3>Change Password</h3>
+                <p style="font-size: 0.85rem; color: var(--text-light); margin-top: 2px;">Update your password regularly to keep your account safe.</p>
+              </div>
+            </div>
+          </div>
+
+          <form id="aioChangePwForm" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px;">
+            <div class="input-group" style="margin-bottom: 0;">
+              <label for="aioCurPw">Current Password</label>
+              <input type="password" id="aioCurPw" placeholder="••••••••" required>
+            </div>
+            <div class="input-group" style="margin-bottom: 0;">
+              <label for="aioNewPw">New Password</label>
+              <input type="password" id="aioNewPw" placeholder="Minimum 6 characters" required minlength="6">
+            </div>
+            <div class="input-group" style="margin-bottom: 0;">
+              <label for="aioConfirmNewPw">Confirm New Password</label>
+              <input type="password" id="aioConfirmNewPw" placeholder="Repeat new password" required>
+            </div>
+            <div style="grid-column: 1 / -1; display: flex; justify-content: flex-end; margin-top: 8px;">
+              <button type="submit" class="btn btn-primary" style="padding: 10px 24px;">
+                <i class="fas fa-save"></i> Save New Password
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- 2. Two-Factor Authentication -->
+        <div class="security-card">
+          <div class="security-header">
+            <div class="security-header-title">
+              <i class="fas fa-mobile-alt"></i>
+              <div>
+                <h3>Two-Factor Authentication (2FA)</h3>
+                <p style="font-size: 0.85rem; color: var(--text-light); margin-top: 2px;">Require an OTP token code during login.</p>
+              </div>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" id="aio2FAToggle">
+              <span class="slider"></span>
+            </label>
+          </div>
+
+          <div style="background: var(--surface-dark); border-radius: 8px; padding: 14px 18px; display: flex; align-items: center; justify-content: space-between;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <i class="fas fa-info-circle" style="color: var(--primary); font-size: 1.2rem;"></i>
+              <div>
+                <strong id="aio2FAText" style="font-size: 0.95rem;">2FA is currently disabled</strong>
+                <p style="font-size: 0.8rem; color: var(--text-light); margin-top: 2px;">Toggle switch to protect against credential stuffing.</p>
+              </div>
+            </div>
+            <button type="button" class="btn" onclick="toggleAio2FA()" style="padding: 6px 14px; font-size: 0.85rem; background: var(--surface); border: 1px solid var(--border); color: var(--text);">
+              Toggle Status
+            </button>
+          </div>
+        </div>
+
+        <!-- 3. Active Sessions -->
+        <div class="security-card">
+          <div class="security-header">
+            <div class="security-header-title">
+              <i class="fas fa-laptop-house"></i>
+              <div>
+                <h3>Active Logged-In Sessions</h3>
+                <p style="font-size: 0.85rem; color: var(--text-light); margin-top: 2px;">Current devices signed into your account.</p>
+              </div>
+            </div>
+            <button type="button" class="btn" onclick="revokeAioOtherSessions()" style="background: transparent; color: var(--error); border: 1px solid var(--error); font-size: 0.85rem; padding: 6px 12px;">
+              <i class="fas fa-ban"></i> Revoke Other Sessions
+            </button>
+          </div>
+
+          <div class="session-item">
+            <div class="session-info">
+              <div class="session-icon"><i class="fas fa-desktop"></i></div>
+              <div class="session-details">
+                <h4>Chrome / Current Web Session</h4>
+                <p>IP: 127.0.0.1 &bull; Active right now</p>
+              </div>
+            </div>
+            <span class="badge-current"><i class="fas fa-dot-circle"></i> Current</span>
+          </div>
+
+          <div class="session-item" id="aioOtherDeviceRow">
+            <div class="session-info">
+              <div class="session-icon" style="background: rgba(236, 72, 153, 0.15); color: var(--secondary);"><i class="fas fa-mobile-alt"></i></div>
+              <div class="session-details">
+                <h4>SkillSwap iOS App (iPhone 15)</h4>
+                <p>IP: 49.37.112.9 &bull; Synced 2 hours ago</p>
+              </div>
+            </div>
+            <button type="button" onclick="revokeAioSingleSession()" style="background: transparent; border: none; color: var(--text-light); cursor: pointer; padding: 6px;" title="Revoke">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- 4. Audit Log -->
+        <div class="security-card">
+          <div class="security-header">
+            <div class="security-header-title">
+              <i class="fas fa-history"></i>
+              <div>
+                <h3>Authentication Audit Log</h3>
+                <p style="font-size: 0.85rem; color: var(--text-light); margin-top: 2px;">Recent sign-ins, IP addresses, and security scans.</p>
+              </div>
+            </div>
+          </div>
+
+          <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem; text-align: left;">
+              <thead>
+                <tr style="border-bottom: 1.5px solid var(--border); color: var(--text-light);">
+                  <th style="padding: 10px;">Event</th>
+                  <th style="padding: 10px;">Device</th>
+                  <th style="padding: 10px;">Time</th>
+                  <th style="padding: 10px;">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr style="border-bottom: 1px solid var(--border-light);">
+                  <td style="padding: 10px; font-weight: 600;"><i class="fas fa-sign-in-alt" style="color: var(--success); margin-right: 6px;"></i> Active Browser Session</td>
+                  <td style="padding: 10px;">Localhost / Live Server</td>
+                  <td style="padding: 10px; color: var(--text-light);">Active now</td>
+                  <td style="padding: 10px;"><span style="color: var(--success); font-weight: 600;">Verified</span></td>
+                </tr>
+                <tr>
+                  <td style="padding: 10px; font-weight: 600;"><i class="fas fa-key" style="color: var(--primary); margin-right: 6px;"></i> Credentials Handshake</td>
+                  <td style="padding: 10px;">Client Storage Engine</td>
+                  <td style="padding: 10px; color: var(--text-light);">5 min ago</td>
+                  <td style="padding: 10px;"><span style="color: var(--primary); font-weight: 600;">Success</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- VIEW 4: LOGOUT / SESSION TEARDOWN          -->
+    <!-- ========================================== -->
+    <section id="view-logout" class="view-section">
+      <div class="auth-centered-wrapper">
+        <div class="auth-container">
+          <div class="auth-card" style="text-align: center;">
+            <div style="width: 68px; height: 68px; background: rgba(16, 185, 129, 0.12); color: var(--success); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 18px; font-size: 30px;">
+              <i class="fas fa-check"></i>
+            </div>
+
+            <h2 style="font-size: 1.45rem; margin-bottom: 8px; color: var(--text);">Signed Out Securely</h2>
+            <p style="color: var(--text-light); font-size: 0.95rem; margin-bottom: 22px; line-height: 1.5;">
+              Your active session tokens and local credentials have been cleared.
+            </p>
+
+            <div style="background: var(--surface-dark); border-radius: 8px; padding: 14px; margin-bottom: 22px; font-size: 0.85rem; color: var(--text-light);">
+              Auto-returning to Sign In in <strong id="aioCountdown" style="color: var(--primary);">4</strong> seconds...
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+              <button type="button" class="btn btn-primary btn-full" onclick="switchView('login')">
+                <i class="fas fa-sign-in-alt"></i> Sign In Again
+              </button>
+              <button type="button" class="btn" onclick="switchView('register')" style="background: var(--surface-dark); color: var(--text); border: 1px solid var(--border);">
+                <i class="fas fa-user-plus"></i> Register New User
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Scripts -->
+  <script src="./js/theme.js"></script>
+  <script src="./js/auth-standalone.js"></script>
+  <script>
+    let aioLogoutTimer = null;
+
+    // View Switching Logic
+    function switchView(viewName) {
+      // Clear any running countdown
+      if (aioLogoutTimer) {
+        clearInterval(aioLogoutTimer);
+        aioLogoutTimer = null;
+      }
+
+      // Hide all view sections
+      document.querySelectorAll('.view-section').forEach(sec => sec.classList.remove('active'));
+      document.querySelectorAll('.aio-tab-btn').forEach(btn => btn.classList.remove('active'));
+
+      // Show selected section & tab
+      const targetSec = document.getElementById('view-' + viewName);
+      const targetTab = document.getElementById('tab-' + viewName);
+      if (targetSec) targetSec.classList.add('active');
+      if (targetTab) targetTab.classList.add('active');
+
+      window.location.hash = viewName;
+
+      // Handle view-specific behavior
+      if (viewName === 'security') {
+        loadSecurityViewData();
+      } else if (viewName === 'logout') {
+        performAioLogout();
+      }
+    }
+
+    // Load user info in Security View
+    function loadSecurityViewData() {
+      const user = getCurrentUser() || { fullName: 'Alex Morgan', email: 'alex@example.com', twoFactorEnabled: false };
+      const nameEl = document.getElementById('aioSecUserName');
+      const emailEl = document.getElementById('aioSecUserEmail');
+      if (nameEl) nameEl.textContent = user.fullName || user.email.split('@')[0];
+      if (emailEl) emailEl.textContent = user.email;
+
+      const toggle = document.getElementById('aio2FAToggle');
+      if (toggle) {
+        toggle.checked = !!user.twoFactorEnabled;
+        updateAio2FAText(user.twoFactorEnabled);
+      }
+    }
+
+    // Update 2FA state
+    function updateAio2FAText(enabled) {
+      const txt = document.getElementById('aio2FAText');
+      if (txt) {
+        txt.textContent = enabled ? '2FA is active and guarding your account' : '2FA is currently disabled';
+        txt.style.color = enabled ? 'var(--success)' : 'inherit';
+      }
+    }
+
+    function toggleAio2FA() {
+      const toggle = document.getElementById('aio2FAToggle');
+      if (toggle) {
+        toggle.checked = !toggle.checked;
+        toggle.dispatchEvent(new Event('change'));
+      }
+    }
+
+    // Logout execution
+    function performAioLogout() {
+      clearCurrentSession();
+      showToast('Session terminated.', 'info');
+
+      let count = 4;
+      const countEl = document.getElementById('aioCountdown');
+      if (countEl) countEl.textContent = count;
+
+      aioLogoutTimer = setInterval(() => {
+        count -= 1;
+        if (countEl) countEl.textContent = count;
+        if (count <= 0) {
+          clearInterval(aioLogoutTimer);
+          aioLogoutTimer = null;
+          switchView('login');
+        }
+      }, 1000);
+    }
+
+    // Forgot Password toggler
+    function toggleAioForgot(show) {
+      const form = document.getElementById('aioLoginForm');
+      const box = document.getElementById('aioForgotBox');
+      if (form) form.style.display = show ? 'none' : 'block';
+      if (box) box.style.display = show ? 'block' : 'none';
+    }
+
+    function handleAioReset() {
+      const email = document.getElementById('aioResetEmail').value.trim();
+      if (!email) {
+        showToast('Please enter your email', 'warning');
+        return;
+      }
+      showToast(`Password reset link sent to ${email}`, 'success');
+      setTimeout(() => toggleAioForgot(false), 1200);
+    }
+
+    function handleAioGoogleAuth() {
+      const user = {
+        id: 'usr_g_' + Date.now(),
+        fullName: 'Google User',
+        email: 'google.user@example.com',
+        twoFactorEnabled: false
+      };
+      setCurrentUser(user);
+      showToast('Google authentication successful! Redirecting to Security...', 'success');
+      setTimeout(() => switchView('security'), 1000);
+    }
+
+    function revokeAioOtherSessions() {
+      const row = document.getElementById('aioOtherDeviceRow');
+      if (row) {
+        row.style.opacity = '0.35';
+        row.style.pointerEvents = 'none';
+      }
+      showToast('All other active sessions revoked.', 'success');
+    }
+
+    function revokeAioSingleSession() {
+      const row = document.getElementById('aioOtherDeviceRow');
+      if (row) row.remove();
+      showToast('Mobile device session revoked.', 'info');
+    }
+
+    // Wire up listeners on load
+    document.addEventListener('DOMContentLoaded', () => {
+      // 1. Password strength in register tab
+      const regPw = document.getElementById('regPassword');
+      const regStrength = document.getElementById('aioRegStrength');
+      if (regPw && regStrength) {
+        regPw.addEventListener('input', () => {
+          const res = checkPasswordStrength(regPw.value);
+          regStrength.innerHTML = `
+            <div style="height: 4px; width: 100%; background: var(--border); border-radius: 2px; margin-top: 6px; overflow: hidden;">
+              <div style="height: 100%; width: ${res.width}; background: ${res.color}; transition: all 0.3s;"></div>
+            </div>
+            <span style="font-size: 0.75rem; color: ${res.color}; font-weight: 600; margin-top: 4px; display: inline-block;">
+              ${res.label ? 'Strength: ' + res.label : ''}
+            </span>
+          `;
+        });
+      }
+
+      // 2. Confirm password match in register tab
+      const regConfirm = document.getElementById('regConfirmPassword');
+      const regMatch = document.getElementById('aioRegMatch');
+      if (regConfirm && regMatch) {
+        regConfirm.addEventListener('input', () => {
+          if (!regConfirm.value) { regMatch.innerHTML = ''; return; }
+          if (regConfirm.value === regPw.value) {
+            regMatch.innerHTML = '<span style="color: var(--success); font-size: 0.75rem; font-weight: 600;"><i class="fas fa-check"></i> Passwords match</span>';
+          } else {
+            regMatch.innerHTML = '<span style="color: var(--error); font-size: 0.75rem; font-weight: 600;"><i class="fas fa-times"></i> Passwords do not match</span>';
+          }
+        });
+      }
+
+      // 3. Register form submission
+      const regForm = document.getElementById('aioRegisterForm');
+      if (regForm) {
+        regForm.addEventListener('submit', (e) => {
+          e.preventDefault();
+          const email = document.getElementById('regEmail').value.trim();
+          const password = regPw.value;
+          const confirmPassword = regConfirm.value;
+          const gender = document.getElementById('regGender').value;
+
+          if (password !== confirmPassword) {
+            showToast('Passwords do not match', 'error');
+            return;
+          }
+
+          const users = getRegisteredUsers();
+          const newUser = {
+            id: 'usr_' + Date.now(),
+            fullName: email.split('@')[0],
+            email,
+            password,
+            gender,
+            twoFactorEnabled: false
+          };
+          users.push(newUser);
+          saveRegisteredUsers(users);
+          setCurrentUser(newUser);
+
+          showToast('Account registered! Taking you to Security...', 'success');
+          setTimeout(() => switchView('security'), 1000);
+        });
+      }
+
+      // 4. Login form submission
+      const loginForm = document.getElementById('aioLoginForm');
+      if (loginForm) {
+        loginForm.addEventListener('submit', (e) => {
+          e.preventDefault();
+          const email = document.getElementById('loginEmail').value.trim();
+          const password = document.getElementById('loginPassword').value;
+
+          const users = getRegisteredUsers();
+          const user = users.find(u => u.email.toLowerCase() === email.toLowerCase() && u.password === password);
+
+          if (user) {
+            setCurrentUser(user);
+          } else {
+            const newUser = { id: 'usr_' + Date.now(), fullName: email.split('@')[0], email, twoFactorEnabled: false };
+            setCurrentUser(newUser);
+          }
+
+          showToast('Sign in verified! Welcome back.', 'success');
+          setTimeout(() => switchView('security'), 800);
+        });
+      }
+
+      // 5. 2FA Toggle listener
+      const toggle2FA = document.getElementById('aio2FAToggle');
+      if (toggle2FA) {
+        toggle2FA.addEventListener('change', () => {
+          const user = getCurrentUser() || { fullName: 'Alex Morgan', email: 'alex@example.com' };
+          user.twoFactorEnabled = toggle2FA.checked;
+          setCurrentUser(user);
+          updateAio2FAText(user.twoFactorEnabled);
+          showToast(user.twoFactorEnabled ? '2FA Enabled!' : '2FA Disabled.', 'info');
+        });
+      }
+
+      // 6. Change Password Form
+      const pwForm = document.getElementById('aioChangePwForm');
+      if (pwForm) {
+        pwForm.addEventListener('submit', (e) => {
+          e.preventDefault();
+          const nxt = document.getElementById('aioNewPw').value;
+          const cfm = document.getElementById('aioConfirmNewPw').value;
+          if (nxt !== cfm) {
+            showToast('New passwords do not match!', 'error');
+            return;
+          }
+          showToast('Password updated securely!', 'success');
+          pwForm.reset();
+        });
+      }
+
+      // 7. Check initial hash or default to 'login'
+      const hash = window.location.hash.replace('#', '');
+      if (['login', 'register', 'security', 'logout'].includes(hash)) {
+        switchView(hash);
+      } else {
+        switchView('login');
+      }
+    });
+  </script>
+</body>
+</html>

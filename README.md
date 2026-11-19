@@ -16,16 +16,35 @@ SkillSwap is an open, peer-to-peer knowledge exchange platform designed to break
 
 ## 📑 Table of Contents
 1. [🌟 Key Highlights & Feature Matrix](#-key-highlights--feature-matrix)
-2. [📘 A-to-Z Study Guide with ELI10 Explanations](STUDY_GUIDE_A_TO_Z.md)
-3. [📱 Mobile First & UI/UX Design](#-mobile-first--uiux-design)
-4. [🌓 Dark & Light Theme Engine](#-dark--light-theme-engine)
-5. [📖 The Complete Feature Suite](#-the-complete-feature-suite)
-6. [🚀 Our Engineering Journey](#-our-engineering-journey)
-7. [🏗️ System Architecture & Stack](#️-system-architecture--stack)
-8. [💻 Local Development & Setup](#-local-development--setup)
-9. [☁️ Production Deployment on Vercel](#️-production-deployment-on-vercel)
-10. [📡 API Reference](#-api-reference)
-11. [👥 Community & License](#-community--license)
+2. [🧩 Standalone Modular Architecture (Live Server Suite)](#-standalone-modular-architecture-live-server-suite)
+3. [📘 A-to-Z Study Guide with ELI10 Explanations](STUDY_GUIDE_A_TO_Z.md)
+4. [📱 Mobile First & UI/UX Design](#-mobile-first--uiux-design)
+5. [🌓 Dark & Light Theme Engine](#-dark--light-theme-engine)
+6. [📖 The Complete Feature Suite](#-the-complete-feature-suite)
+7. [🚀 Our Engineering Journey](#-our-engineering-journey)
+8. [🏗️ System Architecture & Stack](#️-system-architecture--stack)
+9. [💻 Local Development & Setup](#-local-development--setup)
+10. [☁️ Production Deployment on Vercel](#️-production-deployment-on-vercel)
+11. [📡 API Reference](#-api-reference)
+12. [👥 Community & License](#-community--license)
+
+---
+
+## 🧩 Standalone Modular Architecture (Live Server Suite)
+
+SkillSwap now features a completely standalone, modular directory in `modules/` allowing each platform component to be executed individually in **Live Server**, static hosting, or local file viewing with zero backend dependencies:
+
+| Module Directory | Key Capabilities | Standalone Entrypoint |
+| :--- | :--- | :--- |
+| **`modules/user_authentication/`** | User registration with strength meter, sign in, forgot password, 2FA toggle, active devices, and logout. | [user_authentication.html](modules/user_authentication/user_authentication.html) |
+| **`modules/user_profile_management/`** | Personal information management, career details, education, avatar upload, and real-time live preview card. | [user_profile_management.html](modules/user_profile_management/user_profile_management.html) |
+| **`modules/skill_management/`** | Manage offered teaching skills with proficiency tags and wanted learning goals with priority levels. | [skill_management.html](modules/skill_management/skill_management.html) |
+| **`modules/skill_search_and_matching/`** | Instant search, category filters, and 100% reciprocal match detection algorithm. | [skill_search_and_matching.html](modules/skill_search_and_matching/skill_search_and_matching.html) |
+| **`modules/skill_swap_request/`** | Dispatch swap proposals with introductory notes; filter tabs for All, Pending, Accepted, Declined. | [skill_swap_request.html](modules/skill_swap_request/skill_swap_request.html) |
+| **`modules/communication/`** | Peer messaging with chat history, responsive bubbles, and 1-on-1 video session booking. | [communication.html](modules/communication/communication.html) |
+| **`modules/feedback_and_admin/`** | 1–5 star rating submission, platform health KPI analytics, and admin moderation queue. | [feedback_and_admin.html](modules/feedback_and_admin/feedback_and_admin.html) |
+
+> 💡 **Quick Launch:** Open [`modules/index.html`](modules/index.html) in VS Code **Live Server** or run `cd modules && python3 -m http.server 5500` to access the master navigation hub.
 
 ---
 

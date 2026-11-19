@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Skill Search and Matching Module - SkillSwap</title>
+  <link rel="stylesheet" href="../shared/common.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    .search-bar-wrapper {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+    .user-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
+    }
+    .user-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: var(--transition);
+    }
+    .user-card:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-md);
+      border-color: var(--primary);
+    }
+    .match-pill {
+      background: #dcfce7;
+      color: #15803d;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="mod-header">
+    <div class="mod-header-inner">
+      <a href="./skill_search_and_matching.html" class="mod-brand">
+        <i class="fas fa-search-location"></i> SkillSwap Search & Matching
+      </a>
+      <div style="display: flex; align-items: center; gap: 14px;">
+        <span class="badge badge-success"><i class="fas fa-check-circle"></i> Live Server Ready</span>
+        <button class="theme-toggle-btn" title="Toggle Theme" aria-label="Toggle Theme">
+          <span class="theme-toggle-thumb"><i class="fas fa-moon"></i></span>
+          <span class="theme-toggle-text">Theme</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="mod-container">
+    <!-- Hero Banner -->
+    <div class="mod-hero" style="background: linear-gradient(135deg, #0ea5e9 0%, #2563eb 100%);">
+      <div>
+        <h2 style="font-size: 1.6rem; font-weight: 700; margin-bottom: 6px;">Module 4: Skill Search & Smart Matching</h2>
+        <p style="opacity: 0.9; font-size: 0.95rem;">Find reciprocal learning partners and filter peers by offered and requested skills.</p>
+      </div>
+      <div id="matchCountBadge" style="background: rgba(255,255,255,0.2); padding: 8px 16px; border-radius: 8px; font-weight: 700;">
+        Showing 3 Partners
+      </div>
+    </div>
+
+    <!-- Search & Filter Controls -->
+    <div class="search-bar-wrapper">
+      <div style="flex: 2; min-width: 240px; position: relative;">
+        <i class="fas fa-search" style="position: absolute; left: 14px; top: 14px; color: var(--text-light);"></i>
+        <input type="text" id="searchInput" class="form-control" style="padding-left: 38px;" placeholder="Search by skill name (e.g. Python, Figma, React)...">
+      </div>
+      <div style="flex: 1; min-width: 160px;">
+        <select id="filterCategory" class="form-control">
+          <option value="all">All Skills</option>
+          <option value="match_only">100% Reciprocal Matches Only</option>
+          <option value="tech">Coding & Tech</option>
+          <option value="design">Design & Creative</option>
+          <option value="languages">Languages</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- User Cards Grid -->
+    <div class="user-grid" id="usersContainer"></div>
+  </main>
+
+  <script src="../shared/theme.js"></script>
+  <script>
+    const samplePartners = [
+      {
+        id: 'usr_1',
+        name: 'Sarah Chen',
+        title: 'UI/UX Designer & Product Thinker',
+        location: 'Bengaluru, India',
+        avatarInitials: 'SC',
+        teaches: ['UI/UX Design with Figma', 'Product Wireframing'],
+        wants: ['Python Backend Development', 'Django'],
+        reciprocalScore: 100,
+        category: 'design'
+      },
+      {
+        id: 'usr_2',
+        name: 'Carlos Mendez',
+        title: 'Native Spanish Instructor & Polyglot',
+        location: 'Madrid, Spain',
+        avatarInitials: 'CM',
+        teaches: ['Spanish Language', 'Conversational Spanish'],
+        wants: ['Docker & Microservices', 'React'],
+        reciprocalScore: 95,
+        category: 'languages'
+      },
+      {
+        id: 'usr_3',
+        name: 'Priya Sharma',
+        title: 'Cloud DevOps & Kubernetes Consultant',
+        location: 'Pune, India',
+        avatarInitials: 'PS',
+        teaches: ['Kubernetes', 'Terraform', 'CI/CD Pipelines'],
+        wants: ['UI/UX Design with Figma'],
+        reciprocalScore: 75,
+        category: 'tech'
+      },
+      {
+        id: 'usr_4',
+        name: 'David Kim',
+        title: 'Full-Stack JavaScript Engineer',
+        location: 'Seoul, Korea',
+        avatarInitials: 'DK',
+        teaches: ['Next.js', 'TypeScript', 'Node.js'],
+        wants: ['Python Backend Development'],
+        reciprocalScore: 85,
+        category: 'tech'
+      }
+    ];
+
+    function renderPartners(list) {
+      const container = document.getElementById('usersContainer');
+      document.getElementById('matchCountBadge').textContent = `Showing ${list.length} Partners`;
+
+      if (list.length === 0) {
+        container.innerHTML = `
+          <div style="grid-column: 1 / -1; text-align: center; padding: 40px; background: var(--surface); border-radius: var(--radius); border: 1px dashed var(--border);">
+            <i class="fas fa-search" style="font-size: 32px; color: var(--text-light); margin-bottom: 10px;"></i>
+            <h4>No learning partners match your criteria</h4>
+            <p style="color: var(--text-light); font-size: 0.85rem;">Try relaxing your search terms or selecting 'All Skills'.</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = list.map(user => `
+        <div class="user-card">
+          <div>
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+              <div style="display: flex; align-items: center; gap: 12px;">
+                <div style="width: 44px; height: 44px; border-radius: 50%; background: linear-gradient(135deg, var(--primary), #a855f7); color: #fff; font-weight: 700; display: flex; align-items: center; justify-content: center; font-size: 16px;">
+                  ${user.avatarInitials}
+                </div>
+                <div>
+                  <h4 style="font-size: 1rem; font-weight: 700;">${user.name}</h4>
+                  <p style="font-size: 0.75rem; color: var(--text-light);"><i class="fas fa-map-marker-alt"></i> ${user.location}</p>
+                </div>
+              </div>
+              ${user.reciprocalScore >= 90 ? `<span class="match-pill"><i class="fas fa-bolt"></i> ${user.reciprocalScore}% Match</span>` : ''}
+            </div>
+
+            <p style="font-size: 0.85rem; color: var(--text); margin-bottom: 14px; font-weight: 500;">
+              ${user.title}
+            </p>
+
+            <!-- Teaches -->
+            <div style="margin-bottom: 10px;">
+              <div style="font-size: 0.75rem; font-weight: 700; color: var(--text-light); text-transform: uppercase; margin-bottom: 4px;">
+                <i class="fas fa-chalkboard-teacher" style="color: var(--primary);"></i> Can Teach:
+              </div>
+              <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+                ${user.teaches.map(t => `<span class="skill-tag" style="font-size: 0.75rem; padding: 4px 8px;">${t}</span>`).join('')}
+              </div>
+            </div>
+
+            <!-- Wants -->
+            <div style="margin-bottom: 16px;">
+              <div style="font-size: 0.75rem; font-weight: 700; color: var(--text-light); text-transform: uppercase; margin-bottom: 4px;">
+                <i class="fas fa-bullseye" style="color: #ec4899;"></i> Wants to Learn:
+              </div>
+              <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+                ${user.wants.map(w => `<span class="skill-tag wanted" style="font-size: 0.75rem; padding: 4px 8px;">${w}</span>`).join('')}
+              </div>
+            </div>
+          </div>
+
+          <button onclick="requestSwap('${user.name}')" class="btn btn-primary" style="width: 100%; justify-content: center; font-size: 0.85rem; padding: 8px;">
+            <i class="fas fa-exchange-alt"></i> Propose Skill Swap
+          </button>
+        </div>
+      `).join('');
+    }
+
+    function requestSwap(name) {
+      alert(`Navigating to propose a Skill Swap with ${name}!`);
+    }
+
+    function filterPartners() {
+      const q = document.getElementById('searchInput').value.toLowerCase().trim();
+      const cat = document.getElementById('filterCategory').value;
+
+      const filtered = samplePartners.filter(user => {
+        const matchesQuery = !q || 
+          user.name.toLowerCase().includes(q) ||
+          user.teaches.some(t => t.toLowerCase().includes(q)) ||
+          user.wants.some(w => w.toLowerCase().includes(q));
+
+        if (!matchesQuery) return false;
+
+        if (cat === 'match_only') return user.reciprocalScore >= 90;
+        if (cat !== 'all') return user.category === cat;
+        return true;
+      });
+
+      renderPartners(filtered);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      renderPartners(samplePartners);
+      document.getElementById('searchInput').addEventListener('input', filterPartners);
+      document.getElementById('filterCategory').addEventListener('change', filterPartners);
+    });
+  </script>
+</body>
+</html>

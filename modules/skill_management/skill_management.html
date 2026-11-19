@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Skill Management Module - SkillSwap</title>
+  <link rel="stylesheet" href="../shared/common.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    .skills-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+    @media (max-width: 768px) {
+      .skills-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    .skill-list-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 14px;
+      background: var(--surface-dark);
+      border-radius: 8px;
+      margin-bottom: 10px;
+      border: 1px solid var(--border);
+      transition: var(--transition);
+    }
+    .skill-list-item:hover {
+      border-color: var(--primary);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="mod-header">
+    <div class="mod-header-inner">
+      <a href="./skill_management.html" class="mod-brand">
+        <i class="fas fa-layer-group"></i> SkillSwap Skill Manager
+      </a>
+      <div style="display: flex; align-items: center; gap: 14px;">
+        <span class="badge badge-success"><i class="fas fa-check-circle"></i> Live Server Ready</span>
+        <button class="theme-toggle-btn" title="Toggle Theme" aria-label="Toggle Theme">
+          <span class="theme-toggle-thumb"><i class="fas fa-moon"></i></span>
+          <span class="theme-toggle-text">Theme</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="mod-container">
+    <!-- Hero Banner -->
+    <div class="mod-hero" style="background: linear-gradient(135deg, #7209b7 0%, #4361ee 100%);">
+      <div>
+        <h2 style="font-size: 1.6rem; font-weight: 700; margin-bottom: 6px;">Module 3: Skill Management</h2>
+        <p style="opacity: 0.9; font-size: 0.95rem;">Curate your teaching portfolio and target skills you want to learn.</p>
+      </div>
+      <div style="display: flex; gap: 10px;">
+        <span style="background: rgba(255,255,255,0.2); padding: 8px 14px; border-radius: 8px; font-size: 0.85rem; font-weight: 600;">
+          <i class="fas fa-chalkboard-teacher"></i> <span id="teachCount">0</span> Teaching
+        </span>
+        <span style="background: rgba(255,255,255,0.2); padding: 8px 14px; border-radius: 8px; font-size: 0.85rem; font-weight: 600;">
+          <i class="fas fa-graduation-cap"></i> <span id="learnCount">0</span> Learning
+        </span>
+      </div>
+    </div>
+
+    <!-- Skills Columns -->
+    <div class="skills-grid">
+      <!-- Section A: Skills I Can Teach -->
+      <div class="mod-card">
+        <div class="mod-card-header">
+          <h3><i class="fas fa-chalkboard-teacher" style="color: var(--primary);"></i> Skills I Can Teach (Offered)</h3>
+        </div>
+
+        <!-- Add Form -->
+        <form id="addTeachSkillForm" style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px;">
+          <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 10px;">
+            <input type="text" id="teachSkillName" class="form-control" placeholder="e.g. Python Programming" required>
+            <select id="teachSkillLevel" class="form-control">
+              <option value="Expert">Expert</option>
+              <option value="Advanced" selected>Advanced</option>
+              <option value="Intermediate">Intermediate</option>
+            </select>
+          </div>
+          <input type="text" id="teachSkillDesc" class="form-control" placeholder="Short description (e.g. FastAPI, AsyncIO, Pytest)">
+          <button type="submit" class="btn btn-primary" style="justify-content: center;">
+            <i class="fas fa-plus"></i> Add Teaching Skill
+          </button>
+        </form>
+
+        <!-- List -->
+        <div id="teachSkillsList"></div>
+      </div>
+
+      <!-- Section B: Skills I Want to Learn -->
+      <div class="mod-card">
+        <div class="mod-card-header">
+          <h3><i class="fas fa-bullseye" style="color: #ec4899;"></i> Skills I Want to Learn (Wanted)</h3>
+        </div>
+
+        <!-- Add Form -->
+        <form id="addLearnSkillForm" style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px;">
+          <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 10px;">
+            <input type="text" id="learnSkillName" class="form-control" placeholder="e.g. Spanish Fluency" required>
+            <select id="learnSkillPriority" class="form-control">
+              <option value="High Priority">High Priority</option>
+              <option value="Medium Priority" selected>Medium</option>
+              <option value="Casual Hobby">Casual</option>
+            </select>
+          </div>
+          <input type="text" id="learnSkillDesc" class="form-control" placeholder="Goal (e.g. Conversational fluency for travel)">
+          <button type="submit" class="btn btn-primary" style="justify-content: center; background: #ec4899; border-color: #ec4899;">
+            <i class="fas fa-plus"></i> Add Learning Goal
+          </button>
+        </form>
+
+        <!-- List -->
+        <div id="learnSkillsList"></div>
+      </div>
+    </div>
+  </main>
+
+  <script src="../shared/theme.js"></script>
+  <script>
+    const STORAGE_KEY = 'swapskills_user_skills_data';
+
+    const defaultSkills = {
+      teach: [
+        { id: 't1', name: 'Python Backend Development', level: 'Expert', desc: 'FastAPI, SQLAlchemy, REST APIs' },
+        { id: 't2', name: 'Docker & Microservices', level: 'Advanced', desc: 'Containerization, Compose, CI/CD' }
+      ],
+      learn: [
+        { id: 'l1', name: 'UI/UX Design with Figma', priority: 'High Priority', desc: 'Wireframing, auto-layout & prototypes' },
+        { id: 'l2', name: 'Spanish Language', priority: 'Medium Priority', desc: 'Basic conversational phrases' }
+      ]
+    };
+
+    function loadSkills() {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      return saved ? JSON.parse(saved) : defaultSkills;
+    }
+
+    function saveSkills(data) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      renderSkills(data);
+    }
+
+    function renderSkills(data) {
+      // Counters
+      document.getElementById('teachCount').textContent = data.teach.length;
+      document.getElementById('learnCount').textContent = data.learn.length;
+
+      // Render Teaching
+      const teachList = document.getElementById('teachSkillsList');
+      if (data.teach.length === 0) {
+        teachList.innerHTML = '<p style="color: var(--text-light); font-size: 0.85rem;">No teaching skills added yet.</p>';
+      } else {
+        teachList.innerHTML = data.teach.map((item, idx) => `
+          <div class="skill-list-item">
+            <div>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <strong style="font-size: 0.95rem;">${item.name}</strong>
+                <span class="badge badge-success">${item.level}</span>
+              </div>
+              <p style="font-size: 0.8rem; color: var(--text-light); margin-top: 2px;">${item.desc || 'No notes provided'}</p>
+            </div>
+            <button onclick="removeTeachSkill(${idx})" style="background: transparent; border: none; color: var(--error); cursor: pointer; padding: 6px;" title="Remove">
+              <i class="fas fa-trash-alt"></i>
+            </button>
+          </div>
+        `).join('');
+      }
+
+      // Render Learning
+      const learnList = document.getElementById('learnSkillsList');
+      if (data.learn.length === 0) {
+        learnList.innerHTML = '<p style="color: var(--text-light); font-size: 0.85rem;">No learning goals added yet.</p>';
+      } else {
+        learnList.innerHTML = data.learn.map((item, idx) => `
+          <div class="skill-list-item">
+            <div>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <strong style="font-size: 0.95rem;">${item.name}</strong>
+                <span class="badge badge-warning" style="background: rgba(236,72,153,0.15); color: #db2777;">${item.priority}</span>
+              </div>
+              <p style="font-size: 0.8rem; color: var(--text-light); margin-top: 2px;">${item.desc || 'No notes provided'}</p>
+            </div>
+            <button onclick="removeLearnSkill(${idx})" style="background: transparent; border: none; color: var(--error); cursor: pointer; padding: 6px;" title="Remove">
+              <i class="fas fa-trash-alt"></i>
+            </button>
+          </div>
+        `).join('');
+      }
+    }
+
+    function removeTeachSkill(idx) {
+      const skills = loadSkills();
+      skills.teach.splice(idx, 1);
+      saveSkills(skills);
+    }
+
+    function removeLearnSkill(idx) {
+      const skills = loadSkills();
+      skills.learn.splice(idx, 1);
+      saveSkills(skills);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const skills = loadSkills();
+      renderSkills(skills);
+
+      // Add Teach Form
+      document.getElementById('addTeachSkillForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const current = loadSkills();
+        current.teach.push({
+          id: 't_' + Date.now(),
+          name: document.getElementById('teachSkillName').value.trim(),
+          level: document.getElementById('teachSkillLevel').value,
+          desc: document.getElementById('teachSkillDesc').value.trim()
+        });
+        saveSkills(current);
+        document.getElementById('addTeachSkillForm').reset();
+      });
+
+      // Add Learn Form
+      document.getElementById('addLearnSkillForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const current = loadSkills();
+        current.learn.push({
+          id: 'l_' + Date.now(),
+          name: document.getElementById('learnSkillName').value.trim(),
+          priority: document.getElementById('learnSkillPriority').value,
+          desc: document.getElementById('learnSkillDesc').value.trim()
+        });
+        saveSkills(current);
+        document.getElementById('addLearnSkillForm').reset();
+      });
+    });
+  </script>
+</body>
+</html>

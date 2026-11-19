@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Account Authentication & Security - SwapSkills Module</title>
+  <link rel="stylesheet" href="./css/auth.css">
+  <link rel="stylesheet" href="./css/module.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    body {
+      background: var(--background);
+      display: block;
+      padding: 0;
+      color: var(--text);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Module Navigation -->
+  <div style="background: var(--surface); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100;">
+    <div style="max-width: 960px; margin: 0 auto; padding: 14px 20px; display: flex; align-items: center; justify-content: space-between;">
+      <div style="display: flex; align-items: center; gap: 14px;">
+        <a href="./index.html" style="font-weight: 700; font-size: 1.15rem; color: var(--primary); text-decoration: none; display: flex; align-items: center; gap: 8px;">
+          <i class="fas fa-shield-alt"></i> SkillSwap Security
+        </a>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 16px;">
+        <a href="./login.html" style="text-decoration: none; font-size: 0.9rem; color: var(--text-light); font-weight: 500;">
+          <i class="fas fa-sign-in-alt"></i> Switch Account
+        </a>
+        <a href="./logout.html" style="text-decoration: none; font-size: 0.9rem; color: var(--error); font-weight: 500;">
+          <i class="fas fa-power-off"></i> Sign Out
+        </a>
+        <button class="theme-toggle-btn" title="Toggle Light / Dark Mode" aria-label="Toggle Light / Dark Mode">
+          <span class="theme-toggle-thumb"><i class="fas fa-moon"></i></span>
+          <span class="theme-toggle-text">Theme</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="module-container">
+    <!-- User Overview Banner -->
+    <div style="background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); border-radius: var(--radius); padding: 28px; color: white; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; box-shadow: var(--shadow-md);">
+      <div style="display: flex; align-items: center; gap: 18px;">
+        <div style="width: 64px; height: 64px; border-radius: 50%; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; font-size: 28px;">
+          <i class="fas fa-user-shield"></i>
+        </div>
+        <div>
+          <h2 id="userNameDisplay" style="font-size: 1.4rem; font-weight: 700; margin-bottom: 4px;">Alex Morgan</h2>
+          <p id="userEmailDisplay" style="font-size: 0.9rem; opacity: 0.9;">alex@example.com</p>
+        </div>
+      </div>
+      <div style="background: rgba(255,255,255,0.15); backdrop-filter: blur(8px); padding: 12px 20px; border-radius: 12px; text-align: right;">
+        <span style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.8px; opacity: 0.8;">Security Status</span>
+        <div style="font-size: 1.25rem; font-weight: 700; color: #a7f3d0; display: flex; align-items: center; gap: 6px; justify-content: flex-end;">
+          <i class="fas fa-shield-virus"></i> Protected (88%)
+        </div>
+      </div>
+    </div>
+
+    <!-- 1. Password & Authentication -->
+    <div class="security-card">
+      <div class="security-header">
+        <div class="security-header-title">
+          <i class="fas fa-lock"></i>
+          <div>
+            <h3>Change Password</h3>
+            <p style="font-size: 0.85rem; color: var(--text-light); margin-top: 2px;">Ensure your account uses a strong, unique passphrase.</p>
+          </div>
+        </div>
+      </div>
+
+      <form id="changePasswordForm" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px;">
+        <div class="input-group" style="margin-bottom: 0;">
+          <label for="currentPassword">Current Password</label>
+          <input type="password" id="currentPassword" placeholder="••••••••" required>
+        </div>
+        <div class="input-group" style="margin-bottom: 0;">
+          <label for="newPassword">New Password</label>
+          <input type="password" id="newPassword" placeholder="Minimum 6 characters" required minlength="6">
+        </div>
+        <div class="input-group" style="margin-bottom: 0;">
+          <label for="confirmNewPassword">Confirm New Password</label>
+          <input type="password" id="confirmNewPassword" placeholder="Repeat new password" required>
+        </div>
+        <div style="grid-column: 1 / -1; display: flex; justify-content: flex-end; margin-top: 8px;">
+          <button type="submit" class="btn btn-primary" style="padding: 10px 24px;">
+            <i class="fas fa-save"></i> Update Password
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- 2. Two-Factor Authentication (2FA) -->
+    <div class="security-card">
+      <div class="security-header">
+        <div class="security-header-title">
+          <i class="fas fa-mobile-alt"></i>
+          <div>
+            <h3>Two-Factor Authentication (2FA)</h3>
+            <p style="font-size: 0.85rem; color: var(--text-light); margin-top: 2px;">Require an OTP code from Google Authenticator or Authy when signing in.</p>
+          </div>
+        </div>
+        <label class="toggle-switch">
+          <input type="checkbox" id="twoFactorToggle">
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div id="twoFactorStatusBox" style="background: var(--surface-dark); border-radius: 8px; padding: 16px; display: flex; align-items: center; justify-content: space-between;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <i class="fas fa-info-circle" style="color: var(--primary); font-size: 1.25rem;"></i>
+          <div>
+            <strong id="twoFactorStatusText" style="font-size: 0.95rem;">2FA is currently disabled</strong>
+            <p style="font-size: 0.8rem; color: var(--text-light); margin-top: 2px;">Turn on to guard against unauthorized access.</p>
+          </div>
+        </div>
+        <button type="button" class="btn" id="configure2FABtn" onclick="toggle2FASimulation()" style="padding: 8px 16px; font-size: 0.85rem; background: var(--surface); border: 1px solid var(--border); color: var(--text);">
+          Configure
+        </button>
+      </div>
+    </div>
+
+    <!-- 3. Active Sessions & Devices -->
+    <div class="security-card">
+      <div class="security-header">
+        <div class="security-header-title">
+          <i class="fas fa-laptop-house"></i>
+          <div>
+            <h3>Active Sessions & Connected Devices</h3>
+            <p style="font-size: 0.85rem; color: var(--text-light); margin-top: 2px;">Devices currently authenticated to your account.</p>
+          </div>
+        </div>
+        <button type="button" class="btn" onclick="terminateOtherSessions()" style="background: transparent; color: var(--error); border: 1px solid var(--error); font-size: 0.85rem; padding: 6px 14px;">
+          <i class="fas fa-ban"></i> Revoke Other Sessions
+        </button>
+      </div>
+
+      <!-- Current Session -->
+      <div class="session-item">
+        <div class="session-info">
+          <div class="session-icon">
+            <i class="fas fa-desktop"></i>
+          </div>
+          <div class="session-details">
+            <h4>Chrome on Linux (This Device)</h4>
+            <p>IP: 192.168.1.42 &bull; Active Now</p>
+          </div>
+        </div>
+        <span class="badge-current"><i class="fas fa-dot-circle"></i> Current</span>
+      </div>
+
+      <!-- Other Session -->
+      <div class="session-item" id="secondarySessionItem">
+        <div class="session-info">
+          <div class="session-icon" style="background: rgba(236, 72, 153, 0.15); color: var(--secondary);">
+            <i class="fas fa-mobile-alt"></i>
+          </div>
+          <div class="session-details">
+            <h4>SkillSwap Mobile App (iOS 17.5)</h4>
+            <p>IP: 49.37.112.9 &bull; Last accessed 4 hours ago</p>
+          </div>
+        </div>
+        <button type="button" onclick="revokeSingleSession()" style="background: transparent; border: none; color: var(--text-light); cursor: pointer; padding: 6px;" title="Revoke access">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- 4. Security Audit Log -->
+    <div class="security-card">
+      <div class="security-header">
+        <div class="security-header-title">
+          <i class="fas fa-history"></i>
+          <div>
+            <h3>Recent Authentication Activity</h3>
+            <p style="font-size: 0.85rem; color: var(--text-light); margin-top: 2px;">Security audit log of recent sign-ins and key events.</p>
+          </div>
+        </div>
+      </div>
+
+      <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem; text-align: left;">
+          <thead>
+            <tr style="border-bottom: 1.5px solid var(--border); color: var(--text-light);">
+              <th style="padding: 10px;">Event</th>
+              <th style="padding: 10px;">Device / Browser</th>
+              <th style="padding: 10px;">Location</th>
+              <th style="padding: 10px;">Time</th>
+              <th style="padding: 10px;">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="border-bottom: 1px solid var(--border-light);">
+              <td style="padding: 12px 10px; font-weight: 600;"><i class="fas fa-sign-in-alt" style="color: var(--success); margin-right: 6px;"></i> Password Sign-In</td>
+              <td style="padding: 12px 10px;">Chrome / Linux</td>
+              <td style="padding: 12px 10px;">Bengaluru, India</td>
+              <td style="padding: 12px 10px; color: var(--text-light);">Just now</td>
+              <td style="padding: 12px 10px;"><span style="color: var(--success); font-weight: 600;">Success</span></td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--border-light);">
+              <td style="padding: 12px 10px; font-weight: 600;"><i class="fas fa-key" style="color: var(--primary); margin-right: 6px;"></i> Session Token Refresh</td>
+              <td style="padding: 12px 10px;">Safari / iOS</td>
+              <td style="padding: 12px 10px;">Bengaluru, India</td>
+              <td style="padding: 12px 10px; color: var(--text-light);">4 hours ago</td>
+              <td style="padding: 12px 10px;"><span style="color: var(--success); font-weight: 600;">Success</span></td>
+            </tr>
+            <tr>
+              <td style="padding: 12px 10px; font-weight: 600;"><i class="fas fa-shield-alt" style="color: var(--warning); margin-right: 6px;"></i> Security Audit Scan</td>
+              <td style="padding: 12px 10px;">Automated Guardian</td>
+              <td style="padding: 12px 10px;">System Service</td>
+              <td style="padding: 12px 10px; color: var(--text-light);">1 day ago</td>
+              <td style="padding: 12px 10px;"><span style="color: var(--primary); font-weight: 600;">Clean</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 5. Danger Zone -->
+    <div class="security-card danger-zone">
+      <div class="security-header">
+        <div class="security-header-title">
+          <i class="fas fa-exclamation-triangle"></i>
+          <div>
+            <h3 style="color: var(--error);">Account Danger Zone</h3>
+            <p style="font-size: 0.85rem; color: var(--text-light); margin-top: 2px;">Irreversible account termination actions.</p>
+          </div>
+        </div>
+      </div>
+
+      <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: gap; gap: 16px;">
+        <div>
+          <h4 style="font-size: 0.95rem; font-weight: 600; margin-bottom: 2px;">Deactivate or Delete Account</h4>
+          <p style="font-size: 0.8rem; color: var(--text-light);">Once deleted, all skill swaps, messages, and uploaded learning assets are permanently purged.</p>
+        </div>
+        <button type="button" class="btn btn-danger" onclick="confirmDeleteAccount()" style="padding: 8px 18px; font-size: 0.85rem;">
+          <i class="fas fa-trash-alt"></i> Delete Account
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="./js/theme.js"></script>
+  <script src="./js/auth-standalone.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const user = getCurrentUser() || { fullName: 'Alex Morgan', email: 'alex@example.com', twoFactorEnabled: false };
+      
+      const nameEl = document.getElementById('userNameDisplay');
+      const emailEl = document.getElementById('userEmailDisplay');
+      if (nameEl) nameEl.textContent = user.fullName || user.email.split('@')[0];
+      if (emailEl) emailEl.textContent = user.email;
+
+      const toggle2FA = document.getElementById('twoFactorToggle');
+      if (toggle2FA) {
+        toggle2FA.checked = !!user.twoFactorEnabled;
+        update2FAUI(user.twoFactorEnabled);
+
+        toggle2FA.addEventListener('change', () => {
+          user.twoFactorEnabled = toggle2FA.checked;
+          setCurrentUser(user);
+          update2FAUI(user.twoFactorEnabled);
+          showToast(user.twoFactorEnabled ? 'Two-Factor Authentication Enabled!' : 'Two-Factor Authentication Disabled.', 'info');
+        });
+      }
+
+      // Password change form
+      const pwForm = document.getElementById('changePasswordForm');
+      if (pwForm) {
+        pwForm.addEventListener('submit', (e) => {
+          e.preventDefault();
+          const cur = document.getElementById('currentPassword').value;
+          const nxt = document.getElementById('newPassword').value;
+          const cfm = document.getElementById('confirmNewPassword').value;
+
+          if (nxt !== cfm) {
+            showToast('New passwords do not match!', 'error');
+            return;
+          }
+          if (nxt.length < 6) {
+            showToast('Password must be at least 6 characters', 'warning');
+            return;
+          }
+
+          showToast('Password successfully updated!', 'success');
+          pwForm.reset();
+        });
+      }
+    });
+
+    function update2FAUI(isEnabled) {
+      const textEl = document.getElementById('twoFactorStatusText');
+      if (textEl) {
+        textEl.textContent = isEnabled ? '2FA is active and safeguarding your account' : '2FA is currently disabled';
+        textEl.style.color = isEnabled ? 'var(--success)' : 'inherit';
+      }
+    }
+
+    function toggle2FASimulation() {
+      const toggle = document.getElementById('twoFactorToggle');
+      if (toggle) {
+        toggle.checked = !toggle.checked;
+        toggle.dispatchEvent(new Event('change'));
+      }
+    }
+
+    function terminateOtherSessions() {
+      const sec = document.getElementById('secondarySessionItem');
+      if (sec) {
+        sec.style.opacity = '0.4';
+        sec.style.pointerEvents = 'none';
+        showToast('All other active sessions have been revoked.', 'success');
+      }
+    }
+
+    function revokeSingleSession() {
+      const sec = document.getElementById('secondarySessionItem');
+      if (sec) {
+        sec.remove();
+        showToast('Mobile session revoked.', 'info');
+      }
+    }
+
+    function confirmDeleteAccount() {
+      if (confirm('Are you absolutely sure? This action cannot be undone.')) {
+        clearCurrentSession();
+        showToast('Account scheduled for permanent erasure.', 'warning');
+        setTimeout(() => {
+          window.location.href = './logout.html';
+        }, 1200);
+      }
+    }
+  </script>
+</body>
+</html>
