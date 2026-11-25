@@ -1230,6 +1230,63 @@ def update_status(swap_id):
         return jsonify({'status': 'error', 'message': str(e)}), 500
 
 # ------------------ API Endpoints ------------------
+@main.route('/api/db-status')
+def api_db_status():
+    """Public diagnostic endpoint to verify Neon cloud database connectivity and tables"""
+    import os
+    env_keys = {
+        'DATABASE_URL': bool(os.environ.get('DATABASE_URL')),
+        'POSTGRES_URL': bool(os.environ.get('POSTGRES_URL')),
+        'POSTGRES_URL_NON_POOLING': bool(os.environ.get('POSTGRES_URL_NON_POOLING')),
+        'AWS_ENDPOINT_URL_S3': bool(os.environ.get('AWS_ENDPOINT_URL_S3')),
+        'VERCEL': bool(os.environ.get('VERCEL')),
+    }
+    
+    # Extract host safely without exposing passwords
+    raw_url = (
+        os.environ.get('DATABASE_URL')
+        or os.environ.get('POSTGRES_URL')
+        or os.environ.get('POSTGRES_URL_NON_POOLING')
+    )
+    db_host = 'None (No DB URL found in environment)'
+    if raw_url:
+        try:
+            parts = raw_url.split('@')[-1].split('/')[0]
+            db_host = parts.split('?')[0]
+        except Exception:
+            db_host = 'Present but unparseable'
+
+    connection_status = 'failed'
+    table_counts = {}
+    err_msg = None
+
+    try:
+        from .firebase_config import _get_pg_connection
+        conn = _get_pg_connection()
+        if conn:
+            with conn.cursor() as cur:
+                connection_status = 'connected'
+                for t in ['users', 'library_resources', 'swaps', 'stored_files', 'nosql_kv_store']:
+                    try:
+                        cur.execute(f"SELECT count(*) FROM {t};")
+                        table_counts[t] = cur.fetchone()[0]
+                    except Exception:
+                        table_counts[t] = 'table missing'
+            conn.close()
+        else:
+            err_msg = 'Could not establish connection to PostgreSQL'
+    except Exception as e:
+        err_msg = str(e)
+
+    return jsonify({
+        'status': 'healthy' if connection_status == 'connected' else 'unhealthy',
+        'db_host': db_host,
+        'connection': connection_status,
+        'environment_flags': env_keys,
+        'tables': table_counts,
+        'error': err_msg
+    })
+
 @main.route('/api/debug/swaps')
 def debug_swaps():
     """Debug endpoint to check swap data"""
