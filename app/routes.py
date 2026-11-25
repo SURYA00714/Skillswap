@@ -2457,13 +2457,18 @@ def api_library():
     if resource_type == 'file' and 'file' in request.files:
         uploaded_file = request.files['file']
         if uploaded_file and uploaded_file.filename != '':
-            raw_filename = secure_filename(uploaded_file.filename)
-            unique_name = f"{uuid.uuid4().hex[:8]}_{raw_filename}"
-            save_path = os.path.join(current_app.config['LIBRARY_UPLOAD_FOLDER'], unique_name)
-            uploaded_file.save(save_path)
-            file_url = f"/static/uploads/library/{unique_name}"
-            file_name = raw_filename
-            file_size = os.path.getsize(save_path)
+            try:
+                from .storage_helper import save_uploaded_file
+                file_id, file_url, file_name, file_size = save_uploaded_file(uploaded_file, uploaded_file.filename)
+            except Exception as up_err:
+                print(f"⚠️ Cloud upload notice ({up_err}), saving local fallback.")
+                raw_filename = secure_filename(uploaded_file.filename)
+                unique_name = f"{uuid.uuid4().hex[:8]}_{raw_filename}"
+                save_path = os.path.join(current_app.config['LIBRARY_UPLOAD_FOLDER'], unique_name)
+                uploaded_file.save(save_path)
+                file_url = f"/static/uploads/library/{unique_name}"
+                file_name = raw_filename
+                file_size = os.path.getsize(save_path)
 
     resource_id = str(uuid.uuid4())
     resource_data = {
@@ -2482,3 +2487,21 @@ def api_library():
     }
     db.collection('library_resources').document(resource_id).set(resource_data)
     return jsonify({'status': 'success', 'message': 'Resource added to Library!', 'resource': resource_data})
+
+@main.route('/api/library/download/<file_id>')
+def api_library_download(file_id):
+    """Serve uploaded library files reliably from Neon S3 or PostgreSQL across serverless restarts"""
+    from flask import send_file, abort
+    try:
+        from .storage_helper import get_stored_file
+        filename, mimetype, buf = get_stored_file(file_id)
+        if buf and filename:
+            return send_file(
+                buf,
+                download_name=filename,
+                mimetype=mimetype or 'application/octet-stream',
+                as_attachment=False
+            )
+    except Exception as e:
+        print(f"⚠️ Error downloading file {file_id}: {e}")
+    return abort(404, description="File not found or expired.")

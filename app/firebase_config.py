@@ -25,27 +25,37 @@ STORE_PATH = _get_store_path()
 _memory_store = {}
 
 def _get_pg_connection():
-    db_url = os.environ.get("DATABASE_URL")
+    # Supports DATABASE_URL (standard) and POSTGRES_URL (Vercel Storage Neon integration)
+    db_url = (
+        os.environ.get("DATABASE_URL")
+        or os.environ.get("POSTGRES_URL")
+        or os.environ.get("POSTGRES_URL_NON_POOLING")
+        or os.environ.get("POSTGRES_PRISMA_URL")
+    )
     if not db_url:
         return None
     db_url = db_url.replace("&channel_binding=require", "").replace("channel_binding=require&", "").replace("?channel_binding=require", "")
-    try:
-        import psycopg2
-        conn = psycopg2.connect(db_url, connect_timeout=3)
-        conn.autocommit = True
-        return conn
-    except Exception:
+    
+    # 2 retry attempts with 10s timeout to allow Neon serverless compute to wake from sleep
+    for attempt in range(2):
         try:
-            import psycopg
-            conn = psycopg.connect(db_url, connect_timeout=3, autocommit=True)
+            import psycopg2
+            conn = psycopg2.connect(db_url, connect_timeout=10)
+            conn.autocommit = True
             return conn
-        except Exception:
-            return None
+        except Exception as e:
+            try:
+                import psycopg
+                conn = psycopg.connect(db_url, connect_timeout=10, autocommit=True)
+                return conn
+            except Exception:
+                pass
+    return None
 
 def _load_store():
     global _memory_store
 
-    # 1. Attempt to fetch latest shared store from PostgreSQL if configured
+    # 1. Primary: Attempt to fetch latest shared store from PostgreSQL
     try:
         conn = _get_pg_connection()
         if conn:
@@ -58,10 +68,18 @@ def _load_store():
                     if isinstance(pg_data, dict) and pg_data.get("users"):
                         _memory_store = pg_data
                         conn.close()
+                        # Cache to local /tmp path so serverless container reads fast
+                        try:
+                            path = _get_store_path()
+                            os.makedirs(os.path.dirname(path), exist_ok=True)
+                            with open(path, "w", encoding="utf-8") as f:
+                                json.dump(_memory_store, f, default=str)
+                        except Exception:
+                            pass
                         return _memory_store
             conn.close()
-    except Exception:
-        pass
+    except Exception as e:
+        print(f"⚠️ Notice: Cloud PostgreSQL fetch error: {e}")
 
     # 2. In-memory check
     if _memory_store and _memory_store.get("users"):
@@ -70,43 +88,38 @@ def _load_store():
     path = _get_store_path()
     bundle_path = _get_bundle_path()
 
-    # Pre-populate serverless /tmp from bundled seed data if missing
-    if path != bundle_path and not os.path.exists(path) and os.path.exists(bundle_path):
-        try:
-            with open(bundle_path, "r", encoding="utf-8") as bf:
-                seed_data = json.load(bf)
-                if isinstance(seed_data, dict):
-                    _save_store(seed_data)
-                    return _memory_store
-        except Exception:
-            pass
-
+    # 3. Read cached file from disk if present
     if os.path.exists(path):
         try:
             with open(path, "r", encoding="utf-8") as f:
                 data = json.load(f)
-                if isinstance(data, dict):
-                    # Ensure pre-defined users and posts are merged if missing
-                    if not data.get("users") and os.path.exists(bundle_path):
-                        try:
-                            with open(bundle_path, "r", encoding="utf-8") as bf:
-                                bundle_data = json.load(bf)
-                                for col, items in bundle_data.items():
-                                    data.setdefault(col, {}).update(items)
-                        except Exception:
-                            pass
+                if isinstance(data, dict) and data.get("users"):
                     _memory_store = data
                     return _memory_store
         except Exception:
             pass
 
-    # Fallback to bundle directly
+    # 4. Fallback to bundle seed data ONLY if store has never been populated
     if os.path.exists(bundle_path):
         try:
             with open(bundle_path, "r", encoding="utf-8") as bf:
                 data = json.load(bf)
                 if isinstance(data, dict):
                     _memory_store = data
+                    # Only seed to remote PostgreSQL if table was completely empty
+                    try:
+                        conn = _get_pg_connection()
+                        if conn:
+                            with conn.cursor() as cur:
+                                cur.execute("SELECT count(*) FROM nosql_kv_store WHERE key = 'store';")
+                                if cur.fetchone()[0] == 0:
+                                    cur.execute(
+                                        "INSERT INTO nosql_kv_store (key, value) VALUES ('store', %s) ON CONFLICT DO NOTHING;",
+                                        (json.dumps(data, default=str),)
+                                    )
+                            conn.close()
+                    except Exception:
+                        pass
                     return _memory_store
         except Exception:
             pass
@@ -140,6 +153,109 @@ def _save_store(data):
             conn.close()
     except Exception:
         pass
+
+def _sync_to_relational_table(collection_name, doc_id, data):
+    """
+    Mirror NoSQL document updates directly into Neon PostgreSQL relational tables
+    so that Vercel Storage / Neon Console table viewer shows live rows.
+    """
+    try:
+        conn = _get_pg_connection()
+        if not conn:
+            return
+        with conn.cursor() as cur:
+            if collection_name == 'users':
+                cur.execute('''
+                    INSERT INTO users (
+                        "id", "fullName", "email", "title", "bio", "city", "state", "location",
+                        "profilePhotoUrl", "profileVisibility", "offeredSkills", "wantedSkills",
+                        "rating", "reviewCount", "onboarding_completed"
+                    ) VALUES (
+                        %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
+                    )
+                    ON CONFLICT ("id") DO UPDATE SET
+                        "fullName" = COALESCE(EXCLUDED."fullName", users."fullName"),
+                        "email" = COALESCE(EXCLUDED."email", users."email"),
+                        "title" = COALESCE(EXCLUDED."title", users."title"),
+                        "bio" = COALESCE(EXCLUDED."bio", users."bio"),
+                        "city" = COALESCE(EXCLUDED."city", users."city"),
+                        "state" = COALESCE(EXCLUDED."state", users."state"),
+                        "location" = COALESCE(EXCLUDED."location", users."location"),
+                        "profilePhotoUrl" = COALESCE(EXCLUDED."profilePhotoUrl", users."profilePhotoUrl"),
+                        "profileVisibility" = COALESCE(EXCLUDED."profileVisibility", users."profileVisibility"),
+                        "offeredSkills" = COALESCE(EXCLUDED."offeredSkills", users."offeredSkills"),
+                        "wantedSkills" = COALESCE(EXCLUDED."wantedSkills", users."wantedSkills"),
+                        "rating" = COALESCE(EXCLUDED."rating", users."rating"),
+                        "reviewCount" = COALESCE(EXCLUDED."reviewCount", users."reviewCount"),
+                        "onboarding_completed" = COALESCE(EXCLUDED."onboarding_completed", users."onboarding_completed");
+                ''', (
+                    doc_id,
+                    data.get('fullName') or data.get('name'),
+                    data.get('email', ''),
+                    data.get('title') or data.get('headline'),
+                    data.get('bio') or data.get('about'),
+                    data.get('city'),
+                    data.get('state'),
+                    data.get('location'),
+                    data.get('photo_url') or data.get('profilePhotoUrl'),
+                    data.get('profileVisibility', 'Public'),
+                    json.dumps(data.get('offeredSkill') or data.get('offeredSkills') or []),
+                    json.dumps(data.get('requestedSkill') or data.get('wantedSkill') or data.get('wantedSkills') or []),
+                    float(data.get('rating', 5.0)),
+                    int(data.get('review_count') or data.get('reviewCount') or 0),
+                    bool(data.get('onboarding_completed', False))
+                ))
+            elif collection_name == 'library_resources':
+                cur.execute('''
+                    INSERT INTO library_resources (
+                        "id", "uploaderId", "title", "description", "category",
+                        "skillTag", "resourceType", "fileUrl", "fileName", "fileSizeBytes"
+                    ) VALUES (
+                        %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
+                    )
+                    ON CONFLICT ("id") DO UPDATE SET
+                        "title" = EXCLUDED."title",
+                        "description" = EXCLUDED."description",
+                        "category" = EXCLUDED."category",
+                        "skillTag" = EXCLUDED."skillTag",
+                        "fileUrl" = EXCLUDED."fileUrl",
+                        "fileName" = EXCLUDED."fileName",
+                        "fileSizeBytes" = EXCLUDED."fileSizeBytes";
+                ''', (
+                    doc_id,
+                    data.get('uploaderId', 'unknown'),
+                    data.get('title', 'Untitled'),
+                    data.get('description', ''),
+                    data.get('category', 'General'),
+                    data.get('skillTag', ''),
+                    data.get('resourceType', 'file'),
+                    data.get('fileUrl', ''),
+                    data.get('fileName', ''),
+                    int(data.get('fileSizeBytes', 0))
+                ))
+            elif collection_name == 'swaps':
+                cur.execute('''
+                    INSERT INTO swaps (
+                        "id", "swapId", "fromUserId", "toUserId", "offeredSkill", "requestedSkill", "message", "status"
+                    ) VALUES (
+                        %s, %s, %s, %s, %s, %s, %s, %s
+                    )
+                    ON CONFLICT ("id") DO UPDATE SET
+                        "status" = EXCLUDED."status",
+                        "message" = EXCLUDED."message";
+                ''', (
+                    doc_id,
+                    data.get('swapId') or doc_id,
+                    data.get('fromUserId', ''),
+                    data.get('toUserId', ''),
+                    data.get('offeredSkill', ''),
+                    data.get('requestedSkill', ''),
+                    data.get('message', ''),
+                    data.get('status', 'pending')
+                ))
+        conn.close()
+    except Exception as e:
+        print(f"⚠️ Relational sync notice ({collection_name}): {e}")
 
 class ArrayUnion:
     def __init__(self, values):
@@ -215,6 +331,7 @@ class DocumentReference:
                 
         col[self.id] = target
         _save_store(store)
+        _sync_to_relational_table(self.collection_name, self.id, target)
         return self
 
     def update(self, data):

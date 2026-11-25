@@ -13,8 +13,13 @@ def create_app():
     app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-for-swapskills-local")
 
     # Database Configuration
-    # Uses DATABASE_URL provided by Neon Postgres
-    database_url = os.environ.get("DATABASE_URL")
+    # Supports DATABASE_URL (standard) and POSTGRES_URL (injected by Vercel Storage Neon integration)
+    database_url = (
+        os.environ.get("DATABASE_URL")
+        or os.environ.get("POSTGRES_URL")
+        or os.environ.get("POSTGRES_URL_NON_POOLING")
+        or os.environ.get("POSTGRES_PRISMA_URL")
+    )
     if database_url:
         # Standardize PostgreSQL dialect for SQLAlchemy
         if database_url.startswith("postgres://"):
@@ -24,6 +29,11 @@ def create_app():
         # Remove unsupported channel_binding if present
         database_url = database_url.replace("&channel_binding=require", "").replace("channel_binding=require&", "").replace("?channel_binding=require", "")
         app.config["SQLALCHEMY_DATABASE_URI"] = database_url
+        app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
+            "pool_pre_ping": True,
+            "pool_recycle": 300,
+            "connect_args": {"connect_timeout": 10}
+        }
     else:
         # Fallback to SQLite (on Vercel/serverless use /tmp which is writable)
         base_dir = "/tmp" if os.environ.get("VERCEL") or os.environ.get("AWS_LAMBDA_FUNCTION_NAME") else os.path.abspath(os.path.join(app.root_path, "..", "instance"))
