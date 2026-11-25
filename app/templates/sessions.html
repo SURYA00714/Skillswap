@@ -68,6 +68,10 @@
     [data-theme="dark"] .btn-link { background: rgba(37, 99, 235, 0.2); color: #60a5fa; }
     [data-theme="dark"] .form-input { background: #1e293b; border-color: #334155; color: #f8fafc; }
     [data-theme="dark"] .badge-type { background: #1e293b; color: #cbd5e1; }
+    .empty-session-box { background:#fff; border-radius:14px; border: 1px dashed #cbd5e1; text-align:center; padding: 50px; }
+    [data-theme="dark"] .empty-session-box { background: #0f172a; border-color: #334155; color: #f1f5f9; }
+    .session-card.selected { border-color: #2563eb; background: #f8fafc; }
+    [data-theme="dark"] .session-card.selected { border-color: #6366f1; background: #1e293b; }
   </style>
 </head>
 <body>
@@ -265,7 +269,7 @@
 
       if (filtered.length === 0) {
         container.innerHTML = `
-          <div style="background:#fff; border-radius:14px; border: 1px dashed #cbd5e1; text-align:center; padding: 50px;">
+          <div class="empty-session-box">
             <i class="fas fa-calendar-times fa-3x" style="color:#94a3b8; margin-bottom:12px;"></i>
             <h3>No sessions found</h3>
             <p style="color:#64748b;">Schedule a public session or create a study group to learn together!</p>
@@ -279,7 +283,7 @@
         const canManage = (s.hostUserId === currentUserId || s.participantUserId === currentUserId);
 
         return `
-        <div class="session-card" style="${isSelected ? 'border-color: #2563eb; background: #f8fafc;' : ''}">
+        <div class="session-card ${isSelected ? 'selected' : ''}">
           <div style="display:flex; align-items:flex-start; gap: 12px; flex: 1;">
             ${canManage ? `
               <input type="checkbox" 

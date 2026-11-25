@@ -2053,3 +2053,19 @@ body {
 [data-theme="dark"] .modal-close:hover {
   color: #ffffff !important;
 }
+
+[data-theme="dark"] .swap-direction,
+[data-theme="dark"] .swap-arrow {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+  color: #818cf8 !important;
+}
+
+[data-theme="dark"] .participant:hover {
+  background: #1e293b !important;
+}
+
+[data-theme="dark"] .btn-action.details:hover {
+  background: #334155 !important;
+  color: #ffffff !important;
+}

@@ -826,3 +826,48 @@
     color: #94a3b8;
     border: 1px solid #334155;
 }
+
+[data-theme="dark"] .chat-window,
+[data-theme="dark"] .messages-area,
+[data-theme="dark"] .loading-messages,
+[data-theme="dark"] .no-messages {
+    background: #0b1120;
+    color: #94a3b8;
+}
+
+[data-theme="dark"] .message-input-container {
+    background: #0f172a;
+    border-top: 1px solid #1e293b;
+}
+
+[data-theme="dark"] .message-input-container input,
+[data-theme="dark"] .message-input-container textarea {
+    background: #1e293b;
+    color: #f8fafc;
+    border-color: #334155;
+}
+
+[data-theme="dark"] .dropdown-menu {
+    background: #0f172a;
+    border: 1px solid #1e293b;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+}
+
+[data-theme="dark"] .dropdown-menu a,
+[data-theme="dark"] .dropdown-menu button,
+[data-theme="dark"] .dropdown-item {
+    color: #e2e8f0;
+}
+
+[data-theme="dark"] .dropdown-menu a:hover,
+[data-theme="dark"] .dropdown-menu button:hover,
+[data-theme="dark"] .dropdown-item:hover {
+    background: #1e293b;
+    color: #ffffff;
+}
+
+[data-theme="dark"] .message-actions {
+    background: #1e293b;
+    border: 1px solid #334155;
+    color: #e2e8f0;
+}

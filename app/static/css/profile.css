@@ -1607,3 +1607,33 @@ body {
 [data-theme="dark"] .close-modal:hover {
   color: #f8fafc !important;
 }
+
+[data-theme="dark"] .card {
+  background: #0f172a !important;
+  border-color: #1e293b !important;
+  color: #f1f5f9 !important;
+}
+
+[data-theme="dark"] .card-header {
+  border-bottom-color: #1e293b !important;
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] .suggestions-dropdown {
+  background: #0f172a !important;
+  border-color: #334155 !important;
+  color: #f1f5f9 !important;
+}
+
+[data-theme="dark"] .suggestion-item:hover {
+  background: #1e293b !important;
+}
+
+[data-theme="dark"] .checkbox-group,
+[data-theme="dark"] .project-images,
+[data-theme="dark"] .project-links-input,
+[data-theme="dark"] .date-picker-container input[type="month"] {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+  color: #f8fafc !important;
+}

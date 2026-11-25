@@ -54,14 +54,16 @@ def get_avatar_url(photo_url, name, email=""):
     ]
     bg_color = color_palette[hash_val % len(color_palette)]
     
+    import base64
     svg = (
-        f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">'
+        f'<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100">'
         f'<rect width="100" height="100" rx="50" fill="#{bg_color}"/>'
         f'<text x="50" y="54" font-family="Inter,Arial,sans-serif" font-size="46" '
-        f'font-weight="700" fill="#ffffff" text-anchor="middle" dominant-baseline="middle">{initial}</text>'
+        f'font-weight="700" fill="#ffffff" text-anchor="middle" dominant-baseline="central">{initial}</text>'
         f'</svg>'
     )
-    return "data:image/svg+xml;utf8," + urllib.parse.quote(svg)
+    b64_svg = base64.b64encode(svg.encode('utf-8')).decode('ascii')
+    return f"data:image/svg+xml;base64,{b64_svg}"
 
 
 # ---------------------- Landing Page --------------

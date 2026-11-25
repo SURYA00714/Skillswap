@@ -391,3 +391,22 @@ input:focus, select:focus {
     padding-left: 0;
     padding-right: 36px;
 }
+
+[data-theme="dark"] .user-card {
+    background: #0f172a;
+    border: 1px solid #1e293b;
+    color: #f1f5f9;
+}
+
+[data-theme="dark"] .pagination button {
+    background: #1e293b;
+    border-color: #334155;
+    color: #e2e8f0;
+}
+
+[data-theme="dark"] .pagination button:hover,
+[data-theme="dark"] .pagination button.active {
+    background: #6366f1;
+    border-color: #6366f1;
+    color: #ffffff;
+}

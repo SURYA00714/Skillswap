@@ -58,6 +58,8 @@
       background: #1e293b; border-color: #334155; color: #f8fafc;
     }
     [data-theme="dark"] .btn-cancel { background: #1e293b; border-color: #334155; color: #e2e8f0; }
+    .empty-library-box { grid-column: 1/-1; background:#fff; border-radius:12px; border: 1px dashed #cbd5e1; text-align:center; padding: 50px; }
+    [data-theme="dark"] .empty-library-box { background: #0f172a; border-color: #334155; color: #f1f5f9; }
   </style>
 </head>
 <body>
@@ -201,7 +203,7 @@
 
         if (items.length === 0) {
           grid.innerHTML = `
-            <div style="grid-column: 1/-1; background:#fff; border-radius:12px; border: 1px dashed #cbd5e1; text-align:center; padding: 50px;">
+            <div class="empty-library-box">
               <i class="fas fa-folder-open fa-3x" style="color:#94a3b8; margin-bottom:12px;"></i>
               <h3>No resources found</h3>
               <p style="color:#64748b;">Be the first to share a file or guide with the community!</p>
