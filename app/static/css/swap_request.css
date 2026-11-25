@@ -829,24 +829,32 @@ textarea:focus {
 
 [data-theme="dark"] .request-header,
 [data-theme="dark"] .swap-preview-card,
+[data-theme="dark"] .swap-form-card,
 [data-theme="dark"] .form-section,
+[data-theme="dark"] .tips-card,
 [data-theme="dark"] .modal-content {
     background: #0f172a;
     border-color: #1e293b;
     color: #f1f5f9;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
 }
 
 [data-theme="dark"] .header-title-wrap h1,
 [data-theme="dark"] .preview-header h3,
 [data-theme="dark"] .section-title,
+[data-theme="dark"] .form-section h3,
+[data-theme="dark"] .tips-card h3,
 [data-theme="dark"] .modal-header h3 {
     color: #f8fafc;
+    border-bottom-color: #1e293b;
 }
 
 [data-theme="dark"] .header-title-wrap p,
 [data-theme="dark"] .form-group label,
-[data-theme="dark"] .helper-text {
+[data-theme="dark"] .helper-text,
+[data-theme="dark"] .template-label,
+[data-theme="dark"] .char-counter,
+[data-theme="dark"] .tip p {
     color: #94a3b8;
 }
 
@@ -867,7 +875,8 @@ textarea:focus {
 
 [data-theme="dark"] .form-group input,
 [data-theme="dark"] .form-group select,
-[data-theme="dark"] .form-group textarea {
+[data-theme="dark"] .form-group textarea,
+[data-theme="dark"] .custom-skill-input-wrap input {
     background: #1e293b;
     border-color: #334155;
     color: #f8fafc;
@@ -875,21 +884,54 @@ textarea:focus {
 
 [data-theme="dark"] .form-group input:focus,
 [data-theme="dark"] .form-group select:focus,
-[data-theme="dark"] .form-group textarea:focus {
+[data-theme="dark"] .form-group textarea:focus,
+[data-theme="dark"] .custom-skill-input-wrap input:focus {
     border-color: #6366f1;
     box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25);
 }
 
-[data-theme="dark"] .skill-option-card {
+[data-theme="dark"] .skill-option-card,
+[data-theme="dark"] .skill-option {
     background: #1e293b;
     border-color: #334155;
     color: #f1f5f9;
 }
 
 [data-theme="dark"] .skill-option-card:hover,
-[data-theme="dark"] .skill-option-card.selected {
+[data-theme="dark"] .skill-option-card.selected,
+[data-theme="dark"] .skill-option:hover,
+[data-theme="dark"] .skill-option.selected {
     border-color: #6366f1;
-    background: rgba(99, 102, 241, 0.15);
+    background: rgba(99, 102, 241, 0.2);
+    color: #ffffff;
+}
+
+[data-theme="dark"] .message-templates,
+[data-theme="dark"] .terms-agreement,
+[data-theme="dark"] .tip {
+    background: #1e293b;
+    border-color: #334155;
+    color: #e2e8f0;
+}
+
+[data-theme="dark"] .template-btn {
+    background: #0f172a;
+    border-color: #334155;
+    color: #e2e8f0;
+}
+
+[data-theme="dark"] .template-btn:hover {
+    background: #334155;
+    border-color: #6366f1;
+    color: #ffffff;
+}
+
+[data-theme="dark"] .terms-link {
+    color: #818cf8;
+}
+
+[data-theme="dark"] .form-actions {
+    border-top-color: #1e293b;
 }
 
 [data-theme="dark"] .btn-secondary,

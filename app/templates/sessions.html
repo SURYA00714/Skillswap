@@ -49,6 +49,25 @@
     .form-row { display: flex; gap: 12px; }
     .checkbox-row { display: flex; align-items: center; gap: 8px; font-size: 0.9rem; color: #334155; margin: 12px 0; font-weight: 500; }
     .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+
+    /* Dark Mode Overrides */
+    [data-theme="dark"] .session-header h1,
+    [data-theme="dark"] .session-info h3,
+    [data-theme="dark"] .modal-title { color: #f8fafc; }
+    [data-theme="dark"] .session-meta,
+    [data-theme="dark"] .form-group label,
+    [data-theme="dark"] .checkbox-row { color: #94a3b8; }
+    [data-theme="dark"] .session-card,
+    [data-theme="dark"] .modal-box {
+      background: #0f172a; border-color: #1e293b; color: #f1f5f9;
+    }
+    [data-theme="dark"] .status-tab { color: #94a3b8; }
+    [data-theme="dark"] .status-tab.active { background: rgba(37, 99, 235, 0.2); color: #60a5fa; }
+    [data-theme="dark"] .btn-action-small { background: #1e293b; border-color: #334155; color: #e2e8f0; }
+    [data-theme="dark"] .btn-action-small:hover { background: #334155; }
+    [data-theme="dark"] .btn-link { background: rgba(37, 99, 235, 0.2); color: #60a5fa; }
+    [data-theme="dark"] .form-input { background: #1e293b; border-color: #334155; color: #f8fafc; }
+    [data-theme="dark"] .badge-type { background: #1e293b; color: #cbd5e1; }
   </style>
 </head>
 <body>

@@ -39,6 +39,25 @@
     .form-input { width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.95rem; box-sizing: border-box; }
     .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
     .btn-cancel { border: 1px solid #cbd5e1; background: #fff; padding: 8px 16px; border-radius: 8px; cursor: pointer; }
+
+    /* Dark Mode Overrides */
+    [data-theme="dark"] .lib-header h1,
+    [data-theme="dark"] .res-title,
+    [data-theme="dark"] .modal-title { color: #f8fafc; }
+    [data-theme="dark"] .res-desc,
+    [data-theme="dark"] .form-group label { color: #94a3b8; }
+    [data-theme="dark"] .search-filter-row,
+    [data-theme="dark"] .resource-card,
+    [data-theme="dark"] .modal-box {
+      background: #0f172a; border-color: #1e293b; color: #f1f5f9;
+    }
+    [data-theme="dark"] .res-meta { border-top-color: #1e293b; }
+    [data-theme="dark"] .search-input,
+    [data-theme="dark"] .category-select,
+    [data-theme="dark"] .form-input {
+      background: #1e293b; border-color: #334155; color: #f8fafc;
+    }
+    [data-theme="dark"] .btn-cancel { background: #1e293b; border-color: #334155; color: #e2e8f0; }
   </style>
 </head>
 <body>

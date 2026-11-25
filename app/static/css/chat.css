@@ -816,3 +816,13 @@
 [data-theme="dark"] .message-input::placeholder {
     color: #64748b;
 }
+
+[data-theme="dark"] .message-date-divider::before {
+    background: #1e293b;
+}
+
+[data-theme="dark"] .message-date-divider span {
+    background: #1e293b;
+    color: #94a3b8;
+    border: 1px solid #334155;
+}

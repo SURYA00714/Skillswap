@@ -54,7 +54,14 @@ def get_avatar_url(photo_url, name, email=""):
     ]
     bg_color = color_palette[hash_val % len(color_palette)]
     
-    return f"https://ui-avatars.com/api/?name={urllib.parse.quote(initial)}&background={bg_color}&color=fff&size=150&font-size=0.55&bold=true&rounded=true"
+    svg = (
+        f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">'
+        f'<rect width="100" height="100" rx="50" fill="#{bg_color}"/>'
+        f'<text x="50" y="54" font-family="Inter,Arial,sans-serif" font-size="46" '
+        f'font-weight="700" fill="#ffffff" text-anchor="middle" dominant-baseline="middle">{initial}</text>'
+        f'</svg>'
+    )
+    return "data:image/svg+xml;utf8," + urllib.parse.quote(svg)
 
 
 # ---------------------- Landing Page --------------
@@ -1721,17 +1728,19 @@ def api_conversations_v2():
             if not ts:
                 return datetime.utcnow()
             if hasattr(ts, 'to_date'):
-                return ts.to_date()
-            if hasattr(ts, 'seconds'):
-                return datetime.fromtimestamp(ts.seconds)
-            if isinstance(ts, datetime):
-                return ts
-            if isinstance(ts, str):
+                dt_obj = ts.to_date()
+            elif hasattr(ts, 'seconds'):
+                dt_obj = datetime.fromtimestamp(ts.seconds)
+            elif isinstance(ts, datetime):
+                dt_obj = ts
+            elif isinstance(ts, str):
                 try:
-                    return datetime.fromisoformat(ts.replace('Z', '+00:00'))
+                    dt_obj = datetime.fromisoformat(ts.replace('Z', '+00:00'))
                 except Exception:
-                    pass
-            return datetime.utcnow()
+                    dt_obj = datetime.utcnow()
+            else:
+                dt_obj = datetime.utcnow()
+            return dt_obj.replace(tzinfo=None) if hasattr(dt_obj, 'tzinfo') and dt_obj.tzinfo else dt_obj
 
         for conv in conversations_list:
             dt = _parse_ts(conv.get('timestamp'))

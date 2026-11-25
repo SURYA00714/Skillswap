@@ -55,6 +55,23 @@ def _get_pg_connection():
 def _load_store():
     global _memory_store
 
+    # 0. Per-request cache (avoids 15+ redundant Neon DB round-trips per page load)
+    try:
+        from flask import has_request_context, g
+        if has_request_context() and hasattr(g, '_swapskills_store') and g._swapskills_store:
+            return g._swapskills_store
+    except Exception:
+        pass
+
+    def _cache_req(data):
+        try:
+            from flask import has_request_context, g
+            if has_request_context():
+                g._swapskills_store = data
+        except Exception:
+            pass
+        return data
+
     # 1. Primary: Attempt to fetch latest shared store from PostgreSQL
     try:
         conn = _get_pg_connection()
@@ -76,7 +93,7 @@ def _load_store():
                                 json.dump(_memory_store, f, default=str)
                         except Exception:
                             pass
-                        return _memory_store
+                        return _cache_req(_memory_store)
             conn.close()
     except Exception as e:
         print(f"⚠️ Notice: Cloud PostgreSQL fetch error: {e}")
@@ -129,6 +146,12 @@ def _load_store():
 def _save_store(data):
     global _memory_store
     _memory_store = data
+    try:
+        from flask import has_request_context, g
+        if has_request_context():
+            g._swapskills_store = data
+    except Exception:
+        pass
     path = _get_store_path()
     
     # 1. Save to local filesystem
@@ -252,6 +275,50 @@ def _sync_to_relational_table(collection_name, doc_id, data):
                     data.get('requestedSkill', ''),
                     data.get('message', ''),
                     data.get('status', 'pending')
+                ))
+            elif collection_name == 'messages':
+                cur.execute('''
+                    INSERT INTO messages (
+                        "id", "senderId", "receiverId", "swapId", "content", "isRead"
+                    ) VALUES (
+                        %s, %s, %s, %s, %s, %s
+                    )
+                    ON CONFLICT ("id") DO UPDATE SET
+                        "content" = EXCLUDED."content",
+                        "isRead" = EXCLUDED."isRead";
+                ''', (
+                    doc_id,
+                    data.get('senderId', ''),
+                    data.get('receiverId', ''),
+                    data.get('swapId'),
+                    data.get('content', ''),
+                    bool(data.get('read', data.get('isRead', False)))
+                ))
+            elif collection_name == 'learning_sessions':
+                cur.execute('''
+                    INSERT INTO learning_sessions (
+                        "id", "swapId", "hostUserId", "participantUserId", "title", "description", "meetingUrl",
+                        "sessionDate", "startTime", "endTime", "durationMinutes", "status"
+                    ) VALUES (
+                        %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
+                    )
+                    ON CONFLICT ("id") DO UPDATE SET
+                        "status" = EXCLUDED."status",
+                        "title" = EXCLUDED."title",
+                        "meetingUrl" = EXCLUDED."meetingUrl";
+                ''', (
+                    doc_id,
+                    data.get('swapId'),
+                    data.get('hostUserId', ''),
+                    data.get('participantUserId', ''),
+                    data.get('title', 'Learning Session'),
+                    data.get('description', ''),
+                    data.get('meetingUrl', ''),
+                    data.get('sessionDate', '2026-11-25'),
+                    data.get('startTime', '17:00'),
+                    data.get('endTime', '18:00'),
+                    int(data.get('durationMinutes', 60)),
+                    data.get('status', 'scheduled')
                 ))
         conn.close()
     except Exception as e:
